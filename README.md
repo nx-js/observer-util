@@ -1,6 +1,6 @@
 # nx-observe
 
-This library is part of the **nx framework**.
+This library is part of the **nx framework** (coming soon).
 The purpose of this library is to allow powerful data observation/binding without any special syntax.
 
 ## Installation
