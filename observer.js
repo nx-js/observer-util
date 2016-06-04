@@ -1,9 +1,12 @@
 'use strict'
 
-const OBSERVABLE = Symbol('OBSERVABLE')
-const ON_CANCEL = Symbol('ON_CANCEL')
-const CANCELLED = Symbol('CANCELLED')
-let OBSERVER
+const proxy = Symbol('proxy')
+const unobserverSet = Symbol('unobserverSet')
+const observing = Symbol('observing')
+
+const targets = new WeakMap()
+const observerSet = new Set()
+let currentObserver
 
 module.exports = {
   observe,
@@ -12,64 +15,78 @@ module.exports = {
   isObservable
 }
 
-const targets = new WeakMap()
-const observerSet = new Set()
-
-function observe (observer) {
-  if (typeof observer !== 'function') throw new TypeError('first argument must be a function')
-
-  observer[CANCELLED] = false
-  observer[ON_CANCEL] = new Set()
-  queueObserver(observer)
-}
-
-function unobserve (observer) {
-  if (typeof observer !== 'function') throw new TypeError('first argument must be a function')
-
-  observer[CANCELLED] = true
-  if (observer[ON_CANCEL]) observer[ON_CANCEL].forEach(cancelObserver)
-}
-
-function cancelObserver (cancel) {
-  cancel()
-}
-
-function queueObserver (observer) {
-  if (observerSet.size === 0) setTimeout(runObservers)
-  observerSet.add(observer)
-}
-
-function runObservers () {
-  try {
-    observerSet.forEach(runObserver)
-  } finally {
-    OBSERVER = undefined
-    observerSet.clear()
+function observe (fn) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('first argument must be a function')
+  }
+  if (!fn[observing]) {
+    fn[observing] = true
+    fn[unobserverSet] = new Set()
+    queueObserver(fn)
   }
 }
 
-function runObserver (observer) {
-  if (!observer[CANCELLED]) {
-    OBSERVER = observer
-    observer()
+function unobserve (fn) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('first argument must be a function')
   }
+  if (fn[observing]) {
+    fn[unobserverSet].forEach(runUnobserver)
+    fn[unobserverSet] = undefined
+  }
+  fn[observing] = false
+}
+
+function observable (obj) {
+  if (obj === undefined) {
+    obj = {}
+  }
+  if (typeof obj !== 'object') {
+    throw new TypeError('first argument must be an object or undefined')
+  }
+  if (isObservable(obj)) {
+    return obj
+  }
+  if (typeof obj[proxy] === 'object') {
+    return obj[proxy]
+  }
+  obj[proxy] = new Proxy(obj, {get, set, deleteProperty})
+  targets.set(obj, new Map())
+  return obj[proxy]
+}
+
+function isObservable (obj) {
+  if (typeof obj !== 'object') {
+    throw new TypeError('first argument must be an object')
+  }
+  return (obj[proxy] === true)
 }
 
 function get (target, key, receiver) {
-  if (key === OBSERVABLE) return true
+  if (key === proxy) return true
   const result = Reflect.get(target, key, receiver)
-
-  if (OBSERVER !== undefined) {
-    if (!targets.get(target).has(key)) targets.get(target).set(key, new Set())
-    OBSERVER[ON_CANCEL].add(() => targets.get(target).get(key).delete(OBSERVER))
-    targets.get(target).get(key).add(OBSERVER)
-    if (typeof result === 'object') return observable(result)
+  if (currentObserver) {
+    registerObserver(target, key, currentObserver)
+    if (typeof result === 'object') {
+      return observable(result)
+    }
   }
-
-  if (typeof result === 'object' && typeof result[OBSERVABLE] === 'object') {
-    return result[OBSERVABLE]
+  if (typeof result === 'object' && typeof result[proxy] === 'object') {
+    return result[proxy]
   }
   return result
+}
+
+function registerObserver (target, key, observer) {
+  let observersForKey = targets.get(target).get(key)
+  if (!observersForKey) {
+    observersForKey = new Set()
+    targets.get(target).set(key, observersForKey)
+  }
+  if (!observersForKey.has(observer)) {
+    observersForKey.add(observer)
+    observer[unobserverSet].add(() => observersForKey.delete(observer))
+  }
 }
 
 function set (target, key, value, receiver) {
@@ -86,18 +103,29 @@ function deleteProperty (target, key) {
   return Reflect.deleteProperty(target, key)
 }
 
-function observable (target = {}) {
-  if (typeof target !== 'object') throw new TypeError('first argument must be an object or undefined')
-  if (typeof target[OBSERVABLE] === 'object') return target[OBSERVABLE]
-  if (target[OBSERVABLE] === true) return target
-
-  target[OBSERVABLE] = new Proxy(target, {get, set, deleteProperty})
-  targets.set(target, new Map())
-  return target[OBSERVABLE]
+function queueObserver (observer) {
+  if (observerSet.size === 0) {
+    setTimeout(runObservers)
+  }
+  observerSet.add(observer)
 }
 
-function isObservable (observable) {
-  if (typeof observable !== 'object') throw new TypeError('first argument must be an object')
+function runObservers () {
+  try {
+    observerSet.forEach(runObserver)
+  } finally {
+    currentObserver = undefined
+    observerSet.clear()
+  }
+}
 
-  return (observable[OBSERVABLE] === true)
+function runObserver (observer) {
+  if (observer[observing]) {
+    currentObserver = observer
+    observer()
+  }
+}
+
+function runUnobserver (unobserver) {
+  unobserver()
 }

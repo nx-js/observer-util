@@ -1,0 +1,41 @@
+{
+  "name": "@risingstack/nx-observe",
+  "version": "1.0.0",
+  "description": "Data observation and binding",
+  "main": "observer.js",
+  "scripts": {
+    "test": "mocha observer.test.js",
+    "lint": "standard observer.js"
+  },
+  "author": "Miklos Bertalan",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:RisingStack/nx-observe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RisingStack/nx-observe/issues"
+  },
+  "homepage": "https://github.com/RisingStack/nx-observe#readme",
+  "license": "MIT",
+  "keywords": [
+    "nx",
+    "observe",
+    "observable",
+    "data",
+    "binding",
+    "proxy"
+  ],
+  "devDependencies": {
+    "chai": "3.5.0",
+    "mocha": "2.5.3",
+    "standard": "7.1.2",
+    "pre-push": "0.1.1"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "pre-push": [
+    "lint",
+    "test"
+  ]
+}

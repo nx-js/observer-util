@@ -1,13 +1,17 @@
 # nx-compile
 
 This library is part of the **nx framework**.
-The purpose of this library is to
+The purpose of this library is to allow powerful data observation/binding without any special syntax.
 
 ## Installation
 
 ```
 $ TODO: add to npm
 ```
+
+## Compatibility
+
+
 
 ## Usage
 
@@ -19,7 +23,7 @@ const observer = require('nx-observe')
 
 ### observer.observable([Object])
 
-This method creates and returns an observable object. If an object is passed as argument it wraps the object in an observable and returns the observable. If an observable is passed as argument it returns the observable.
+This method creates and returns an observable object. If an object is passed as argument it wraps the object in an observable and returns that observable. If an observable is passed as argument it simply returns it.
 
 ```js
 const observable = observer.observable({prop: 'someValue'})
@@ -71,22 +75,24 @@ observer.observe(() => console.log(observable1.nested.prop1 + observable2.list[0
 
 observable1.nested.prop1 = 'hi'
 observable2.list[0] += '!'
-// will log 'hi there!' on the console once, after the current stack empties
+// will log 'hi there!' on the console once (after the current stack empties)
 
 setTimeout(() => {
   observable1.nested.prop1 = 'check this '
   observable2.list[0] = 'out!'
 }, 1000)
-// will log 'check this out!' on console once, after 1 sec (when that stack empties)
+// after 1 second this log 'check this out!' on console once (after that stack empties)
 ```
 
 ## Features and limitations
 
 A function passed to observer.observe can correctly observe any synchronous javascript code (you can do conditionals, loops or call other functions too). It however won't observe asynchronous operations.
 
-Observed functions will run after the current stack empties. This allows for many optimization.
-- changing many observable properties used by the function won't cause it to run more than once
-- observed function won't cause infinite loops, you can safely do the following
+Observed function will also rerun if a property of an observable used by the function is deleted by the delete operator.
+
+Observed functions will run after the current stack empties. This allows for some optimization.
+- Changing many observable properties used by the function, won't cause it to run more than once.
+- Observed function won't cause infinite loops, you can safely do the following.
 ```js
 // this keeps observable1.prop1 and observable2.prop1 in sync
 observer.observe(() => observable1.prop1 = observable2.prop1)
