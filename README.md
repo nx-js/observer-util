@@ -13,7 +13,7 @@ $ TODO: add to npm
 
 - Node: 6 and above
 - Chrome: 49 and above (after browserified)
-- Firefox: 18 and above (after browserified)
+- Firefox: 48 and above (after browserified)
 - Edge: 13 and above (after browserified)
 
 ## Usage
