@@ -97,7 +97,9 @@ console.log(observable1 === observable2)
 console.log(observable2 === observable3)
 ```
 
-#### an observers always runs once, after the stack it was defined in empties
+#### when does the observer run
+
+An observer always runs once after the stack it was defined in empties. After that the observer runs after every stack in which the observable properties used by the observer are changed. An observer runs maximum once per stack. Multiple changes of the observable properties won't trigger it more than once.
 
 ```js
 const observer = require('nx-observe')
@@ -105,6 +107,10 @@ const observer = require('nx-observe')
 let dummy
 const observable = observer.observable({prop: 'value'})
 observer.observe(() => dummy = observable.prop)
+
+// observed function didn't run yet
+// outputs 'undefined' to the console
+console.log(dummy)
 
 // outputs 'value' to the console
 setTimeout(() => console.log(dummy))
