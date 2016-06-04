@@ -115,6 +115,23 @@ describe('nx-observe', () => {
         .thenAsync(() => expect(dummy).to.equal(undefined))
     })
 
+    it('should observe set operations without value change', () => {
+      let dummy
+      const observable = observer.observable({counter: 0})
+
+      let numOfRuns = 0
+      function test () {
+        dummy = observable.counter
+        numOfRuns++
+      }
+      observer.observe(test)
+
+      return Promise.resolve()
+        .thenAsync(() => observable.counter = 0)
+        .thenAsync(() => observable.counter = 0)
+        .thenAsync(() => expect(numOfRuns).to.equal(3))
+    })
+
     it('should observe function call chains', () => {
       let dummy
       const observable = observer.observable({counter: 0})
@@ -207,23 +224,6 @@ describe('nx-observe', () => {
           expect(numOfRuns1).to.equal(3)
           expect(numOfRuns2).to.equal(3)
         })
-    })
-
-    it('should observe set operations without value change', () => {
-      let dummy
-      const observable = observer.observable({counter: 0})
-
-      let numOfRuns = 0
-      function test () {
-        dummy = observable.counter
-        numOfRuns++
-      }
-      observer.observe(test)
-
-      return Promise.resolve()
-        .thenAsync(() => observable.counter = 0)
-        .thenAsync(() => observable.counter = 0)
-        .thenAsync(() => expect(numOfRuns).to.equal(3))
     })
 
     it('should throw TypeError on invalid arguments', () => {

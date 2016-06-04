@@ -37,7 +37,7 @@ const observable = observer.observable({prop: 'someValue'})
 This method observes a function. An observed function reruns every time a property of an observable, which is used by the function changes (or is deleted). The function doesn't run immediately on property change, it will run after the current stack empties. Multiple changes won't cause the function to run multiple times after the stack empties. The function can observe any synchronous javascript code (nested data, iterations, function calls, etc.)
 
 ```js
-observer.observe(() => console.log(observable.someProp))
+observer.observe(() => console.log(observable.prop))
 ```
 
 ### observer.unobserve(function)
@@ -80,9 +80,9 @@ setTimeout(() => console.log(dummy), 300)
 
 ## Features, limitations and edge cases
 
-#### observer.observable argument behavior
+#### observable argument cases
 
-If an observable is passed as argument to the observer.observable method it simply returns the passed observable. If you pass the same object into different observer.observable calls it always returns the same observable instance.
+If an observable is passed as argument to the observer.observable method, it simply returns the passed observable. If you pass the same object into different observer.observable calls, it always returns the same observable instance.
 
 ```js
 const observer = require('nx-observe')
@@ -108,7 +108,7 @@ let dummy
 const observable = observer.observable({prop: 'value'})
 observer.observe(() => dummy = observable.prop)
 
-// observed function didn't run yet
+// observer function didn't run yet
 // outputs 'undefined' to the console
 console.log(dummy)
 
@@ -154,7 +154,7 @@ setTimeout(() => console.log(dummy), 300)
 
 #### two way binding
 
-Every observed function is guaranteed to run maximum once par stack. Asynchronous infinite loops are also handled and avoided by the library.
+Every observed function is guaranteed to run maximum once per stack. Asynchronous infinite loops are also handled and avoided by the library.
 
 ```js
 const observer = require('nx-observe')
