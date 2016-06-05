@@ -64,18 +64,17 @@ const isObservable = observer.isObservable(observable)
 ```js
 const observer = require('nx-observe')
 
-let dummy
 const observable = observer.observable({prop: 'value'})
 
-observer.observe(() => dummy = observable.prop)
+// runs once after the current stack empties
+// outputs 'value' to the console
+observer.observe(() => console.log(observable.prop))
 
-setTimeout(() => observable.prop = 'Hello')
 // outputs 'Hello' to the console
-setTimeout(() => console.log(dummy), 100)
+setTimeout(() => observable.prop = 'Hello', 100)
 
-setTimeout(() => observable.prop = 'World', 200)
 // outputs 'World' to the console
-setTimeout(() => console.log(dummy), 300)
+setTimeout(() => observable.prop = 'World', 200)
 ```
 
 ## Features, limitations and edge cases
@@ -123,13 +122,14 @@ Observing nested properties works with arbitrary depth.
 ```js
 const observer = require('nx-observe')
 
-let dummy
 const observable = observer.observable({prop: {nested: 'nestedValue'}})
-observer.observe(() => dummy = observable.prop.nested)
 
-setTimeout(() => observable.nested.prop = 'otherValue')
+// runs once after the current stack empties
+// outputs 'nestedValue' to the console
+observer.observe(() => console.log(observable.prop.nested))
+
 // outputs 'otherValue' to the console
-setTimeout(() => console.log(dummy), 100)
+setTimeout(() => observable.prop.nested = 'otherValue', 100)
 ```
 
 #### observing implicit properties
@@ -139,17 +139,17 @@ The library also observes implicit properties. Implicit properties are not direc
 ```js
 const observer = require('nx-observe')
 
-let dummy
 const observable = observer.observable({words: ['Hello', 'World']})
-observer.observe(() => dummy = observable.words.join(' '))
 
-setTimeout(() => observable.words.push('!'))
+// runs once after the current stack empties
+// outputs 'Hello World' to the console
+observer.observe(() => console.log(observable.words.join(' ')))
+
 // outputs 'Hello World !' to the console
-setTimeout(() => console.log(dummy), 100)
+setTimeout(() => observable.words.push('!'), 100)
 
-setTimeout(() => observable.words.splice(1, 1, 'There'), 200)
 // outputs 'Hello There !' to the console
-setTimeout(() => console.log(dummy), 300)
+setTimeout(() => observable.words.splice(1, 1, 'There'), 200)
 ```
 
 #### two way binding
@@ -181,29 +181,26 @@ You can use prototypal inheritance with observables. The library walks and obser
 ```js
 const observer = require('nx-observe')
 
-let message
 const parentObservable = observer.observable({greeting: 'Hello'})
 const observable = observer.observable({subject: 'World!'})
 
 Object.setPrototypeOf(observable, parentObservable)
 
-observer.observe(() => message = observable.greeting + ' ' + observable.subject)
+// runs once after the current stack empties
+// outputs 'Hello World' to the console
+observer.observe(() => console.log(observable.greeting + ' ' + observable.subject))
 
-setTimeout(() => observable.subject = 'There!')
 // outputs 'Hello There!' to the console
-setTimeout(() => console.log(message), 100)
+setTimeout(() => observable.subject = 'There!')
 
-setTimeout(() => parentObservable.greeting = 'Hey', 200)
 // outputs 'Hey There!' to the console
-setTimeout(() => console.log(message), 300)
+setTimeout(() => parentObservable.greeting = 'Hey', 100)
 
-setTimeout(() => observable.greeting = 'Look', 400)
 // outputs 'Look There!' to the console
-setTimeout(() => console.log(message), 500)
+setTimeout(() => observable.greeting = 'Look', 200)
 
-setTimeout(() => delete observable.greeting, 600)
 // outputs 'Hey There!' to the console
-setTimeout(() => console.log(message), 700)
+setTimeout(() => delete observable.greeting, 300)
 ```
 
 ## Contributions
