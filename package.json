@@ -1,7 +1,7 @@
 {
   "name": "@risingstack/nx-observe",
   "version": "1.0.0",
-  "description": "Data observation and binding",
+  "description": "Powerful data observation/binding without special syntax.",
   "main": "observer.js",
   "scripts": {
     "test": "mocha observer.test.js",
