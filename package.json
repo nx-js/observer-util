@@ -7,7 +7,10 @@
     "test": "mocha observer.test.js",
     "lint": "standard observer.js"
   },
-  "author": "Miklos Bertalan",
+  "author": {
+    "name": "Miklos Bertalan",
+    "email": "miklos.bertalan@risingstack.com"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:RisingStack/nx-observe.git"

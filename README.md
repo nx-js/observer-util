@@ -6,7 +6,7 @@ The purpose of this library is to allow powerful data observation/binding withou
 ## Installation
 
 ```
-$ TODO: add to npm
+$ npm install @risingstack/nx-observe
 ```
 
 ## Platform support
@@ -19,7 +19,7 @@ $ TODO: add to npm
 ## Usage
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 ```
 
 ## API
@@ -62,7 +62,7 @@ const isObservable = observer.isObservable(observable)
 ## Example
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable({prop: 'value'})
 
@@ -84,7 +84,7 @@ setTimeout(() => observable.prop = 'World', 200)
 If an observable is passed as argument to the observer.observable method, it simply returns the passed observable. If you pass the same object into different observer.observable calls, it always returns the same observable instance.
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 
 const obj = {prop: 'value'}
 const observable1 = observer.observable(obj)
@@ -101,7 +101,7 @@ console.log(observable2 === observable3)
 An observer always runs once after the stack it was defined in empties. After that the observer runs after every stack in which the observable properties used by the observer are changed. An observer runs maximum once per stack. Multiple changes of the observable properties won't trigger it more than once.
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 
 let dummy
 const observable = observer.observable({prop: 'value'})
@@ -120,7 +120,7 @@ setTimeout(() => console.log(dummy))
 Observing nested properties works with arbitrary depth.
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable({prop: {nested: 'nestedValue'}})
 
@@ -137,7 +137,7 @@ setTimeout(() => observable.prop.nested = 'otherValue', 100)
 The library also observes implicit properties. Implicit properties are not directly used by your code, but by native function implementations for example.
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable({words: ['Hello', 'World']})
 
@@ -157,7 +157,7 @@ setTimeout(() => observable.words.splice(1, 1, 'There'), 200)
 Every observed function is guaranteed to run maximum once per stack. Asynchronous infinite loops are also handled and avoided by the library.
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 
 const observable1 = observer.observable({prop: 'value1'})
 const observable2 = observer.observable({prop: 'value2'})
@@ -179,7 +179,7 @@ setTimeout(() => console.log(observable1.prop), 300)
 You can use prototypal inheritance with observables. The library walks and observes the prototype chain correctly.
 
 ```js
-const observer = require('nx-observe')
+const observer = require('@risingstack/nx-observe')
 
 const parentObservable = observer.observable({greeting: 'Hello'})
 const observable = observer.observable({subject: 'World!'})

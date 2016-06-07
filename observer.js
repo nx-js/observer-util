@@ -63,7 +63,9 @@ function isObservable (obj) {
 }
 
 function get (target, key, receiver) {
-  if (key === proxy) return true
+  if (key === proxy) {
+    return true
+  }
   const result = Reflect.get(target, key, receiver)
   if (currentObserver) {
     registerObserver(target, key, currentObserver)
