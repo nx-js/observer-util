@@ -69,7 +69,7 @@ function get (target, key, receiver) {
   const result = Reflect.get(target, key, receiver)
   if (currentObserver) {
     registerObserver(target, key, currentObserver)
-    if (typeof result === 'object') {
+    if (typeof result === 'object' && !(result instanceof Date)) {
       return observable(result)
     }
   }
