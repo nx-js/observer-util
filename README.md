@@ -13,8 +13,11 @@ $ npm install @risingstack/nx-observe
 
 - Node: 6 and above
 - Chrome: 49 and above (after browserified)
-- Firefox: 48 and above (after browserified)
-- Edge: 13 and above (after browserified)
+- Firefox: 38 and above (after browserified)
+- Safari: Technical Preview, 10 and above (after browserified)
+- Edge: 12 and above (after browserified)
+- Opera: 36 and above (after browserified)
+- IE is not supported
 
 ## Usage
 
