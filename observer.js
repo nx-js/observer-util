@@ -107,7 +107,7 @@ function deleteProperty (target, key) {
 
 function queueObserver (observer) {
   if (observerSet.size === 0) {
-    setTimeout(runObservers)
+    Promise.resolve().then(runObservers)
   }
   observerSet.add(observer)
 }

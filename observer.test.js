@@ -3,17 +3,6 @@
 const expect = require('chai').expect
 const observer = require('./observer')
 
-Promise.prototype.thenAsync = function (callback) {
-  return this.then(() => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        callback()
-        resolve()
-      })
-    })
-  })
-}
-
 describe('nx-observe', () => {
   describe('observable', () => {
     it('should return an observable wrapping the object argument', () => {
@@ -73,10 +62,10 @@ describe('nx-observe', () => {
       observer.observe(() => dummy = observable.counter)
 
       return Promise.resolve()
-        .thenAsync(() => observable.counter = 2)
-        .thenAsync(() => expect(dummy).to.equal(2))
-        .thenAsync(() => observable.counter = undefined)
-        .thenAsync(() => expect(dummy).to.equal(undefined))
+        .then(() => observable.counter = 2)
+        .then(() => expect(dummy).to.equal(2))
+        .then(() => observable.counter = undefined)
+        .then(() => expect(dummy).to.equal(undefined))
     })
 
     it('should observe nested properties', () => {
@@ -85,10 +74,10 @@ describe('nx-observe', () => {
       observer.observe(() => dummy = observable.nested.counter)
 
       return Promise.resolve()
-        .thenAsync(() => observable.nested.counter = 2)
-        .thenAsync(() => expect(dummy).to.equal(2))
-        .thenAsync(() => observable.nested.counter = 'invalid')
-        .thenAsync(() => expect(dummy).to.equal('invalid'))
+        .then(() => observable.nested.counter = 2)
+        .then(() => expect(dummy).to.equal(2))
+        .then(() => observable.nested.counter = 'invalid')
+        .then(() => expect(dummy).to.equal('invalid'))
     })
 
     it('should observe properties on the prototype chain', () => {
@@ -99,10 +88,10 @@ describe('nx-observe', () => {
       observer.observe(() => dummy = observable.counter + observable.parentCounter)
 
       return Promise.resolve()
-        .thenAsync(() => observable.counter = 2)
-        .thenAsync(() => expect(dummy).to.equal(4))
-        .thenAsync(() => parentObservable.parentCounter = 3)
-        .thenAsync(() => expect(dummy).to.equal(5))
+        .then(() => observable.counter = 2)
+        .then(() => expect(dummy).to.equal(4))
+        .then(() => parentObservable.parentCounter = 3)
+        .then(() => expect(dummy).to.equal(5))
     })
 
     it('should observe delete operations', () => {
@@ -111,8 +100,8 @@ describe('nx-observe', () => {
       observer.observe(() => dummy = observable.counter)
 
       return Promise.resolve()
-        .thenAsync(() => delete observable.counter)
-        .thenAsync(() => expect(dummy).to.equal(undefined))
+        .then(() => delete observable.counter)
+        .then(() => expect(dummy).to.equal(undefined))
     })
 
     it('should observe set operations without value change', () => {
@@ -127,9 +116,9 @@ describe('nx-observe', () => {
       observer.observe(test)
 
       return Promise.resolve()
-        .thenAsync(() => observable.counter = 0)
-        .thenAsync(() => observable.counter = 0)
-        .thenAsync(() => expect(numOfRuns).to.equal(3))
+        .then(() => observable.counter = 0)
+        .then(() => observable.counter = 0)
+        .then(() => expect(numOfRuns).to.equal(3))
     })
 
     it('should observe function call chains', () => {
@@ -142,8 +131,8 @@ describe('nx-observe', () => {
       }
 
       return Promise.resolve()
-        .thenAsync(() => observable.counter = 2)
-        .thenAsync(() => expect(dummy).to.equal(2))
+        .then(() => observable.counter = 2)
+        .then(() => expect(dummy).to.equal(2))
     })
 
     it('should observe implicit properties (iteration, etc)', () => {
@@ -156,10 +145,10 @@ describe('nx-observe', () => {
       }
 
       return Promise.resolve()
-        .thenAsync(() => observable.array.push('World!'))
-        .thenAsync(() => expect(dummy).to.equal('Hello World!'))
-        .thenAsync(() => observable.array.shift())
-        .thenAsync(() => expect(dummy).to.equal('World!'))
+        .then(() => observable.array.push('World!'))
+        .then(() => expect(dummy).to.equal('Hello World!'))
+        .then(() => observable.array.shift())
+        .then(() => expect(dummy).to.equal('World!'))
     })
 
     it('should run once (asynchronously) after the defining stack empties', () => {
@@ -175,7 +164,7 @@ describe('nx-observe', () => {
       expect(numOfRuns).to.equal(0)
 
       return Promise.resolve()
-        .thenAsync(() => expect(numOfRuns).to.equal(1))
+        .then(() => expect(numOfRuns).to.equal(1))
     })
 
     it('should rerun maximum once per stack', () => {
@@ -190,12 +179,12 @@ describe('nx-observe', () => {
       observer.observe(test)
 
       return Promise.resolve()
-        .thenAsync(() => {
+        .then(() => {
           observable.prop1 = 1
           observable.prop2 = 3
           observable.prop1 = 0
         })
-        .thenAsync(() => expect(numOfRuns).to.equal(2))
+        .then(() => expect(numOfRuns).to.equal(2))
     })
 
     it('should avoid infinite loops', () => {
@@ -216,11 +205,11 @@ describe('nx-observe', () => {
       observer.observe(test2)
 
       return Promise.resolve()
-        .thenAsync(() => observable1.prop = 'Hello')
-        .thenAsync(() => expect(observable2.prop).to.equal('Hello'))
-        .thenAsync(() => observable2.prop = 'World!')
-        .thenAsync(() => expect(observable1.prop).to.equal('World!'))
-        .thenAsync(() => {
+        .then(() => observable1.prop = 'Hello')
+        .then(() => expect(observable2.prop).to.equal('Hello'))
+        .then(() => observable2.prop = 'World!')
+        .then(() => expect(observable1.prop).to.equal('World!'))
+        .then(() => {
           expect(numOfRuns1).to.equal(3)
           expect(numOfRuns2).to.equal(3)
         })
@@ -246,11 +235,11 @@ describe('nx-observe', () => {
       observer.observe(test)
 
       return Promise.resolve()
-        .thenAsync(() => observable.prop = 'Hello')
-        .thenAsync(() => observer.unobserve(test))
-        .thenAsync(() => observable.prop = 'World')
-        .thenAsync(() => observable.prop = '!')
-        .thenAsync(() => expect(numOfRuns).to.equal(2))
+        .then(() => observable.prop = 'Hello')
+        .then(() => observer.unobserve(test))
+        .then(() => observable.prop = 'World')
+        .then(() => observable.prop = '!')
+        .then(() => expect(numOfRuns).to.equal(2))
     })
 
     it('should unobserve even if the function is registered for the stack', () => {
@@ -266,7 +255,7 @@ describe('nx-observe', () => {
       observer.unobserve(test)
 
       return Promise.resolve()
-        .thenAsync(() => expect(numOfRuns).to.equal(0))
+        .then(() => expect(numOfRuns).to.equal(0))
     })
 
     it('should throw TypeError on invalid arguments', () => {
