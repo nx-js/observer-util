@@ -50,7 +50,7 @@ function observable (obj) {
   if (typeof obj[proxy] === 'object') {
     return obj[proxy]
   }
-  obj[proxy] = new Proxy(obj, {get, set, deleteProperty})
+  obj[proxy] = new Proxy(obj, {get: get, set: set, deleteProperty: deleteProperty})
   targets.set(obj, new Map())
   return obj[proxy]
 }
