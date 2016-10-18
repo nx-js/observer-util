@@ -22,7 +22,7 @@ function observe (fn) {
   if (!fn[observing]) {
     fn[observing] = true
     fn[unobserverSet] = new Set()
-    queueObserver(fn)
+    runObserver(fn)
   }
 }
 
@@ -65,6 +65,8 @@ function isObservable (obj) {
 function get (target, key, receiver) {
   if (key === proxy) {
     return true
+  } else if (key === '$raw') {
+    return target
   }
   const result = Reflect.get(target, key, receiver)
   if (currentObserver) {
@@ -116,7 +118,6 @@ function runObservers () {
   try {
     observerSet.forEach(runObserver)
   } finally {
-    currentObserver = undefined
     observerSet.clear()
   }
 }
@@ -124,7 +125,11 @@ function runObservers () {
 function runObserver (observer) {
   if (observer[observing]) {
     currentObserver = observer
-    observer()
+    try {
+      observer()
+    } finally {
+      currentObserver = undefined
+    }
   }
 }
 
