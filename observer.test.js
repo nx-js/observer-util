@@ -151,7 +151,7 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('World!'))
     })
 
-    it('should run once (asynchronously) after the defining stack empties', () => {
+    it('should run once (synchronously) right away', () => {
       let dummy
       const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
 
@@ -160,11 +160,9 @@ describe('nx-observe', () => {
         dummy = observable.prop1 + observable.prop2
         numOfRuns++
       }
-      observer.observe(test)
       expect(numOfRuns).to.equal(0)
-
-      return Promise.resolve()
-        .then(() => expect(numOfRuns).to.equal(1))
+      observer.observe(test)
+      expect(numOfRuns).to.equal(1)
     })
 
     it('should rerun maximum once per stack', () => {
@@ -210,8 +208,8 @@ describe('nx-observe', () => {
         .then(() => observable2.prop = 'World!')
         .then(() => expect(observable1.prop).to.equal('World!'))
         .then(() => {
-          expect(numOfRuns1).to.equal(3)
-          expect(numOfRuns2).to.equal(3)
+          expect(numOfRuns1).to.equal(4)
+          expect(numOfRuns2).to.equal(4)
         })
     })
 
@@ -255,7 +253,8 @@ describe('nx-observe', () => {
       observer.unobserve(test)
 
       return Promise.resolve()
-        .then(() => expect(numOfRuns).to.equal(0))
+        .then(() => observable.prop = 1)
+        .then(() => expect(numOfRuns).to.equal(1))
     })
 
     it('should throw TypeError on invalid arguments', () => {

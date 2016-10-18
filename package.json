@@ -1,6 +1,6 @@
 {
   "name": "@risingstack/nx-observe",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Powerful data observation/binding without special syntax.",
   "main": "observer.js",
   "scripts": {
