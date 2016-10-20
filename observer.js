@@ -1,5 +1,6 @@
 'use strict'
 
+const nextTick = require('./nextTick')
 const proxy = Symbol('proxy')
 const unobserverSet = Symbol('unobserverSet')
 const observing = Symbol('observing')
@@ -109,7 +110,7 @@ function deleteProperty (target, key) {
 
 function queueObserver (observer) {
   if (observerSet.size === 0) {
-    Promise.resolve().then(runObservers)
+    nextTick(runObservers)
   }
   observerSet.add(observer)
 }
