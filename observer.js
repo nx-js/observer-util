@@ -1,8 +1,8 @@
 'use strict'
 
 const nextTick = require('./nextTick')
-const proxy = Symbol('proxy')
-const unobserverSet = Symbol('unobserverSet')
+const proxy = Symbol('observable proxy')
+const unobservers = Symbol('unobservers')
 const observing = Symbol('observing')
 
 const targets = new WeakMap()
@@ -22,8 +22,8 @@ function observe (fn) {
   }
   if (!fn[observing]) {
     fn[observing] = true
-    fn[unobserverSet] = new Set()
-    runObserver(fn)
+    fn[unobservers] = new Map()
+    queueObserver(fn)
   }
 }
 
@@ -32,16 +32,14 @@ function unobserve (fn) {
     throw new TypeError('first argument must be a function')
   }
   if (fn[observing]) {
-    fn[unobserverSet].forEach(runUnobserver)
-    fn[unobserverSet] = undefined
+    fn[unobservers].forEach(runUnobserver)
+    fn[unobservers] = undefined
   }
   fn[observing] = false
 }
 
 function observable (obj) {
-  if (obj === undefined) {
-    obj = {}
-  }
+  obj = obj || {}
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object or undefined')
   }
@@ -51,7 +49,7 @@ function observable (obj) {
   if (typeof obj[proxy] === 'object') {
     return obj[proxy]
   }
-  obj[proxy] = new Proxy(obj, {get: get, set: set, deleteProperty: deleteProperty})
+  obj[proxy] = new Proxy(obj, {get, set, deleteProperty})
   targets.set(obj, new Map())
   return obj[proxy]
 }
@@ -66,7 +64,8 @@ function isObservable (obj) {
 function get (target, key, receiver) {
   if (key === proxy) {
     return true
-  } else if (key === '$raw') {
+  }
+  if (key === '$raw') {
     return target
   }
   const result = Reflect.get(target, key, receiver)
@@ -90,20 +89,22 @@ function registerObserver (target, key, observer) {
   }
   if (!observersForKey.has(observer)) {
     observersForKey.add(observer)
-    observer[unobserverSet].add(() => observersForKey.delete(observer))
+    observer[unobservers].set(observersForKey, observer)
   }
 }
 
 function set (target, key, value, receiver) {
-  if (targets.get(target).has(key)) {
-    targets.get(target).get(key).forEach(queueObserver)
+  const observers = targets.get(target).get(key)
+  if (observers) {
+    observers.forEach(queueObserver)
   }
   return Reflect.set(target, key, value, receiver)
 }
 
 function deleteProperty (target, key) {
-  if (targets.get(target).has(key)) {
-    targets.get(target).get(key).forEach(queueObserver)
+  const observers = targets.get(target).get(key)
+  if (observers) {
+    observers.forEach(queueObserver)
   }
   return Reflect.deleteProperty(target, key)
 }
@@ -120,20 +121,17 @@ function runObservers () {
     observerSet.forEach(runObserver)
   } finally {
     observerSet.clear()
+    currentObserver = undefined
   }
 }
 
 function runObserver (observer) {
   if (observer[observing]) {
     currentObserver = observer
-    try {
-      observer()
-    } finally {
-      currentObserver = undefined
-    }
+    observer()
   }
 }
 
-function runUnobserver (unobserver) {
-  unobserver()
+function runUnobserver (observer, observers) {
+  observers.delete(observer)
 }

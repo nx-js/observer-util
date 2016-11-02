@@ -5,11 +5,11 @@ let currTask
 
 if (typeof MutationObserver !== 'undefined') {
   let counter = 0
-  const observer = new MutationObserver(onMutation)
+  const observer = new MutationObserver(onTask)
   const textNode = document.createTextNode(String(counter))
   observer.observe(textNode, {characterData: true})
 
-  function onMutation () {
+  function onTask () {
     if (currTask) {
       currTask()
     }
@@ -17,7 +17,7 @@ if (typeof MutationObserver !== 'undefined') {
 
   mutateWithTask = function mutateWithTask () {
     counter = (counter + 1) % 2
-    textNode.data = String(counter)
+    textNode.textContent = counter
   }
 }
 
