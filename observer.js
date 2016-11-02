@@ -5,8 +5,8 @@ const proxy = Symbol('observable proxy')
 const unobservers = Symbol('unobservers')
 const observing = Symbol('observing')
 
-const targets = new WeakMap()
-const observerSet = new Set()
+const observers = new WeakMap()
+const queuedObservers = new Set()
 let currentObserver
 
 module.exports = {
@@ -50,7 +50,7 @@ function observable (obj) {
     return obj[proxy]
   }
   obj[proxy] = new Proxy(obj, {get, set, deleteProperty})
-  targets.set(obj, new Map())
+  observers.set(obj, new Map())
   return obj[proxy]
 }
 
@@ -82,10 +82,10 @@ function get (target, key, receiver) {
 }
 
 function registerObserver (target, key, observer) {
-  let observersForKey = targets.get(target).get(key)
+  let observersForKey = observers.get(target).get(key)
   if (!observersForKey) {
     observersForKey = new Set()
-    targets.get(target).set(key, observersForKey)
+    observers.get(target).set(key, observersForKey)
   }
   if (!observersForKey.has(observer)) {
     observersForKey.add(observer)
@@ -94,33 +94,33 @@ function registerObserver (target, key, observer) {
 }
 
 function set (target, key, value, receiver) {
-  const observers = targets.get(target).get(key)
-  if (observers) {
-    observers.forEach(queueObserver)
+  const observersForKey = observers.get(target).get(key)
+  if (observersForKey) {
+    observersForKey.forEach(queueObserver)
   }
   return Reflect.set(target, key, value, receiver)
 }
 
 function deleteProperty (target, key) {
-  const observers = targets.get(target).get(key)
-  if (observers) {
-    observers.forEach(queueObserver)
+  const observersForKey = observers.get(target).get(key)
+  if (observersForKey) {
+    observersForKey.forEach(queueObserver)
   }
   return Reflect.deleteProperty(target, key)
 }
 
 function queueObserver (observer) {
-  if (observerSet.size === 0) {
+  if (queuedObservers.size === 0) {
     nextTick(runObservers)
   }
-  observerSet.add(observer)
+  queuedObservers.add(observer)
 }
 
 function runObservers () {
   try {
-    observerSet.forEach(runObserver)
+    queuedObservers.forEach(runObserver)
   } finally {
-    observerSet.clear()
+    queuedObservers.clear()
     currentObserver = undefined
   }
 }
