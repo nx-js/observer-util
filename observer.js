@@ -43,27 +43,24 @@ function observable (obj) {
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object or undefined')
   }
-  if (isObservable(obj)) {
-    return obj
+  let observable = obj[proxy]
+  if (!observable) {
+    observable = new Proxy(obj, {get, set, deleteProperty})
+    observers.set(obj, new Map())
   }
-  if (typeof obj[proxy] === 'object') {
-    return obj[proxy]
-  }
-  obj[proxy] = new Proxy(obj, {get, set, deleteProperty})
-  observers.set(obj, new Map())
-  return obj[proxy]
+  return observable
 }
 
 function isObservable (obj) {
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object')
   }
-  return (obj[proxy] === true)
+  return (typeof obj[proxy] === 'object')
 }
 
 function get (target, key, receiver) {
   if (key === proxy) {
-    return true
+    return receiver
   }
   if (key === '$raw') {
     return target
@@ -75,8 +72,8 @@ function get (target, key, receiver) {
       return observable(result)
     }
   }
-  if (typeof result === 'object' && typeof result[proxy] === 'object') {
-    return result[proxy]
+  if (typeof result === 'object') {
+    return result[proxy] || result
   }
   return result
 }
