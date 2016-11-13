@@ -1,12 +1,14 @@
 'use strict'
 
 const nextTick = require('./nextTick')
-const proxy = Symbol('observable proxy')
 const unobservers = Symbol('unobservers')
 const observing = Symbol('observing')
 
+const objToProxy = new WeakMap()
+const proxies = new WeakSet()
 const observers = new WeakMap()
 const queuedObservers = new Set()
+let queued = false
 let currentObserver
 
 module.exports = {
@@ -43,9 +45,14 @@ function observable (obj) {
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object or undefined')
   }
-  let observable = obj[proxy]
+  if (proxies.has(obj)) {
+    return obj
+  }
+  let observable = objToProxy.get(obj)
   if (!observable) {
     observable = new Proxy(obj, {get, set, deleteProperty})
+    objToProxy.set(obj, observable)
+    proxies.add(observable)
     observers.set(obj, new Map())
   }
   return observable
@@ -55,34 +62,32 @@ function isObservable (obj) {
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object')
   }
-  return (typeof obj[proxy] === 'object')
+  return proxies.has(obj)
 }
 
 function get (target, key, receiver) {
-  if (key === proxy) {
-    return receiver
-  }
   if (key === '$raw') {
     return target
   }
   const result = Reflect.get(target, key, receiver)
-  if (currentObserver) {
+  if (currentObserver && typeof key !== 'symbol' && typeof result !== 'function') {
     registerObserver(target, key, currentObserver)
-    if (typeof result === 'object' && !(result instanceof Date)) {
+    if (typeof result === 'object') {
       return observable(result)
     }
   }
   if (typeof result === 'object') {
-    return result[proxy] || result
+    return objToProxy.get(result) || result
   }
   return result
 }
 
 function registerObserver (target, key, observer) {
-  let observersForKey = observers.get(target).get(key)
+  const observersForTarget = observers.get(target)
+  let observersForKey = observersForTarget.get(key)
   if (!observersForKey) {
     observersForKey = new Set()
-    observers.get(target).set(key, observersForKey)
+    observersForTarget.set(key, observersForKey)
   }
   if (!observersForKey.has(observer)) {
     observersForKey.add(observer)
@@ -91,9 +96,11 @@ function registerObserver (target, key, observer) {
 }
 
 function set (target, key, value, receiver) {
-  const observersForKey = observers.get(target).get(key)
-  if (observersForKey) {
-    observersForKey.forEach(queueObserver)
+  if ((key === 'length' || target[key] !== value) && objToProxy.get(target) === receiver) {
+    const observersForKey = observers.get(target).get(key)
+    if (observersForKey) {
+      observersForKey.forEach(queueObserver)
+    }
   }
   return Reflect.set(target, key, value, receiver)
 }
@@ -107,8 +114,9 @@ function deleteProperty (target, key) {
 }
 
 function queueObserver (observer) {
-  if (queuedObservers.size === 0) {
+  if (!queued) {
     nextTick(runObservers)
+    queued = true
   }
   queuedObservers.add(observer)
 }
@@ -118,14 +126,18 @@ function runObservers () {
     queuedObservers.forEach(runObserver)
   } finally {
     queuedObservers.clear()
-    currentObserver = undefined
+    queued = false
   }
 }
 
 function runObserver (observer) {
   if (observer[observing]) {
-    currentObserver = observer
-    observer()
+    try {
+      currentObserver = observer
+      observer()
+    } finally {
+      currentObserver = undefined
+    }
   }
 }
 

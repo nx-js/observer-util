@@ -28,7 +28,6 @@ describe('nx-observe', () => {
     it('should throw TypeError on invalid arguments', () => {
       expect(() => observer.observable(12)).to.throw(TypeError)
       expect(() => observer.observable('string')).to.throw(TypeError)
-      expect(() => observer.observable(null)).to.throw(TypeError)
     })
   })
 
@@ -104,7 +103,7 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal(undefined))
     })
 
-    it('should observe set operations without value change', () => {
+    it('should not observe set operations without value change', () => {
       let dummy
       const observable = observer.observable({counter: 0})
 
@@ -118,7 +117,7 @@ describe('nx-observe', () => {
       return Promise.resolve()
         .then(() => observable.counter = 0)
         .then(() => observable.counter = 0)
-        .then(() => expect(numOfRuns).to.equal(3))
+        .then(() => expect(numOfRuns).to.equal(1))
     })
 
     it('should observe function call chains', () => {
@@ -151,7 +150,7 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('World!'))
     })
 
-    it('should run once (synchronously) right away', () => {
+    it('should run once (asynchronously) after the defining stack empties', () => {
       let dummy
       const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
 
@@ -160,9 +159,11 @@ describe('nx-observe', () => {
         dummy = observable.prop1 + observable.prop2
         numOfRuns++
       }
-      expect(numOfRuns).to.equal(0)
       observer.observe(test)
-      expect(numOfRuns).to.equal(1)
+      expect(numOfRuns).to.equal(0)
+
+      return Promise.resolve()
+        .then(() => expect(numOfRuns).to.equal(1))
     })
 
     it('should rerun maximum once per stack', () => {
@@ -208,8 +209,8 @@ describe('nx-observe', () => {
         .then(() => observable2.prop = 'World!')
         .then(() => expect(observable1.prop).to.equal('World!'))
         .then(() => {
-          expect(numOfRuns1).to.equal(4)
-          expect(numOfRuns2).to.equal(4)
+          expect(numOfRuns1).to.equal(3)
+          expect(numOfRuns2).to.equal(3)
         })
     })
 
@@ -253,8 +254,7 @@ describe('nx-observe', () => {
       observer.unobserve(test)
 
       return Promise.resolve()
-        .then(() => observable.prop = 1)
-        .then(() => expect(numOfRuns).to.equal(1))
+        .then(() => expect(numOfRuns).to.equal(0))
     })
 
     it('should throw TypeError on invalid arguments', () => {
