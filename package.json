@@ -1,7 +1,7 @@
 {
   "name": "@risingstack/nx-observe",
-  "version": "1.1.1",
-  "description": "Powerful data observation/binding without special syntax.",
+  "version": "2.0.0",
+  "description": "Powerful data observation/binding with ES6 Proxies.",
   "main": "observer.js",
   "scripts": {
     "test": "mocha observer.test.js",
@@ -26,7 +26,9 @@
     "observable",
     "data",
     "binding",
-    "proxy"
+    "proxy",
+    "ES6",
+    "reactive"
   ],
   "devDependencies": {
     "chai": "3.5.0",

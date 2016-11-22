@@ -5,33 +5,47 @@ const observer = require('./observer')
 
 describe('nx-observe', () => {
   describe('observable', () => {
-    it('should return an observable wrapping the object argument', () => {
+    it('should throw TypeError on invalid arguments', () => {
+      expect(() => observer.observable(12)).to.throw(TypeError)
+      expect(() => observer.observable('string')).to.throw(TypeError)
+      expect(() => observer.observable({})).to.not.throw(TypeError)
+      expect(() => observer.observable()).to.not.throw(TypeError)
+    })
+
+    it('should return a new observable when no argument is provided', () => {
+      const observable = observer.observable()
+      expect(observer.isObservable(observable)).to.be.true
+    })
+
+    it('should return an observable wrapping of an object argument', () => {
       const obj = {prop: 'value'}
       const observable = observer.observable(obj)
       expect(observable).to.not.equal(obj)
       expect(observer.isObservable(observable)).to.be.true
     })
 
-    it('should return the argument if its an observable', () => {
+    it('should return the argument if it is already an observable', () => {
       const observable1 = observer.observable()
       const observable2 = observer.observable(observable1)
       expect(observable1).to.equal(observable2)
     })
 
-    it('should return the same proxy for repeated calls with the same argument', () => {
+    it('should return the same observable wrapper when called repeatedly with the same argument', () => {
       const obj = {prop: 'value'}
       const observable1 = observer.observable(obj)
       const observable2 = observer.observable(obj)
       expect(observable1).to.equal(observable2)
     })
-
-    it('should throw TypeError on invalid arguments', () => {
-      expect(() => observer.observable(12)).to.throw(TypeError)
-      expect(() => observer.observable('string')).to.throw(TypeError)
-    })
   })
 
   describe('isObservable', () => {
+    it('should throw a TypeError on invalid arguments', () => {
+      expect(() => observer.isObservable(12)).to.throw(TypeError)
+      expect(() => observer.isObservable('string')).to.throw(TypeError)
+      expect(() => observer.isObservable()).to.throw(TypeError)
+      expect(() => observer.isObservable({})).to.not.throw(TypeError)
+    })
+
     it('should return true if an observable is passed as argument', () => {
       const observable = observer.observable()
       const isObservable = observer.isObservable(observable)
@@ -46,15 +60,15 @@ describe('nx-observe', () => {
       expect(isObservable1).to.be.false
       expect(isObservable2).to.be.false
     })
-
-    it('should throw TypeError on invalid arguments', () => {
-      expect(() => observer.isObservable(12)).to.throw(TypeError)
-      expect(() => observer.isObservable('string')).to.throw(TypeError)
-      expect(() => observer.isObservable()).to.throw(TypeError)
-    })
   })
 
   describe('observe', () => {
+    it('should throw TypeError on invalid arguments', () => {
+      expect(() => observer.observe(12)).to.throw(TypeError)
+      expect(() => observer.observe({})).to.throw(TypeError)
+      expect(() => observer.observe()).to.throw(TypeError)
+    })
+
     it('should observe basic properties', () => {
       let dummy
       const observable = observer.observable({counter: 0})
@@ -103,7 +117,7 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal(undefined))
     })
 
-    it('should not observe set operations without value change', () => {
+    it('should observe set operations without a value change', () => {
       let dummy
       const observable = observer.observable({counter: 0})
 
@@ -117,7 +131,7 @@ describe('nx-observe', () => {
       return Promise.resolve()
         .then(() => observable.counter = 0)
         .then(() => observable.counter = 0)
-        .then(() => expect(numOfRuns).to.equal(1))
+        .then(() => expect(numOfRuns).to.equal(3))
     })
 
     it('should observe function call chains', () => {
@@ -150,7 +164,7 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('World!'))
     })
 
-    it('should run once (asynchronously) after the defining stack empties', () => {
+    it('should run once (synchronously) rigth away', () => {
       let dummy
       const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
 
@@ -160,10 +174,7 @@ describe('nx-observe', () => {
         numOfRuns++
       }
       observer.observe(test)
-      expect(numOfRuns).to.equal(0)
-
-      return Promise.resolve()
-        .then(() => expect(numOfRuns).to.equal(1))
+      expect(numOfRuns).to.equal(1)
     })
 
     it('should rerun maximum once per stack', () => {
@@ -209,19 +220,59 @@ describe('nx-observe', () => {
         .then(() => observable2.prop = 'World!')
         .then(() => expect(observable1.prop).to.equal('World!'))
         .then(() => {
-          expect(numOfRuns1).to.equal(3)
-          expect(numOfRuns2).to.equal(3)
+          expect(numOfRuns1).to.equal(4)
+          expect(numOfRuns2).to.equal(4)
         })
     })
 
-    it('should throw TypeError on invalid arguments', () => {
-      expect(() => observer.observe(12)).to.throw(TypeError)
-      expect(() => observer.observe({})).to.throw(TypeError)
-      expect(() => observer.observe()).to.throw(TypeError)
+    it('should accept a context argument and set the observer "this" to it', () => {
+      let dummy
+      const observable = observer.observable({counter: 0})
+      observer.observe(setDummy, observable)
+
+      function setDummy () {
+        dummy = this.counter
+      }
+
+      return Promise.resolve()
+        .then(() => observable.counter = 2)
+        .then(() => expect(dummy).to.equal(2))
+        .then(() => observable.counter = undefined)
+        .then(() => expect(dummy).to.equal(undefined))
+    })
+
+    it('should accept a list of arguments and set the observer arguments to them', () => {
+      let dummy
+      const observable1 = observer.observable({counter: 0})
+      const observable2 = observer.observable({counter: 0})
+      observer.observe(setDummy, undefined, observable1, observable2)
+
+      function setDummy (state1, state2) {
+        dummy = state1.counter + state2.counter
+      }
+
+      return Promise.resolve()
+        .then(() => observable1.counter = 2)
+        .then(() => expect(dummy).to.equal(2))
+        .then(() => observable2.counter = 1)
+        .then(() => expect(dummy).to.equal(3))
+    })
+
+    it('should return an unobserve (object) signal', () => {
+      let dummy
+      const observable = observer.observable({counter: 0})
+      const signal = observer.observe(() => dummy = observable.counter)
+      expect(signal).to.be.an('object')
     })
   })
 
   describe('unobserve', () => {
+    it('should throw TypeError on invalid arguments', () => {
+      expect(() => observer.unobserve(12)).to.throw(TypeError)
+      expect(() => observer.unobserve({})).to.throw(TypeError)
+      expect(() => observer.unobserve()).to.throw(TypeError)
+    })
+
     it('should unobserve the observed function', () => {
       let dummy
       const observable = observer.observable({prop: 0})
@@ -231,11 +282,11 @@ describe('nx-observe', () => {
         dummy = observable.prop
         numOfRuns++
       }
-      observer.observe(test)
+      const signal = observer.observe(test)
 
       return Promise.resolve()
         .then(() => observable.prop = 'Hello')
-        .then(() => observer.unobserve(test))
+        .then(() => observer.unobserve(signal))
         .then(() => observable.prop = 'World')
         .then(() => observable.prop = '!')
         .then(() => expect(numOfRuns).to.equal(2))
@@ -250,17 +301,14 @@ describe('nx-observe', () => {
         dummy = observable.prop
         numOfRuns++
       }
-      observer.observe(test)
-      observer.unobserve(test)
+      const signal = observer.observe(test)
 
       return Promise.resolve()
-        .then(() => expect(numOfRuns).to.equal(0))
-    })
-
-    it('should throw TypeError on invalid arguments', () => {
-      expect(() => observer.unobserve(12)).to.throw(TypeError)
-      expect(() => observer.unobserve({})).to.throw(TypeError)
-      expect(() => observer.unobserve()).to.throw(TypeError)
+        .then(() => {
+          observable.prop = 2
+          observer.unobserve(signal)
+        })
+        .then(() => expect(numOfRuns).to.equal(1))
     })
   })
 })
