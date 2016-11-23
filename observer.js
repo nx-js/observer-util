@@ -28,11 +28,10 @@ function observe (fn, context, ...args) {
 }
 
 function unobserve (observer) {
-  if (typeof observer !== 'object' || !observer.observedKeys) {
-    throw new TypeError('first argument must be an observer signal')
+  if (typeof observer === 'object' && observer.observedKeys) {
+    observer.observedKeys.forEach(unobserveKey, observer)
+    observer.fn = observer.context = observer.args = observer.observedKeys = undefined
   }
-  observer.observedKeys.forEach(unobserveKey, observer)
-  observer.fn = observer.context = observer.args = observer.observedKeys = undefined
 }
 
 function observable (obj) {

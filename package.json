@@ -1,6 +1,6 @@
 {
   "name": "@risingstack/nx-observe",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Powerful data observation/binding with ES6 Proxies.",
   "main": "observer.js",
   "scripts": {

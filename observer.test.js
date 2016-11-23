@@ -267,12 +267,6 @@ describe('nx-observe', () => {
   })
 
   describe('unobserve', () => {
-    it('should throw TypeError on invalid arguments', () => {
-      expect(() => observer.unobserve(12)).to.throw(TypeError)
-      expect(() => observer.unobserve({})).to.throw(TypeError)
-      expect(() => observer.unobserve()).to.throw(TypeError)
-    })
-
     it('should unobserve the observed function', () => {
       let dummy
       const observable = observer.observable({prop: 0})
