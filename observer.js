@@ -63,7 +63,7 @@ function get (target, key, receiver) {
   if (typeof key === 'symbol' || typeof result === 'function') {
     return result
   }
-  const isObject = (typeof result === 'object')
+  const isObject = (typeof result === 'object' && result !== null)
   const observable = isObject && proxies.get(result)
   if (currentObserver) {
     registerObserver(target, key, currentObserver)
