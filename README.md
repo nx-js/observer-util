@@ -311,9 +311,35 @@ setTimeout(() => person.$raw.name = 'Anne', 200)
 
 ## Performance
 
+This [benchmark](/benchmark.js) compares vanilla JS, [MobX](mobxjs.github.io) and nx-observe in
+a few scenarios. You can set it up locally with the `npm run build-benchmark` command an run it
+with `npm run benchmark`. The result on a MacBook Pro and Node 6.2.0 can be seen below.
 
+![Benchmark result](/benchmark.png)
 
-![Benchmark result](/benchmark.png).
+- The first two tests compare NX and MobX observable creation cost with plain JS object creation.
+In case of MobX the overhead grows with the number of properties.
+
+- 'Dynamic property addition' tests the cost of adding expando properties to a plain object or an
+observable without any observer/listener function registered for the observable.
+MobX requires the special `mobx.extendObservable(obj, { prop: 'value' })` syntax
+instead of `obj.prop = 'value'`.
+
+- 'Get and set operation' test the cost of get/set operations of a plain object or an
+observable without any observer/listener function registered for the observable.
+
+- 'Function creation' tests the cost of vanilla JS function creation versus `mobx.autorun(newFn)`
+and `nx.observe(newFn)`.
+
+- 'Function trigger' tests the cost of registering observable property mutations
+and running appropriate observer/listener functions.
+
+- 'Function cleanup' tests the cost of disposing observer/listener functions with `disposeFn()`
+or `nx.unobserve(fn)`.
+
+Do not worry about the large difference between the vanilla and nx-observe / MobX results.
+The operations tested above are some of the fastest ones in vanilla JS. The overhead would be a
+lot smaller compared to some commonly used built in objects, like Promises.
 
 ## Contributions
 
@@ -321,7 +347,7 @@ This library has the very specific purpose of supporting the
 [NX framework](https://github.com/RisingStack/nx-framework).
 Features should only be added, if they are used by the framework. Otherwise please fork.
 
-Bug fixes, tests and doc updates are always welcome.
+Bug fixes, tests, benchmark corrections and doc updates are always welcome.
 Tests and linter (standardJS) must pass.
 
 ## Authors

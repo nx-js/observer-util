@@ -6,7 +6,7 @@ const Canvas = require('canvas')
 const Chart = require('nchart')
 const fs = require('fs')
 
-const NUM_OF_RUNS = 100000
+const NUM_OF_RUNS = 50000
 
 const result = {
   vanilla: [],
@@ -17,9 +17,9 @@ const result = {
 const chartData = {
   labels: [
     `Object creation
-    (3 props)`,
+      (3 props)`,
     `Object creation
-    (10 props)`,
+      (15 props)`,
     'New property',
     'Set operation',
     'Get operation',
@@ -58,8 +58,8 @@ const chartOptions = {
       ctx.fillStyle = dataset.fillColor
       ctx.textAlign = 'left'
       ctx.textBaseline = 'left'
-      ctx.fillRect((i + 1) * 100, 15, 20, 10)
-      ctx.fillText(dataset.label, (i + 1) * 100 + 25, 20)
+      ctx.fillRect((i + 1) * 100 + 200, 15, 20, 10)
+      ctx.fillText(dataset.label, (i + 1) * 100 + 225, 20)
     }
   }
 }
@@ -83,32 +83,32 @@ for (let i = 0; i < NUM_OF_RUNS; i++) {
 }
 updateResult('nx', 'object creation (3 props)')
 
-// OBJECT CREATION (10 PROPS)
+// OBJECT CREATION (15 PROPS)
 for (let i = 0; i < NUM_OF_RUNS; i++) {
   const obj = {}
-  for (let j = 0; j < 10; j++) {
+  for (let j = 0; j < 15; j++) {
     obj[j] = j
   }
 }
-updateResult('vanilla', 'object creation (10 props)')
+updateResult('vanilla', 'object creation (15 props)')
 
 for (let i = 0; i < NUM_OF_RUNS; i++) {
   const obj = {}
-  for (let j = 0; j < 10; j++) {
+  for (let j = 0; j < 15; j++) {
     obj[j] = j
   }
   const mobxObj = mobx.observable(obj)
 }
-updateResult('mobx', 'object creation (10 props)')
+updateResult('mobx', 'object creation (15 props)')
 
 for (let i = 0; i < NUM_OF_RUNS; i++) {
   const obj = {}
-  for (let j = 0; j < 10; j++) {
+  for (let j = 0; j < 15; j++) {
     obj[j] = j
   }
   const nxObj = nx.observable(obj)
 }
-updateResult('nx', 'object creation (10 props)')
+updateResult('nx', 'object creation (15 props)')
 
 // DYNAMIC PROPERTY ADDITION
 for (let obj of objs) {
@@ -190,41 +190,33 @@ for (let nxObj of nxObjs) {
 updateResult('nx', 'observer function creation')
 
 // TRIGGER OBSERVER FUNCTIONS
-let promise = Promise.resolve()
-
 for (let mobxObj of mobxObjs) {
-  promise = promise
-    .then(() => mobxObj.prop -= 1)
-    .then(() => mobxObj.nested.prop -= 2)
-    .then(() => mobxObj.dynamic -= 3)
+  mobxObj.prop -= 1
+  mobxObj.nested.prop -= 2
+  mobxObj.dynamic -= 3
 }
-promise = promise.then(() => updateResult('mobx', 'observer function trigger'))
+updateResult('mobx', 'observer function trigger')
 
 for (let nxObj of nxObjs) {
-  promise = promise
-    .then(() => nxObj.prop -= 1)
-    .then(() => nxObj.nested.prop -= 2)
-    .then(() => nxObj.dynamic -= 3)
+  nxObj.prop -= 1
+  nxObj.nested.prop -= 2
+  nxObj.dynamic -= 3
 }
-promise = promise.then(() => updateResult('nx', 'observer function trigger'))
+updateResult('nx', 'observer function trigger')
 
 // UNOBSERVE OBSERVER FUNCTIONS
-promise = promise.then(() => {
-  for (let mobxSignal of mobxSignals) {
-    mobxSignal()
-  }
-})
-promise = promise.then(() => updateResult('mobx', 'unobserve observer function'))
+for (let mobxSignal of mobxSignals) {
+  mobxSignal()
+}
+updateResult('mobx', 'unobserve observer function')
 
-promise = promise.then(() => {
-  for (let nxSignal of nxSignals) {
-    nx.unobserve(nxSignal)
-  }
-})
-promise = promise.then(() => updateResult('nx', 'unobserve observer function'))
+for (let nxSignal of nxSignals) {
+  nx.unobserve(nxSignal)
+}
+updateResult('nx', 'unobserve observer function')
 
 // CREATE RESULT CHART
-promise.then(createChart)
+createChart()
 
 // UTILITIES
 function updateResult (framework, message) {
