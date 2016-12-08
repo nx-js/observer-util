@@ -4,6 +4,8 @@
   "description": "Powerful data observation/binding with ES6 Proxies.",
   "main": "observer.js",
   "scripts": {
+    "build-benchmark": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
+    "benchmark": "node benchmark",
     "test": "mocha observer.test.js",
     "lint": "standard observer.js"
   },
@@ -33,8 +35,8 @@
   "devDependencies": {
     "chai": "3.5.0",
     "mocha": "2.5.3",
-    "standard": "7.1.2",
-    "pre-push": "0.1.1"
+    "pre-push": "0.1.1",
+    "standard": "7.1.2"
   },
   "engines": {
     "node": ">=6.0.0"

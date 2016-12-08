@@ -309,6 +309,12 @@ setTimeout(() => person.name = 'Bill', 100)
 setTimeout(() => person.$raw.name = 'Anne', 200)
 ```
 
+## Performance
+
+
+
+![Benchmark result](/benchmark.png).
+
 ## Contributions
 
 This library has the very specific purpose of supporting the
