@@ -7,6 +7,15 @@ const observers = new WeakMap()
 const queuedObservers = new Set()
 let queued = false
 let currentObserver
+const handlers = {get, set, deleteProperty}
+const wellKnowSymbols = new Set()
+
+for (let key of Object.getOwnPropertyNames(Symbol)) {
+  const value = Symbol[key]
+  if (typeof value === 'symbol') {
+    wellKnowSymbols.add(value)
+  }
+}
 
 module.exports = {
   observe,
@@ -14,8 +23,6 @@ module.exports = {
   observable,
   isObservable
 }
-
-const handlers = {get, set, deleteProperty}
 
 function observe (fn, context, ...args) {
   if (typeof fn !== 'function') {
@@ -60,7 +67,7 @@ function isObservable (obj) {
 function get (target, key, receiver) {
   if (key === '$raw') return target
   const result = Reflect.get(target, key, receiver)
-  if (typeof key === 'symbol' || typeof result === 'function') {
+  if (typeof key === 'symbol' && wellKnowSymbols.has(key)) {
     return result
   }
   const isObject = (typeof result === 'object' && result !== null)

@@ -164,6 +164,17 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('World!'))
     })
 
+    it('should not observe well-known symbols', () => {
+      let dummy
+      const observable = observer.observable({[Symbol.toStringTag]: 'myString'})
+      observer.observe(() => dummy = String(observable))
+
+      return Promise.resolve()
+        .then(() => expect(dummy).to.equal('[object myString]'))
+        .then(() => observable[Symbol.toStringTag] = 'otherString')
+        .then(() => expect(dummy).to.equal('[object myString]'))
+    })
+
     it('should run once (synchronously) rigth away', () => {
       let dummy
       const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
