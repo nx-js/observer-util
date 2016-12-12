@@ -36,6 +36,15 @@ describe('nx-observe', () => {
       const observable2 = observer.observable(obj)
       expect(observable1).to.equal(observable2)
     })
+
+    it('should never modify the underlying plain object', () => {
+      const obj = {}
+      const observable = observer.observable(obj)
+      obj.nested1 = {}
+      observable.nested2 = observer.observable({})
+      expect(observer.isObservable(obj.nested1)).to.be.false
+      expect(observer.isObservable(obj.nested2)).to.be.false
+    })
   })
 
   describe('isObservable', () => {
