@@ -232,4 +232,5 @@ function createChart () {
   const chart = new Chart(ctx).Bar(chartData, chartOptions)
   const legend = chart.generateLegend()
   canvas.toBuffer((err, buf) => fs.writeFile(__dirname + '/benchmark.png', buf))
+  console.log('See ./benchmark.png for the benchmark result in a barchart format.')
 }

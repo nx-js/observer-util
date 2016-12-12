@@ -4,7 +4,8 @@
   "description": "Powerful data observation/binding with ES6 Proxies.",
   "main": "observer.js",
   "scripts": {
-    "build-benchmark": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
+    "build-benchmark-mac": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
+    "build-benchmark-ubuntu": "sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++ && npm i canvas nchart mobx",
     "benchmark": "node benchmark",
     "test": "mocha observer.test.js",
     "lint": "standard observer.js"

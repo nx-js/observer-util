@@ -311,9 +311,10 @@ setTimeout(() => person.$raw.name = 'Anne', 200)
 
 ## Performance
 
-This [benchmark](/benchmark.js) compares vanilla JS, [MobX](http://mobxjs.github.io) and nx-observe in
-a few scenarios. You can set it up locally with the `npm run build-benchmark` command an run it
-with `npm run benchmark`. The result on a MacBook Pro and Node 6.2.0 can be seen below.
+This [benchmark](/benchmark.js) compares vanilla JS, [MobX](http://mobxjs.github.io) and nx-observer
+in a few scenarios. You can set it up locally with the `npm run build-benchmark-mac` or
+`npm run build-benchmark-ubuntu` command (depending on your OS) and run it
+with `npm run benchmark`. The result on a MacBook Pro with Node 6.2.0 can be seen below.
 
 ![Benchmark result](/benchmark.png)
 
