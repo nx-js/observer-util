@@ -70,11 +70,11 @@ function get (target, key, receiver) {
   if (typeof key === 'symbol' && wellKnowSymbols.has(key)) {
     return result
   }
-  const isObject = (typeof result === 'object' && result !== null)
+  const isObject = (typeof result === 'object' && result && result.constructor !== Date)
   const observable = isObject && proxies.get(result)
   if (currentObserver) {
     registerObserver(target, key, currentObserver)
-    if (isObject && result.constructor !== Date) {
+    if (isObject) {
       return observable || toObservable(result)
     }
   }
@@ -98,6 +98,9 @@ function set (target, key, value, receiver) {
   const observersForKey = observers.get(target).get(key)
   if (observersForKey) {
     observersForKey.forEach(queueObserver)
+  }
+  if (typeof value === 'object' && value) {
+    value = value.$raw || value
   }
   return Reflect.set(target, key, value, receiver)
 }
