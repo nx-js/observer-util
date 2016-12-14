@@ -9,13 +9,16 @@ const observers = new WeakMap()
 const queuedObservers = new Set()
 let queued = false
 let currentObserver
+let mode = 'sync_once'
+const validModes = ['sync_once', 'async']
 const handlers = {get, set, deleteProperty}
 
 module.exports = {
   observe,
   unobserve,
   observable,
-  isObservable
+  isObservable,
+  config
 }
 
 function observe (fn, context, ...args) {
@@ -24,7 +27,11 @@ function observe (fn, context, ...args) {
   }
   args = args.length ? args : undefined
   const observer = {fn, context, args, observedKeys: []}
-  runObserver(observer)
+  if (mode === 'async') {
+    queueObserver(observer)
+  } else {
+    runObserver(observer)
+  }
   return observer
 }
 
@@ -147,4 +154,11 @@ function runObserver (observer) {
 
 function unobserveKey (observersForKey) {
   observersForKey.delete(this)
+}
+
+function config (configObj) {
+  mode = configObj.mode || mode
+  if (validModes.indexOf(mode) === -1) {
+    throw new Error (`Invalid mode config: ${mode}. Valid values are: ${validModes.join(', ')}`)
+  }
 }

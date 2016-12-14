@@ -3,6 +3,8 @@
 const expect = require('chai').expect
 const observer = require('./observer')
 
+observer.config({mode: 'async'})
+
 describe('nx-observe', () => {
   describe('observable', () => {
     it('should throw TypeError on invalid arguments', () => {
@@ -71,8 +73,15 @@ describe('nx-observe', () => {
     })
   })
 
+  describe('config', () => {
+    it('should throw an Error on invalid sync modes', () => {
+      expect(() => observer.config({mode: 'syc'})).to.throw(Error)
+      expect(() => observer.config({mode: null})).to.throw(Error)
+    })
+  })
+
   describe('observe', () => {
-    it('should throw TypeError on invalid arguments', () => {
+    it('should throw TypeError on invalid first argument', () => {
       expect(() => observer.observe(12)).to.throw(TypeError)
       expect(() => observer.observe({})).to.throw(TypeError)
       expect(() => observer.observe()).to.throw(TypeError)
@@ -81,7 +90,10 @@ describe('nx-observe', () => {
     it('should observe basic properties', () => {
       let dummy
       const observable = observer.observable({counter: 0})
-      observer.observe(() => dummy = observable.counter)
+      observer.observe(() => {
+        dummy = observable.counter
+        console.log(dummy)
+      })
 
       return Promise.resolve()
         .then(() => observable.counter = 2)
@@ -220,19 +232,6 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('[object myString]'))
     })
 
-    it('should run once (synchronously) rigth away', () => {
-      let dummy
-      const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
-
-      let numOfRuns = 0
-      function test () {
-        dummy = observable.prop1 + observable.prop2
-        numOfRuns++
-      }
-      observer.observe(test)
-      expect(numOfRuns).to.equal(1)
-    })
-
     it('should rerun maximum once per stack', () => {
       let dummy
       const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
@@ -319,6 +318,40 @@ describe('nx-observe', () => {
       const observable = observer.observable({counter: 0})
       const signal = observer.observe(() => dummy = observable.counter)
       expect(signal).to.be.an('object')
+    })
+
+    describe('sync_once mode', () => {
+      it('should run once synchronously rigth away', () => {
+        observer.config({mode: 'sync_once'})
+
+        let dummy
+        const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
+
+        let numOfRuns = 0
+        function test () {
+          dummy = observable.prop1 + observable.prop2
+          numOfRuns++
+        }
+        observer.observe(test)
+        expect(numOfRuns).to.equal(1)
+      })
+    })
+
+    describe('async_once mode', () => {
+      it('should not synchronously after registration', () => {
+        observer.config({mode: 'async'})
+
+        let dummy
+        const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
+
+        let numOfRuns = 0
+        function test () {
+          dummy = observable.prop1 + observable.prop2
+          numOfRuns++
+        }
+        observer.observe(test)
+        expect(numOfRuns).to.equal(0)
+      })
     })
   })
 
