@@ -90,10 +90,7 @@ describe('nx-observe', () => {
     it('should observe basic properties', () => {
       let dummy
       const observable = observer.observable({counter: 0})
-      observer.observe(() => {
-        dummy = observable.counter
-        console.log(dummy)
-      })
+      observer.observe(() => dummy = observable.counter)
 
       return Promise.resolve()
         .then(() => observable.counter = 2)
@@ -190,35 +187,6 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('Hello World!'))
         .then(() => observable.array.shift())
         .then(() => expect(dummy).to.equal('World!'))
-    })
-
-    it('should observe implicit properties (iteration, etc) Set', () => {
-      let dummy
-      const observable = observer.observable({set: new Set()})
-      observer.observe(() => {
-        //console.log(observable.set.has('World!'))
-        observable.set.forEach((item) => console.log(item))
-      })
-
-      return Promise.resolve()
-        .then(() => observable.set.add('Hello'))
-        .then(() => observable.set.add('Beautiful'))
-        .then(() => observable.set.$raw.add('World!'))
-    })
-
-    it('should observe implicit properties (iteration, etc) Map', () => {
-      let dummy
-      const observable = observer.observable({map: new Map()})
-      observer.observe(() => {
-        console.log(observable.map.get(3))
-        // observable.map.forEach((item) => console.log(item))
-      })
-
-      return Promise.resolve()
-        .then(() => observable.map.set(3, 'thingy!'))
-        .then(() => observable.map.set(1, 'Hello'))
-        .then(() => observable.map.set(2, 'Beautiful'))
-        .then(() => observable.map.set(3, 'World!'))
     })
 
     it('should not observe well-known symbols', () => {
