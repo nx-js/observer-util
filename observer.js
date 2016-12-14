@@ -2,6 +2,7 @@
 
 const nextTick = require('./nextTick')
 const builtIns = require('./builtIns')
+const wellKnowSymbols = require('./wellKnownSymbols')
 
 const proxies = new WeakMap()
 const observers = new WeakMap()
@@ -9,14 +10,6 @@ const queuedObservers = new Set()
 let queued = false
 let currentObserver
 const handlers = {get, set, deleteProperty}
-const wellKnowSymbols = new Set()
-
-for (let key of Object.getOwnPropertyNames(Symbol)) {
-  const value = Symbol[key]
-  if (typeof value === 'symbol') {
-    wellKnowSymbols.add(value)
-  }
-}
 
 module.exports = {
   observe,
