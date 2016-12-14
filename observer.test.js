@@ -3,8 +3,6 @@
 const expect = require('chai').expect
 const observer = require('./observer')
 
-observer.config({mode: 'async'})
-
 describe('nx-observe', () => {
   describe('observable', () => {
     it('should throw TypeError on invalid arguments', () => {
@@ -76,7 +74,12 @@ describe('nx-observe', () => {
   describe('config', () => {
     it('should throw an Error on invalid sync modes', () => {
       expect(() => observer.config({mode: 'syc'})).to.throw(Error)
-      expect(() => observer.config({mode: null})).to.throw(Error)
+      expect(() => observer.config({mode: 'sync-once'})).to.throw(Error)
+    })
+
+    it('should throw an Error on invalid alwaysTrigger settings', () => {
+      expect(() => observer.config({alwaysTrigger: null})).to.throw(Error)
+      expect(() => observer.config({alwaysTrigger: 'on'})).to.throw(Error)
     })
   })
 
@@ -133,30 +136,6 @@ describe('nx-observe', () => {
       return Promise.resolve()
         .then(() => delete observable.counter)
         .then(() => expect(dummy).to.equal(undefined))
-    })
-
-    it('should not observe set operations without a value change', () => {
-      let dummy
-      const observable = observer.observable({prop: 'prop'})
-
-      let numOfRuns = 0
-      function test () {
-        dummy = observable.prop
-        numOfRuns++
-      }
-      observer.observe(test)
-
-      return Promise.resolve()
-        .then(() => observable.prop = 'prop')
-        .then(() => observable.prop = 'prop')
-        .then(() => observable.prop = 'prop')
-        .then(() => expect(numOfRuns).to.equal(1))
-        .then(() => expect(dummy).to.equal('prop'))
-        .then(() => observable.prop = 'prop2')
-        .then(() => observable.prop = 'prop2')
-        .then(() => observable.prop = 'prop2')
-        .then(() => expect(numOfRuns).to.equal(2))
-        .then(() => expect(dummy).to.equal('prop2'))
     })
 
     it('should observe function call chains', () => {
@@ -319,6 +298,52 @@ describe('nx-observe', () => {
         }
         observer.observe(test)
         expect(numOfRuns).to.equal(0)
+      })
+    })
+
+    describe('alwaysTrigger on', () => {
+      it('should observe set operations without a value change', () => {
+        observer.config({mode: 'async', alwaysTrigger: true})
+        let dummy
+        const observable = observer.observable({prop: 'prop'})
+
+        let numOfRuns = 0
+        function test () {
+          dummy = observable.prop
+          numOfRuns++
+        }
+        observer.observe(test)
+
+        return Promise.resolve(() => observable.prop = 'prop')
+          .then(() => observable.prop = 'prop')
+          .then(() => expect(numOfRuns).to.equal(2))
+          .then(() => observable.prop = 'prop2')
+          .then(() => observable.prop = 'prop2')
+          .then(() => expect(numOfRuns).to.equal(4))
+      })
+    })
+
+    describe('alwaysTrigger off', () => {
+      it('should not observe set operations without a value change', () => {
+        observer.config({mode: 'async', alwaysTrigger: false})
+
+        let dummy
+        const observable = observer.observable({prop: 'prop'})
+
+        let numOfRuns = 0
+        function test () {
+          dummy = observable.prop
+          numOfRuns++
+        }
+        observer.observe(test)
+
+        return Promise.resolve()
+          .then(() => observable.prop = 'prop')
+          .then(() => observable.prop = 'prop')
+          .then(() => expect(numOfRuns).to.equal(1))
+          .then(() => observable.prop = 'prop2')
+          .then(() => observable.prop = 'prop2')
+          .then(() => expect(numOfRuns).to.equal(2))
       })
     })
   })
