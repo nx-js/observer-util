@@ -106,7 +106,9 @@ function registerObserver (target, key) {
 }
 
 function set (target, key, value, receiver) {
-  queueObservers(target, key)
+  if (key === 'length' || value !== Reflect.get(target, key, receiver)) {
+    queueObservers(target, key)
+  }
   if (typeof value === 'object' && value) {
     value = value.$raw || value
   }

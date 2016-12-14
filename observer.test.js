@@ -126,21 +126,28 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal(undefined))
     })
 
-    it('should observe set operations without a value change', () => {
+    it('should not observe set operations without a value change', () => {
       let dummy
-      const observable = observer.observable({counter: 0})
+      const observable = observer.observable({prop: 'prop'})
 
       let numOfRuns = 0
       function test () {
-        dummy = observable.counter
+        dummy = observable.prop
         numOfRuns++
       }
       observer.observe(test)
 
       return Promise.resolve()
-        .then(() => observable.counter = 0)
-        .then(() => observable.counter = 0)
-        .then(() => expect(numOfRuns).to.equal(3))
+        .then(() => observable.prop = 'prop')
+        .then(() => observable.prop = 'prop')
+        .then(() => observable.prop = 'prop')
+        .then(() => expect(numOfRuns).to.equal(1))
+        .then(() => expect(dummy).to.equal('prop'))
+        .then(() => observable.prop = 'prop2')
+        .then(() => observable.prop = 'prop2')
+        .then(() => observable.prop = 'prop2')
+        .then(() => expect(numOfRuns).to.equal(2))
+        .then(() => expect(dummy).to.equal('prop2'))
     })
 
     it('should observe function call chains', () => {
@@ -269,8 +276,8 @@ describe('nx-observe', () => {
         .then(() => observable2.prop = 'World!')
         .then(() => expect(observable1.prop).to.equal('World!'))
         .then(() => {
-          expect(numOfRuns1).to.equal(4)
-          expect(numOfRuns2).to.equal(4)
+          expect(numOfRuns1).to.equal(3)
+          expect(numOfRuns2).to.equal(3)
         })
     })
 
