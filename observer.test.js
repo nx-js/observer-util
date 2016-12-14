@@ -173,6 +173,35 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('World!'))
     })
 
+    it('should observe implicit properties (iteration, etc) Set', () => {
+      let dummy
+      const observable = observer.observable({set: new Set()})
+      observer.observe(() => {
+        //console.log(observable.set.has('World!'))
+        observable.set.forEach((item) => console.log(item))
+      })
+
+      return Promise.resolve()
+        .then(() => observable.set.add('Hello'))
+        .then(() => observable.set.add('Beautiful'))
+        .then(() => observable.set.$raw.add('World!'))
+    })
+
+    it('should observe implicit properties (iteration, etc) Map', () => {
+      let dummy
+      const observable = observer.observable({map: new Map()})
+      observer.observe(() => {
+        console.log(observable.map.get(3))
+        // observable.map.forEach((item) => console.log(item))
+      })
+
+      return Promise.resolve()
+        .then(() => observable.map.set(3, 'thingy!'))
+        .then(() => observable.map.set(1, 'Hello'))
+        .then(() => observable.map.set(2, 'Beautiful'))
+        .then(() => observable.map.set(3, 'World!'))
+    })
+
     it('should not observe well-known symbols', () => {
       let dummy
       const observable = observer.observable({[Symbol.toStringTag]: 'myString'})

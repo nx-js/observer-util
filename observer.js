@@ -1,6 +1,7 @@
 'use strict'
 
 const nextTick = require('./nextTick')
+const builtIns = require('./builtIns')
 
 const proxies = new WeakMap()
 const observers = new WeakMap()
@@ -50,7 +51,15 @@ function observable (obj) {
 }
 
 function toObservable (obj) {
-  const observable = new Proxy(obj, handlers)
+  let observable
+  const builtIn = builtIns.get(obj.constructor)
+  if (typeof builtIn === 'function') {
+    observable = builtIn(obj, registerObserver, queueObservers)
+  } else if (!builtIn) {
+    observable = new Proxy(obj, handlers)
+  } else {
+    observable = obj
+  }
   proxies.set(obj, observable)
   proxies.set(observable, observable)
   observers.set(obj, new Map())
@@ -70,10 +79,10 @@ function get (target, key, receiver) {
   if (typeof key === 'symbol' && wellKnowSymbols.has(key)) {
     return result
   }
-  const isObject = (typeof result === 'object' && result && result.constructor !== Date)
+  const isObject = (typeof result === 'object' && result)
   const observable = isObject && proxies.get(result)
   if (currentObserver) {
-    registerObserver(target, key, currentObserver)
+    registerObserver(target, key)
     if (isObject) {
       return observable || toObservable(result)
     }
@@ -81,24 +90,23 @@ function get (target, key, receiver) {
   return observable || result
 }
 
-function registerObserver (target, key, observer) {
-  const observersForTarget = observers.get(target)
-  let observersForKey = observersForTarget.get(key)
-  if (!observersForKey) {
-    observersForKey = new Set()
-    observersForTarget.set(key, observersForKey)
-  }
-  if (!observersForKey.has(observer)) {
-    observersForKey.add(observer)
-    observer.observedKeys.push(observersForKey)
+function registerObserver (target, key) {
+  if (currentObserver) {
+    const observersForTarget = observers.get(target)
+    let observersForKey = observersForTarget.get(key)
+    if (!observersForKey) {
+      observersForKey = new Set()
+      observersForTarget.set(key, observersForKey)
+    }
+    if (!observersForKey.has(currentObserver)) {
+      observersForKey.add(currentObserver)
+      currentObserver.observedKeys.push(observersForKey)
+    }
   }
 }
 
 function set (target, key, value, receiver) {
-  const observersForKey = observers.get(target).get(key)
-  if (observersForKey) {
-    observersForKey.forEach(queueObserver)
-  }
+  queueObservers(target, key)
   if (typeof value === 'object' && value) {
     value = value.$raw || value
   }
@@ -106,11 +114,15 @@ function set (target, key, value, receiver) {
 }
 
 function deleteProperty (target, key) {
+  queueObservers(target, key)
+  return Reflect.deleteProperty(target, key)
+}
+
+function queueObservers (target, key) {
   const observersForKey = observers.get(target).get(key)
   if (observersForKey) {
     observersForKey.forEach(queueObserver)
   }
-  return Reflect.deleteProperty(target, key)
 }
 
 function queueObserver (observer) {
