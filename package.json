@@ -43,7 +43,6 @@
     "node": ">=6.0.0"
   },
   "pre-push": [
-    "lint",
     "test"
   ]
 }
