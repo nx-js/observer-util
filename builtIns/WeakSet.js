@@ -3,8 +3,7 @@
 const native = WeakSet.prototype
 
 const getters = ['has']
-const setters = ['add', 'delete']
-const all = [].concat(getters, setters)
+const all = ['add', 'delete'].concat(getters)
 
 module.exports = function shim (target, registerObserver, queueObservers) {
   target.$raw = {}
@@ -22,11 +21,19 @@ module.exports = function shim (target, registerObserver, queueObservers) {
     }
   }
 
-  for (let setter of setters) {
-    target[setter] = function (value) {
+  target.add = function (value) {
+    if (!this.has(value)) {
       queueObservers(this, value)
-      return native[setter].apply(this, arguments)
     }
+    return native.add.apply(this, arguments)
   }
-  return traget
+
+  target.delete = function (value) {
+    if (this.has(value)) {
+      queueObservers(this, value)
+    }
+    return native.delete.apply(this, arguments)
+  }
+
+  return target
 }

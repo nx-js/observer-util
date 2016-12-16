@@ -9,18 +9,13 @@ const observers = new WeakMap()
 const queuedObservers = new Set()
 let queued = false
 let currentObserver
-
-const configObj = { mode: 'sync_once', alwaysTrigger: false }
-const validModes = ['sync_once', 'async']
-const validTriggers = [true, false]
 const handlers = {get, set, deleteProperty}
 
 module.exports = {
   observe,
   unobserve,
   observable,
-  isObservable,
-  config
+  isObservable
 }
 
 function observe (fn, context, ...args) {
@@ -29,11 +24,7 @@ function observe (fn, context, ...args) {
   }
   args = args.length ? args : undefined
   const observer = {fn, context, args, observedKeys: []}
-  if (configObj.mode === 'async') {
-    queueObserver(observer)
-  } else {
-    runObserver(observer)
-  }
+  queueObserver(observer)
   return observer
 }
 
@@ -108,7 +99,7 @@ function registerObserver (target, key) {
 }
 
 function set (target, key, value, receiver) {
-  if (configObj.alwaysTrigger || key === 'length' || value !== Reflect.get(target, key, receiver)) {
+  if (key === 'length' || value !== Reflect.get(target, key, receiver)) {
     queueObservers(target, key)
   }
   if (typeof value === 'object' && value) {
@@ -156,16 +147,4 @@ function runObserver (observer) {
 
 function unobserveKey (observersForKey) {
   observersForKey.delete(this)
-}
-
-function config (obj) {
-  configObj.mode = obj.mode || configObj.mode
-  if (validModes.indexOf(configObj.mode) === -1) {
-    throw new Error (`Invalid mode config: ${configObj.mode}. Valid values are: ${validModes.join(', ')}`)
-  }
-  if (validTriggers.indexOf(obj.alwaysTrigger) !== -1) {
-    configObj.alwaysTrigger = obj.alwaysTrigger
-  } else if (obj.alwaysTrigger !== undefined) {
-    throw new Error (`Invalid alwaysTrigger config: ${configObj.mode}. Valid values are: ${validTriggers.join(', ')}`)
-  }
 }

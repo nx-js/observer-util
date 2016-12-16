@@ -11,5 +11,5 @@ module.exports = new Map([
   [WeakMap, WeakMapShim],
   [WeakSet, WeakSetShim],
   [Date, true],
-  [RegExp, true] // ...
+  [RegExp, true]
 ])

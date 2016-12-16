@@ -4,10 +4,8 @@ const native = Map.prototype
 const masterKey = Symbol('Map master key')
 
 const getters = ['has', 'get']
-const setters = ['set', 'delete']
 const iterators = ['forEach', 'keys', 'values', 'entries', Symbol.iterator]
-const clearers = ['clear']
-const all = [].concat(getters, setters, iterators, clearers)
+const all = ['set', 'delete', 'clear'].concat(getters, iterators)
 
 module.exports = function shim (target, registerObserver, queueObservers) {
   target.$raw = {}
@@ -32,19 +30,28 @@ module.exports = function shim (target, registerObserver, queueObservers) {
     }
   }
 
-  for (let setter of setters) {
-    target[setter] = function (key) {
+  target.set = function (key, value) {
+    if (this.get(key) !== value) {
       queueObservers(this, key)
       queueObservers(this, masterKey)
-      return native[setter].apply(this, arguments)
     }
+    return native.set.apply(this, arguments)
   }
 
-  for (let clearer of clearers) {
-    target[clearer] = function () {
+  target.delete = function (key) {
+    if (this.has(key)) {
+      queueObservers(this, key)
       queueObservers(this, masterKey)
-      return native[clearer].apply(this, arguments)
     }
+    return native.delete.apply(this, arguments)
   }
+
+  target.clear = function () {
+    if (this.size) {
+      queueObservers(this, masterKey)
+    }
+    return native.clear.apply(this, arguments)
+  }
+
   return target
 }

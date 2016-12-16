@@ -71,18 +71,6 @@ describe('nx-observe', () => {
     })
   })
 
-  describe('config', () => {
-    it('should throw an Error on invalid sync modes', () => {
-      expect(() => observer.config({mode: 'syc'})).to.throw(Error)
-      expect(() => observer.config({mode: 'sync-once'})).to.throw(Error)
-    })
-
-    it('should throw an Error on invalid alwaysTrigger settings', () => {
-      expect(() => observer.config({alwaysTrigger: null})).to.throw(Error)
-      expect(() => observer.config({alwaysTrigger: 'on'})).to.throw(Error)
-    })
-  })
-
   describe('observe', () => {
     it('should throw TypeError on invalid first argument', () => {
       expect(() => observer.observe(12)).to.throw(TypeError)
@@ -96,10 +84,9 @@ describe('nx-observe', () => {
       observer.observe(() => dummy = observable.counter)
 
       return Promise.resolve()
-        .then(() => observable.counter = 2)
-        .then(() => expect(dummy).to.equal(2))
-        .then(() => observable.counter = undefined)
-        .then(() => expect(dummy).to.equal(undefined))
+        .then(() => expect(dummy).to.equal(0))
+        .then(() => observable.counter = 7)
+        .then(() => expect(dummy).to.equal(7))
     })
 
     it('should observe nested properties', () => {
@@ -108,24 +95,9 @@ describe('nx-observe', () => {
       observer.observe(() => dummy = observable.nested.counter)
 
       return Promise.resolve()
-        .then(() => observable.nested.counter = 2)
-        .then(() => expect(dummy).to.equal(2))
+        .then(() => expect(dummy).to.equal(0))
         .then(() => observable.nested.counter = 'invalid')
         .then(() => expect(dummy).to.equal('invalid'))
-    })
-
-    it('should observe properties on the prototype chain', () => {
-      let dummy
-      const observable = observer.observable({counter: 0})
-      const parentObservable = observer.observable({parentCounter: 2})
-      Object.setPrototypeOf(observable, parentObservable)
-      observer.observe(() => dummy = observable.counter + observable.parentCounter)
-
-      return Promise.resolve()
-        .then(() => observable.counter = 2)
-        .then(() => expect(dummy).to.equal(4))
-        .then(() => parentObservable.parentCounter = 3)
-        .then(() => expect(dummy).to.equal(5))
     })
 
     it('should observe delete operations', () => {
@@ -134,8 +106,26 @@ describe('nx-observe', () => {
       observer.observe(() => dummy = observable.counter)
 
       return Promise.resolve()
+        .then(() => expect(dummy).to.equal(0))
         .then(() => delete observable.counter)
         .then(() => expect(dummy).to.equal(undefined))
+    })
+
+    it('should observe properties on the prototype chain', () => {
+      let dummy
+      const observable = observer.observable({counter: 0})
+      const parentObservable = observer.observable({counter: 2})
+      Object.setPrototypeOf(observable, parentObservable)
+      observer.observe(() => dummy = observable.counter)
+
+      return Promise.resolve()
+        .then(() => expect(dummy).to.equal(0))
+        .then(() => delete observable.counter)
+        .then(() => expect(dummy).to.equal(2))
+        .then(() => parentObservable.counter = 4)
+        .then(() => expect(dummy).to.equal(4))
+        .then(() => observable.counter = 3)
+        .then(() => expect(dummy).to.equal(3))
     })
 
     it('should observe function call chains', () => {
@@ -148,11 +138,12 @@ describe('nx-observe', () => {
       }
 
       return Promise.resolve()
+        .then(() => expect(dummy).to.equal(0))
         .then(() => observable.counter = 2)
         .then(() => expect(dummy).to.equal(2))
     })
 
-    it('should observe implicit properties (iteration, etc)', () => {
+    it('should observe iterations', () => {
       let dummy
       const observable = observer.observable({array: ['Hello']})
       observer.observe(() => dummy = observable.array.join(' '))
@@ -162,6 +153,7 @@ describe('nx-observe', () => {
       }
 
       return Promise.resolve()
+        .then(() => expect(dummy).to.equal('Hello'))
         .then(() => observable.array.push('World!'))
         .then(() => expect(dummy).to.equal('Hello World!'))
         .then(() => observable.array.shift())
@@ -179,9 +171,35 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('[object myString]'))
     })
 
+    it('should not observe set operations without a value change', () => {
+      let dummy
+      const observable = observer.observable({prop: 'prop'})
+
+      let numOfRuns = 0
+      function test () {
+        dummy = observable.prop
+        numOfRuns++
+      }
+      observer.observe(test)
+
+      return Promise.resolve()
+        .then(() => expect(dummy).to.equal('prop'))
+        .then(() => observable.prop = 'prop')
+        .then(() => {
+          expect(numOfRuns).to.equal(1)
+          expect(dummy).to.equal('prop')
+        })
+        .then(() => observable.prop = 'prop2')
+        .then(() => observable.prop = 'prop2')
+        .then(() => {
+          expect(numOfRuns).to.equal(2)
+          expect(dummy).to.equal('prop2')
+        })
+    })
+
     it('should rerun maximum once per stack', () => {
       let dummy
-      const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
+      const observable = observer.observable({prop1: 0, prop2: 0})
 
       let numOfRuns = 0
       function test () {
@@ -192,11 +210,18 @@ describe('nx-observe', () => {
 
       return Promise.resolve()
         .then(() => {
+          expect(numOfRuns).to.equal(1)
+          expect(dummy).to.equal(0)
+        })
+        .then(() => {
           observable.prop1 = 1
           observable.prop2 = 3
-          observable.prop1 = 0
+          observable.prop1 = 2
         })
-        .then(() => expect(numOfRuns).to.equal(2))
+        .then(() => {
+          expect(numOfRuns).to.equal(2)
+          expect(dummy).to.equal(5)
+        })
     })
 
     it('should avoid infinite loops', () => {
@@ -267,83 +292,223 @@ describe('nx-observe', () => {
       expect(signal).to.be.an('object')
     })
 
-    describe('sync_once mode', () => {
-      it('should run once synchronously rigth away', () => {
-        observer.config({mode: 'sync_once'})
-
+    describe('Set', () => {
+      it('should observe mutations', () => {
         let dummy
-        const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
-
-        let numOfRuns = 0
-        function test () {
-          dummy = observable.prop1 + observable.prop2
-          numOfRuns++
-        }
-        observer.observe(test)
-        expect(numOfRuns).to.equal(1)
-      })
-    })
-
-    describe('async_once mode', () => {
-      it('should not synchronously after registration', () => {
-        observer.config({mode: 'async'})
-
-        let dummy
-        const observable = observer.observable({prop1: 'value1', prop2: 'value2'})
-
-        let numOfRuns = 0
-        function test () {
-          dummy = observable.prop1 + observable.prop2
-          numOfRuns++
-        }
-        observer.observe(test)
-        expect(numOfRuns).to.equal(0)
-      })
-    })
-
-    describe('alwaysTrigger on', () => {
-      it('should observe set operations without a value change', () => {
-        observer.config({mode: 'async', alwaysTrigger: true})
-        let dummy
-        const observable = observer.observable({prop: 'prop'})
-
-        let numOfRuns = 0
-        function test () {
-          dummy = observable.prop
-          numOfRuns++
-        }
-        observer.observe(test)
-
-        return Promise.resolve(() => observable.prop = 'prop')
-          .then(() => observable.prop = 'prop')
-          .then(() => expect(numOfRuns).to.equal(2))
-          .then(() => observable.prop = 'prop2')
-          .then(() => observable.prop = 'prop2')
-          .then(() => expect(numOfRuns).to.equal(4))
-      })
-    })
-
-    describe('alwaysTrigger off', () => {
-      it('should not observe set operations without a value change', () => {
-        observer.config({mode: 'async', alwaysTrigger: false})
-
-        let dummy
-        const observable = observer.observable({prop: 'prop'})
-
-        let numOfRuns = 0
-        function test () {
-          dummy = observable.prop
-          numOfRuns++
-        }
-        observer.observe(test)
+        const observable = observer.observable(new Set())
+        observer.observe(() => dummy = observable.has('value'))
 
         return Promise.resolve()
-          .then(() => observable.prop = 'prop')
-          .then(() => observable.prop = 'prop')
-          .then(() => expect(numOfRuns).to.equal(1))
-          .then(() => observable.prop = 'prop2')
-          .then(() => observable.prop = 'prop2')
-          .then(() => expect(numOfRuns).to.equal(2))
+          .then(() => expect(dummy).to.equal(false))
+          .then(() => observable.add('value'))
+          .then(() => expect(dummy).to.equal(true))
+          .then(() => observable.delete('value'))
+          .then(() => expect(dummy).to.equal(false))
+      })
+
+      it('should observe iteration', () => {
+        let dummy
+        const observable = observer.observable(new Set())
+        observer.observe(() => {
+          dummy = 0
+          for (let num of observable) {
+            dummy += num
+          }
+        })
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.add(3))
+          .then(() => expect(dummy).to.equal(3))
+          .then(() => observable.add(2))
+          .then(() => expect(dummy).to.equal(5))
+          .then(() => observable.delete(2))
+          .then(() => expect(dummy).to.equal(3))
+          .then(() => observable.clear())
+          .then(() => expect(dummy).to.equal(0))
+      })
+
+      it('should not observe non value changing mutations', () => {
+        let dummy
+        let numOfRuns = 0
+        const observable = observer.observable(new Set())
+        observer.observe(() => {
+          numOfRuns++
+          dummy = observable.has('value')
+        })
+
+        return Promise.resolve()
+          .then(() => {
+            expect(dummy).to.equal(false)
+            expect(numOfRuns).to.equal(1)
+          })
+          .then(() => observable.add('value'))
+          .then(() => observable.add('value'))
+          .then(() => {
+            expect(dummy).to.equal(true)
+            expect(numOfRuns).to.equal(2)
+          })
+          .then(() => observable.delete('value'))
+          .then(() => observable.delete('value'))
+          .then(() => {
+            expect(dummy).to.equal(false)
+            expect(numOfRuns).to.equal(3)
+          })
+      })
+    })
+
+    describe('WeakSet', () => {
+      it('should observe mutations', () => {
+        let dummy
+        const value = {}
+        const observable = observer.observable(new Set())
+        observer.observe(() => dummy = observable.has(value))
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(false))
+          .then(() => observable.add(value))
+          .then(() => expect(dummy).to.equal(true))
+          .then(() => observable.delete(value))
+          .then(() => expect(dummy).to.equal(false))
+      })
+
+      it('should not observe non value changing mutations', () => {
+        let dummy
+        const value = {}
+        let numOfRuns = 0
+        const observable = observer.observable(new Set())
+        observer.observe(() => {
+          numOfRuns++
+          dummy = observable.has(value)
+        })
+
+        return Promise.resolve()
+          .then(() => {
+            expect(dummy).to.equal(false)
+            expect(numOfRuns).to.equal(1)
+          })
+          .then(() => observable.add(value))
+          .then(() => observable.add(value))
+          .then(() => {
+            expect(dummy).to.equal(true)
+            expect(numOfRuns).to.equal(2)
+          })
+          .then(() => observable.delete(value))
+          .then(() => observable.delete(value))
+          .then(() => {
+            expect(dummy).to.equal(false)
+            expect(numOfRuns).to.equal(3)
+          })
+      })
+    })
+
+    describe('Map', () => {
+      it('should observe mutations', () => {
+        let dummy
+        const observable = observer.observable(new Map())
+        observer.observe(() => dummy = observable.get('key'))
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(undefined))
+          .then(() => observable.set('key', 'value'))
+          .then(() => expect(dummy).to.equal('value'))
+          .then(() => observable.delete('key'))
+          .then(() => expect(dummy).to.equal(undefined))
+      })
+
+      it('should observe iteration', () => {
+        let dummy
+        const observable = observer.observable(new Map())
+        observer.observe(() => {
+          dummy = 0
+          for (let [key, num] of observable) {
+            dummy += num
+          }
+        })
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.set('key0', 3))
+          .then(() => expect(dummy).to.equal(3))
+          .then(() => observable.set('key1', 2))
+          .then(() => expect(dummy).to.equal(5))
+          .then(() => observable.delete('key0'))
+          .then(() => expect(dummy).to.equal(2))
+          .then(() => observable.clear())
+          .then(() => expect(dummy).to.equal(0))
+      })
+
+      it('should not observe non value changing mutations', () => {
+        let dummy
+        let numOfRuns = 0
+        const observable = observer.observable(new Map())
+        observer.observe(() => {
+          numOfRuns++
+          dummy = observable.get('key')
+        })
+
+        return Promise.resolve()
+          .then(() => {
+            expect(dummy).to.equal(undefined)
+            expect(numOfRuns).to.equal(1)
+          })
+          .then(() => observable.set('key', 'value'))
+          .then(() => observable.set('key', 'value'))
+          .then(() => {
+            expect(dummy).to.equal('value')
+            expect(numOfRuns).to.equal(2)
+          })
+          .then(() => observable.delete('key'))
+          .then(() => observable.delete('key'))
+          .then(() => {
+            expect(dummy).to.equal(undefined)
+            expect(numOfRuns).to.equal(3)
+          })
+      })
+    })
+
+    describe('WeakMap', () => {
+      it('should observe mutations', () => {
+        let dummy
+        const key = {}
+        const observable = observer.observable(new WeakMap())
+        observer.observe(() => dummy = observable.get(key))
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(undefined))
+          .then(() => observable.set(key, 'value'))
+          .then(() => expect(dummy).to.equal('value'))
+          .then(() => observable.delete(key))
+          .then(() => expect(dummy).to.equal(undefined))
+      })
+
+      it('should not observe non value changing mutations', () => {
+        let dummy
+        let numOfRuns = 0
+        const key = {}
+        const observable = observer.observable(new WeakMap())
+        observer.observe(() => {
+          numOfRuns++
+          dummy = observable.get(key)
+        })
+
+        return Promise.resolve()
+          .then(() => {
+            expect(dummy).to.equal(undefined)
+            expect(numOfRuns).to.equal(1)
+          })
+          .then(() => observable.set(key, 'value'))
+          .then(() => observable.set(key, 'value'))
+          .then(() => {
+            expect(dummy).to.equal('value')
+            expect(numOfRuns).to.equal(2)
+          })
+          .then(() => observable.delete(key))
+          .then(() => observable.delete(key))
+          .then(() => {
+            expect(dummy).to.equal(undefined)
+            expect(numOfRuns).to.equal(3)
+          })
       })
     })
   })

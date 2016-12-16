@@ -1,13 +1,11 @@
 'use strict'
 
 const native = Set.prototype
-const masterKey = Symbol('Set master key')
+const masterValue = Symbol('Set master value')
 
 const getters = ['has']
-const setters = ['add', 'delete']
 const iterators = ['forEach', 'keys', 'values', 'entries', Symbol.iterator]
-const clearers = ['clear']
-const all = [].concat(getters, setters, iterators, clearers)
+const all = ['add', 'delete', 'clear'].concat(getters, iterators)
 
 module.exports = function shim (target, registerObserver, queueObservers) {
   target.$raw = {}
@@ -27,24 +25,33 @@ module.exports = function shim (target, registerObserver, queueObservers) {
 
   for (let iterator of iterators) {
     target[iterator] = function () {
-      registerObserver(this, masterKey)
+      registerObserver(this, masterValue)
       return native[iterator].apply(this, arguments)
     }
   }
 
-  for (let setter of setters) {
-    target[setter] = function (value) {
+  target.add = function (value) {
+    if (!this.has(value)) {
       queueObservers(this, value)
-      queueObservers(this, masterKey)
-      return native[setter].apply(this, arguments)
+      queueObservers(this, masterValue)
     }
+    return native.add.apply(this, arguments)
   }
 
-  for (let clearer of clearers) {
-    target[clearer] = function () {
-      queueObservers(this, masterKey)
-      return native[clearer].apply(this, arguments)
+  target.delete = function (value) {
+    if (this.has(value)) {
+      queueObservers(this, value)
+      queueObservers(this, masterValue)
     }
+    return native.delete.apply(this, arguments)
   }
+
+  target.clear = function () {
+    if (this.size) {
+      queueObservers(this, masterValue)
+    }
+    return native.clear.apply(this, arguments)
+  }
+
   return target
 }
