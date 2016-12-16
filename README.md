@@ -158,6 +158,9 @@ setTimeout(() => {
   observable.prop = 'new value'
   observable.prop = 'newer value'
 })
+
+// causes no rerun (the value did not change), doesn't trigger console.log
+setTimeout(() => observable.prop = 'newer value', 100)
 ```
 
 #### observing nested properties
