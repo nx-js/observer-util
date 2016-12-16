@@ -45,7 +45,8 @@ const observable = observer.observable({prop: 'someValue'})
 This method observes a function. An observed function automatically reruns when a property of an
 observable, which is used by the function changes (or is deleted). The function doesn't run
 immediately on property change, instead it runs after a small delay (when the current stack empties).
-Multiple synchronous changes won't cause the function to run multiple times.
+Multiple synchronous changes won't cause the function to run multiple times. Changes that result in
+no value change (`state.prop = state.prop`) won't cause the function to run either.
 The function can observe any synchronous javascript code (nested data, iterations, function calls,
 getters/setters, etc.)
 
@@ -142,7 +143,8 @@ console.log(observable2 === observable3)
 An observer always runs once synchronously, right away. After that, the observer runs after every
 stack in which the observable properties used by the observer are changed.
 An observer runs maximum once per stack. Multiple changes of the observable
-properties won't trigger it more than once.
+properties won't trigger it more than once. Setting on observable property without a value change
+won't trigger it either.
 
 ```js
 const observer = require('@risingstack/nx-observe')
@@ -311,12 +313,12 @@ setTimeout(() => person.$raw.name = 'Anne', 200)
 
 ## Performance
 
-This [benchmark](/benchmark.js) compares vanilla JS, [MobX](http://mobxjs.github.io) and nx-observer
+This [benchmark](/benchmark/benchmark.js) compares vanilla JS, [MobX](http://mobxjs.github.io) and nx-observer
 in a few scenarios. You can set it up locally with the `npm run build-benchmark-mac` or
 `npm run build-benchmark-ubuntu` command (depending on your OS) and run it
 with `npm run benchmark`. The result on a MacBook Pro with Node 6.2.0 can be seen below.
 
-![Benchmark result](/benchmark.png)
+![Benchmark result](/benchmark/benchmark.png)
 
 - The first two tests compare NX and MobX observable creation cost with plain JS object creation.
 In case of MobX the overhead grows with the number of properties.

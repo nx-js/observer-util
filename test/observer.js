@@ -1,7 +1,7 @@
 'use strict'
 
 const expect = require('chai').expect
-const observer = require('./observer')
+const observer = require('../src/observer')
 
 describe('nx-observe', () => {
   describe('observable', () => {

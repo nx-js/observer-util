@@ -1,6 +1,6 @@
 'use strict'
 
-const nx = require('./observer')
+const nx = require('../src/observer')
 const mobx = require('mobx')
 const Canvas = require('canvas')
 const Chart = require('nchart')
@@ -64,7 +64,12 @@ const chartOptions = {
   }
 }
 
-const objs = [], nxObjs = [], mobxObjs = [], nxSignals = [], mobxSignals = []
+const objs = []
+const mobxObjs = []
+const mobxSignals = []
+const nxObjs = []
+const nxSignals = []
+
 let start = Date.now()
 
 // OBJECT CREATION (3 PROPS)

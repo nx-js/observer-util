@@ -2,13 +2,12 @@
   "name": "@risingstack/nx-observe",
   "version": "2.0.4",
   "description": "Powerful data observation/binding with ES6 Proxies.",
-  "main": "observer.js",
   "scripts": {
     "build-benchmark-mac": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
     "build-benchmark-ubuntu": "sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++ && npm i canvas nchart mobx",
-    "benchmark": "node benchmark",
-    "test": "mocha observer.test.js",
-    "lint": "standard observer.js"
+    "benchmark": "node benchmark/benchmark",
+    "test": "mocha test",
+    "lint": "standard"
   },
   "author": {
     "name": "Miklos Bertalan",
@@ -42,7 +41,17 @@
   "engines": {
     "node": ">=6.0.0"
   },
+  "standard": {
+    "ignore": [
+      "test",
+      "benchmark"
+    ],
+    "globals": [
+      "MutationObserver"
+    ]
+  },
   "pre-push": [
+    "lint",
     "test"
   ]
 }
