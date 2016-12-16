@@ -24,7 +24,7 @@ function observe (fn, context, ...args) {
   }
   args = args.length ? args : undefined
   const observer = {fn, context, args, observedKeys: []}
-  queueObserver(observer)
+  runObserver(observer)
   return observer
 }
 
