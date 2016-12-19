@@ -163,6 +163,46 @@ setTimeout(() => {
 setTimeout(() => observable.prop = 'newer value', 100)
 ```
 
+#### observing expando properties
+
+Expando (dynamically added) properties can be observed without any special syntax.
+
+```js
+const observer = require('@risingstack/nx-observe')
+
+const observable = observer.observable()
+
+// outputs 'undefined' to the console
+observer.observe(() => console.log(observable.expando))
+
+// outputs 'dynamically added prop' to the console
+setTimeout(() => observable.expando = 'dynamically added prop', 100)
+```
+
+#### observing conditionals
+
+Any synchronous JavaScript code can be observed. This includes code 'hidden behind' conditionals or loops.
+
+```js
+const observer = require('@risingstack/nx-observe')
+
+const observable = observer.observable({
+  condition: true,
+  prop1: 'prop1',
+  prop2: 'hidden'
+})
+
+// runs once right away
+// outputs 'prop1' to the console
+observer.observe(() => console.log(observable.condition ? observable.prop1 : observable.prop2))
+
+// outputs 'hidden' to the console
+setTimeout(() => observable.condition = false, 100)
+
+// outputs 'but tracked' to the console
+setTimeout(() => observable.prop2 = 'but tracked', 200)
+```
+
 #### observing nested properties
 
 Observing nested properties works with arbitrary depth.
@@ -172,7 +212,7 @@ const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable({prop: {nested: 'nestedValue'}})
 
-// runs once after the current stack empties
+// runs once right away
 // outputs 'nestedValue' to the console
 observer.observe(() => console.log(observable.prop.nested))
 
@@ -190,7 +230,7 @@ const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable({words: ['Hello', 'World']})
 
-// runs once after the current stack empties
+// runs once right away
 // outputs 'Hello World' to the console
 observer.observe(() => console.log(observable.words.join(' ')))
 
@@ -214,7 +254,7 @@ const observable = observer.observable({subject: 'World!'})
 
 Object.setPrototypeOf(observable, parentObservable)
 
-// runs once after the current stack empties
+// runs once right away
 // outputs 'Hello World' to the console
 observer.observe(() => console.log(observable.greeting + ' ' + observable.subject))
 
