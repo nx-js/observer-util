@@ -102,12 +102,12 @@ describe('nx-observe', () => {
 
     it('should observe delete operations', () => {
       let dummy
-      const observable = observer.observable({counter: 0})
-      observer.observe(() => dummy = observable.counter)
+      const observable = observer.observable({prop: 'value'})
+      observer.observe(() => dummy = observable.prop)
 
       return Promise.resolve()
-        .then(() => expect(dummy).to.equal(0))
-        .then(() => delete observable.counter)
+        .then(() => expect(dummy).to.equal('value'))
+        .then(() => delete observable.prop)
         .then(() => expect(dummy).to.equal(undefined))
     })
 
@@ -143,7 +143,7 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal(2))
     })
 
-    it('should observe iteration', () => {
+    it('should observe for of iteration', () => {
       let dummy
       const observable = observer.observable({array: ['Hello']})
       observer.observe(() => dummy = observable.array.join(' '))
@@ -159,6 +159,25 @@ describe('nx-observe', () => {
         .then(() => observable.array.shift())
         .then(() => expect(dummy).to.equal('World!'))
     })
+
+    /*it('should observe for in iteration', () => {
+      let dummy = 0
+      const observable = observer.observable({prop: 0})
+      observer.observe(() => {
+        for (let key in observable) {
+          dummy += observable[key]
+        }
+      })
+
+      return Promise.resolve()
+        .then(() => expect(dummy).to.equal(0))
+        .then(() => observable.prop1 = 1)
+        .then(() => expect(dummy).to.equal(1))
+        .then(() => observable.prop2 = 3)
+        .then(() => expect(dummy).to.equal(4))
+        .then(() => observable.prop1 = 6)
+        .then(() => expect(dummy).to.equal(10))
+    })*/
 
     it('should not observe well-known symbols', () => {
       let dummy
@@ -536,6 +555,44 @@ describe('nx-observe', () => {
             expect(dummy).to.equal(undefined)
             expect(numOfRuns).to.equal(3)
           })
+      })
+    })
+
+    describe('execution order', () => {
+      it('should run in registration order the first time', () => {
+        let dummy = ''
+        const observable = observer.observable({prop1: 'prop1', prop2: 'prop2', prop3: 'prop3'})
+
+        observer.observe(() => dummy += observable.prop1)
+        observer.queue(() => dummy += observable.prop2)
+        observer.observe(() => dummy += observable.prop3)
+
+        observable.prop2 = 'p'
+        observable.prop1 = 'p1'
+        observable.prop3 = 'p3'
+        observable.prop2 = 'p2'
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal('p1p2p3'))
+      })
+
+      it('should run in first-tigger order after the first time', () => {
+        let dummy = ''
+        const observable = observer.observable({prop1: 'prop1', prop2: 'prop2', prop3: 'prop3'})
+
+        observer.observe(() => dummy += observable.prop1)
+        observer.observe(() => dummy += observable.prop2)
+        observer.observe(() => dummy += observable.prop3)
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal('prop1prop2prop3'))
+          .then(() => {
+            observable.prop2 = 'p'
+            observable.prop1 = 'p1'
+            observable.prop3 = 'p3'
+            observable.prop2 = 'p2'
+          })
+          .then(() => expect(dummy).to.equal('prop1prop2prop3p2p1p3'))
       })
     })
   })
