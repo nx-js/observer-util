@@ -69,10 +69,29 @@ function printSum (arg1, arg2) {
 }
 ```
 
+### const signal = observer.queue(function, [context], ...[args])
+
+This method queues a function to be executed together with the currently triggered observed functions. `queue()` returns a signal, which can later be used to remove the function from the queue.
+
+```js
+const signal = observer.queue(() => console.log(observable.prop))
+```
+
+A `this` context and a list of argument can be passed after the queued function as arguments.
+In this case the queued function will be called with the passed `this` context and arguments.
+
+```js
+observer.queue(printSum, context, arg1, arg2)
+
+function printSum (arg1, arg2) {
+  console.log(arg1 + arg2)
+}
+```
+
 ### observer.unobserve(signal)
 
-If the passed function is observed, it unobserves it. Unobserved functions won't be
-rerun by observable changes anymore.
+If unobserves the observed or queued function associated with the assed signal.
+Unobserved functions won't be rerun by observable changes anymore.
 
 ```js
 const signal = observer.observe(() => console.log(observable.prop))
@@ -97,8 +116,7 @@ const observer = require('@risingstack/nx-observe')
 const observable1 = observer.observable({num: 0})
 const observable2 = observer.observable({num: 0})
 
-// runs once synchronously, right away
-// outputs 0 to the console
+// outputs 0 to the console after the stack empties
 // the arguments are: observer func, observer func 'this' context, observer func arguments
 const signal = observer.observe(printSum, undefined, observable1, observable2)
 
@@ -138,19 +156,19 @@ console.log(observable1 === observable2)
 console.log(observable2 === observable3)
 ```
 
-#### when does the observer run
+#### when does the observed function run
 
-An observer always runs once synchronously, right away. After that, the observer runs after every
-stack in which the observable properties used by the observer are changed.
-An observer runs maximum once per stack. Multiple changes of the observable
+And observer runs after every stack in which the observable properties used by it changes value.
+An observer runs maximum once per stack. Multiple synchronous changes of the observable
 properties won't trigger it more than once. Setting on observable property without a value change
 won't trigger it either.
 
 ```js
 const observer = require('@risingstack/nx-observe')
+
 const observable = observer.observable({prop: 'value'})
 
-// runs once right away, outputs 'value' to the console
+// outputs 'value' to the console after the stack empties
 observer.observe(() => console.log(observable.prop))
 
 // causes only 1 rerun, outputs 'newer value' to the console
@@ -172,7 +190,7 @@ const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable()
 
-// outputs 'undefined' to the console
+// outputs 'undefined' to the console after the current stack empties
 observer.observe(() => console.log(observable.expando))
 
 // outputs 'dynamically added prop' to the console
@@ -192,8 +210,7 @@ const observable = observer.observable({
   prop2: 'hidden'
 })
 
-// runs once right away
-// outputs 'prop1' to the console
+// outputs 'prop1' to the console after the current stack empties
 observer.observe(() => console.log(observable.condition ? observable.prop1 : observable.prop2))
 
 // outputs 'hidden' to the console
@@ -212,8 +229,7 @@ const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable({prop: {nested: 'nestedValue'}})
 
-// runs once right away
-// outputs 'nestedValue' to the console
+// outputs 'nestedValue' to the console after the current stack empties
 observer.observe(() => console.log(observable.prop.nested))
 
 // outputs 'otherValue' to the console
@@ -230,8 +246,7 @@ const observer = require('@risingstack/nx-observe')
 
 const observable = observer.observable({words: ['Hello', 'World']})
 
-// runs once right away
-// outputs 'Hello World' to the console
+// outputs 'Hello World' to the console after the current stack empties
 observer.observe(() => console.log(observable.words.join(' ')))
 
 // outputs 'Hello World !' to the console
@@ -254,8 +269,7 @@ const observable = observer.observable({subject: 'World!'})
 
 Object.setPrototypeOf(observable, parentObservable)
 
-// runs once right away
-// outputs 'Hello World' to the console
+// outputs 'Hello World' to the console after the current stack empties
 observer.observe(() => console.log(observable.greeting + ' ' + observable.subject))
 
 // outputs 'Hello There!' to the console
@@ -288,7 +302,7 @@ const observable = observer.observable({
   }
 })
 
-// outputs 0  to the console
+// outputs 0  to the console after the current stack empties
 observer.observe(() => console.log(observable.sum))
 
 // outputs 1 to the console
@@ -339,7 +353,7 @@ const person = observer.observable({
   age: 25
 })
 
-// outputs 'name: John, age: 25' to the console
+// outputs 'name: John, age: 25' to the console after the current stack empties
 observer.observe(() => console.log(`name: ${person.name}, age: ${person.$raw.age}`))
 
 // will not cause a rerun, since the observer only uses person.$raw.age
