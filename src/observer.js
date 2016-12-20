@@ -7,9 +7,10 @@ const wellKnowSymbols = require('./wellKnownSymbols')
 const proxies = new WeakMap()
 const observers = new WeakMap()
 const queuedObservers = new Set()
+const enumerate = Symbol('enumerate')
 let queued = false
 let currentObserver
-const handlers = {get, set, deleteProperty}
+const handlers = {get, ownKeys, set, deleteProperty}
 
 module.exports = {
   observe,
@@ -111,6 +112,11 @@ function registerObserver (target, key) {
   }
 }
 
+function ownKeys (target) {
+  registerObserver(target, enumerate)
+  return Reflect.ownKeys(target)
+}
+
 function set (target, key, value, receiver) {
   if (key === 'length' || value !== Reflect.get(target, key, receiver)) {
     queueObservers(target, key)
@@ -122,14 +128,21 @@ function set (target, key, value, receiver) {
 }
 
 function deleteProperty (target, key) {
-  queueObservers(target, key)
+  if (Reflect.has(target, key)) {
+    queueObservers(target, key)
+  }
   return Reflect.deleteProperty(target, key)
 }
 
 function queueObservers (target, key) {
-  const observersForKey = observers.get(target).get(key)
+  const observersForTarget = observers.get(target)
+  const observersForKey = observersForTarget.get(key)
   if (observersForKey) {
     observersForKey.forEach(queueObserver)
+  }
+  const observersForEnumerate = observersForTarget.get(enumerate)
+  if (observersForEnumerate) {
+    observersForEnumerate.forEach(queueObserver)
   }
 }
 

@@ -160,10 +160,11 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal('World!'))
     })
 
-    /*it('should observe for in iteration', () => {
+    it('should observe for in iteration', () => {
       let dummy = 0
       const observable = observer.observable({prop: 0})
       observer.observe(() => {
+        dummy = 0
         for (let key in observable) {
           dummy += observable[key]
         }
@@ -176,8 +177,8 @@ describe('nx-observe', () => {
         .then(() => observable.prop2 = 3)
         .then(() => expect(dummy).to.equal(4))
         .then(() => observable.prop1 = 6)
-        .then(() => expect(dummy).to.equal(10))
-    })*/
+        .then(() => expect(dummy).to.equal(9))
+    })
 
     it('should not observe well-known symbols', () => {
       let dummy
@@ -587,12 +588,13 @@ describe('nx-observe', () => {
         return Promise.resolve()
           .then(() => expect(dummy).to.equal('prop1prop2prop3'))
           .then(() => {
+            dummy = ''
             observable.prop2 = 'p'
             observable.prop1 = 'p1'
             observable.prop3 = 'p3'
             observable.prop2 = 'p2'
           })
-          .then(() => expect(dummy).to.equal('prop1prop2prop3p2p1p3'))
+          .then(() => expect(dummy).to.equal('p2p1p3'))
       })
     })
   })
