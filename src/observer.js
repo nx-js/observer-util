@@ -14,6 +14,7 @@ const handlers = {get, set, deleteProperty}
 module.exports = {
   observe,
   unobserve,
+  queue,
   observable,
   isObservable
 }
@@ -24,15 +25,27 @@ function observe (fn, context, ...args) {
   }
   args = args.length ? args : undefined
   const observer = {fn, context, args, observedKeys: []}
-  runObserver(observer)
+  queueObserver(observer)
   return observer
 }
 
 function unobserve (observer) {
-  if (typeof observer === 'object' && observer.observedKeys) {
-    observer.observedKeys.forEach(unobserveKey, observer)
+  if (typeof observer === 'object') {
+    if (observer.observedKeys) {
+      observer.observedKeys.forEach(unobserveKey, observer)
+    }
     observer.fn = observer.context = observer.args = observer.observedKeys = undefined
   }
+}
+
+function queue (fn, context, ...args) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('first argument must be a function')
+  }
+  args = args.length ? args : undefined
+  const observer = {fn, context, args, once: true}
+  queueObserver(observer)
+  return observer
 }
 
 function observable (obj) {
@@ -136,11 +149,16 @@ function runObservers () {
 
 function runObserver (observer) {
   if (observer.fn) {
-    try {
-      currentObserver = observer
+    if (observer.once) {
       observer.fn.apply(observer.context, observer.args)
-    } finally {
-      currentObserver = undefined
+      unobserve(observer)
+    } else {
+      try {
+        currentObserver = observer
+        observer.fn.apply(observer.context, observer.args)
+      } finally {
+        currentObserver = undefined
+      }
     }
   }
 }
