@@ -1,6 +1,6 @@
 {
   "name": "@risingstack/nx-observe",
-  "version": "2.0.5",
+  "version": "3.0.0",
   "description": "Powerful data observation/binding with ES6 Proxies.",
   "scripts": {
     "build-benchmark-mac": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
