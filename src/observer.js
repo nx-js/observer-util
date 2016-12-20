@@ -120,6 +120,7 @@ function ownKeys (target) {
 function set (target, key, value, receiver) {
   if (key === 'length' || value !== Reflect.get(target, key, receiver)) {
     queueObservers(target, key)
+    queueObservers(target, enumerate)
   }
   if (typeof value === 'object' && value) {
     value = value.$raw || value
@@ -130,19 +131,15 @@ function set (target, key, value, receiver) {
 function deleteProperty (target, key) {
   if (Reflect.has(target, key)) {
     queueObservers(target, key)
+    queueObservers(target, enumerate)
   }
   return Reflect.deleteProperty(target, key)
 }
 
 function queueObservers (target, key) {
-  const observersForTarget = observers.get(target)
-  const observersForKey = observersForTarget.get(key)
+  const observersForKey = observers.get(target).get(key)
   if (observersForKey) {
     observersForKey.forEach(queueObserver)
-  }
-  const observersForEnumerate = observersForTarget.get(enumerate)
-  if (observersForEnumerate) {
-    observersForEnumerate.forEach(queueObserver)
   }
 }
 
