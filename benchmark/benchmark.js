@@ -54,16 +54,19 @@ const chartOptions = {
   barValueSpacing: 15,
   scaleBeginAtZero: true,
   scaleLabel: '<%=value%> ms',
+  scaleFontSize: 16,
   onAnimationComplete () {
     const ctx = this.chart.ctx
     const datasets = this.datasets
+
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'left'
+    ctx.font = 'normal 16px Calibri'
     for (let i = 0; i < datasets.length; i++) {
       const dataset = datasets[i]
       ctx.fillStyle = dataset.fillColor
-      ctx.textAlign = 'left'
-      ctx.textBaseline = 'left'
-      ctx.fillRect((i + 1) * 100 + 200, 15, 20, 10)
-      ctx.fillText(dataset.label, (i + 1) * 100 + 225, 20)
+      ctx.fillRect((i + 1) * 100 + 625, 12, 20, 14)
+      ctx.fillText(dataset.label, (i + 1) * 100 + 650, 20)
     }
   }
 }

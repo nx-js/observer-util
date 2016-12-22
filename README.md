@@ -378,24 +378,16 @@ with `npm run benchmark`. The result on a MacBook Pro with Node 6.2.0 can be see
 ![Benchmark result](/benchmark/benchmark.png)
 
 - The first two tests compare NX and MobX observable creation cost with plain JS object creation.
-In case of MobX the overhead grows with the number of properties.
 
-- 'Dynamic property addition' tests the cost of adding expando properties to a plain object or an
-observable without any observer/listener function registered for the observable.
-MobX requires the special `mobx.extendObservable(obj, { prop: 'value' })` syntax
-instead of `obj.prop = 'value'`.
+- 'New property' tests the cost of adding expando properties to a plain object or an observable without any observer function. MobX requires the special `mobx.extendObservable(obj, { prop: 'value' })` syntax instead of `obj.prop = 'value'`.
 
-- 'Get and set operation' test the cost of get/set operations of a plain object or an
-observable without any observer/listener function registered for the observable.
+- 'Get and set operation' tests the cost of get/set operations of a plain object or an observable without any observer function.
 
-- 'Function creation' tests the cost of vanilla JS function creation versus `mobx.autorun(newFn)`
-and `nx.observe(newFn)`.
+- 'Function creation' tests the cost of vanilla JS function creation versus `mobx.autorun(newFn)` and `nx.observe(newFn)`.
 
-- 'Function trigger' tests the cost of registering observable property mutations
-and running appropriate observer/listener functions.
+- 'Function trigger' tests the cost of intercepting observable property mutations and running the appropriate reactions. The 'no value change' test checks the same thing, in case of observable property mutations without a value change.
 
-- 'Function cleanup' tests the cost of disposing observer/listener functions with `disposeFn()`
-or `nx.unobserve(fn)`.
+- 'Function cleanup' tests the cost of disposing observer/listener functions with `disposeFn()` or `nx.unobserve(fn)`.
 
 Do not worry about the large difference between the vanilla and nx-observe / MobX results.
 The operations tested above are some of the fastest ones in vanilla JS. The overhead would be a
