@@ -1,16 +1,16 @@
-# nx-observe
+# The observer utility
 
 This library is part of the [NX framework](http://nx-framework.com).
 
-The purpose of this library is to allow powerful data observation/binding without any special syntax.
+The purpose of this library is to allow powerful data observation/binding without any special syntax and with a 100% language observability coverage.
 It uses ES6 Proxies internally to create seamless data binding with a minimal interface.
 A more detailed blog post about this library can be found
-[here](https://blog.risingstack.com/writing-a-javascript-framework-data-binding-es6-proxy/).
+[here](https://blog.risingstack.com/writing-a-javascript-framework-data-binding-es6-proxy/) and a comparison with MobX can be found [here](http://www.nx-framework.com/blog/public/mobx-vs-nx/).
 
 ## Installation
 
 ```
-$ npm install @risingstack/nx-observe
+$ npm install @nx-js/observer-util
 ```
 
 ## Platform support
@@ -26,7 +26,7 @@ $ npm install @risingstack/nx-observe
 ## Usage
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 ```
 
 ## API
@@ -110,7 +110,7 @@ const isObservable = observer.isObservable(observable)
 ## Example
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 // creating two observable objects
 const observable1 = observer.observable({num: 0})
@@ -144,7 +144,7 @@ setTimeout(() => observable1.num = 6, 400)
 If an observable is passed as argument to the observer.observable method, it simply returns the passed observable. If you pass the same object into different observer.observable calls, it always returns the same observable instance.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const obj = {prop: 'value'}
 const observable1 = observer.observable(obj)
@@ -164,7 +164,7 @@ properties won't trigger it more than once. Setting on observable property witho
 won't trigger it either.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({prop: 'value'})
 
@@ -186,7 +186,7 @@ setTimeout(() => observable.prop = 'newer value', 100)
 Expando (dynamically added) properties can be observed without any special syntax.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable()
 
@@ -202,7 +202,7 @@ setTimeout(() => observable.expando = 'dynamically added prop', 100)
 Any synchronous JavaScript code can be observed. This includes code 'hidden behind' conditionals or loops.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({
   condition: true,
@@ -225,7 +225,7 @@ setTimeout(() => observable.prop2 = 'but tracked', 200)
 Observing nested properties works with arbitrary depth.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({prop: {nested: 'nestedValue'}})
 
@@ -242,7 +242,7 @@ The library also observes implicit properties. Implicit properties are not direc
 by your code, but by native function implementations for example.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({words: ['Hello', 'World']})
 
@@ -262,7 +262,7 @@ You can use prototypal inheritance with observables.
 The library walks and observes the prototype chain correctly.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const parentObservable = observer.observable({greeting: 'Hello'})
 const observable = observer.observable({subject: 'World!'})
@@ -290,7 +290,7 @@ setTimeout(() => delete observable.greeting, 300)
 Computed getters/setter properties of observables will be correctly observed by observer functions.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({
   num1: 0,
@@ -321,7 +321,7 @@ Every observed function is guaranteed to run maximum once per stack.
 Asynchronous infinite loops are also handled and avoided by the library.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const observable1 = observer.observable({prop: 'value1'})
 const observable2 = observer.observable({prop: 'value2'})
@@ -346,7 +346,7 @@ use `observable.$raw`, which is the exposed raw (unwrapped) object behind the ob
 This object will not cause any observers to be triggered or registered.
 
 ```js
-const observer = require('@risingstack/nx-observe')
+const observer = require('@nx-js/observer-util')
 
 const person = observer.observable({
   name: 'John',
@@ -370,7 +370,7 @@ setTimeout(() => person.$raw.name = 'Anne', 200)
 
 ## Performance
 
-This [benchmark](/benchmark/benchmark.js) compares vanilla JS, [MobX](http://mobxjs.github.io) and nx-observer
+This [benchmark](/benchmark/benchmark.js) compares vanilla JS, [MobX](http://mobxjs.github.io) and nx-observe
 in a few scenarios. You can set it up locally with the `npm run build-benchmark-mac` or
 `npm run build-benchmark-ubuntu` command (depending on your OS) and run it
 with `npm run benchmark`. The result on a MacBook Pro with Node 6.2.0 can be seen below.
@@ -396,7 +396,7 @@ lot smaller compared to some commonly used built in objects, like Promises.
 ## Contributions
 
 This library has the very specific purpose of supporting the
-[NX framework](https://github.com/RisingStack/nx-framework).
+[NX framework](https://github.com/nx-js/framework).
 Features should only be added, if they are used by the framework. Otherwise please fork.
 
 Bug fixes, tests, benchmark corrections and doc updates are always welcome.

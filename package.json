@@ -1,7 +1,7 @@
 {
-  "name": "@risingstack/nx-observe",
-  "version": "3.0.0",
-  "description": "Powerful data observation/binding with ES6 Proxies.",
+  "name": "@nx-js/observer-util",
+  "version": "1.0.0",
+  "description": "An NX utility, responsible for powerful data observation with ES6 Proxies.",
   "scripts": {
     "build-benchmark-mac": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
     "build-benchmark-ubuntu": "sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++ && npm i canvas nchart mobx",
@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:RisingStack/nx-observe.git"
+    "url": "git@github.com:nx-js/observer-util.git"
   },
   "bugs": {
-    "url": "https://github.com/RisingStack/nx-observe/issues"
+    "url": "https://github.com/nx-js/observer-util/issues"
   },
-  "homepage": "https://github.com/RisingStack/nx-observe#readme",
+  "homepage": "https://github.com/nx-js/observer-util#readme",
   "license": "MIT",
   "keywords": [
     "nx",
