@@ -14,39 +14,34 @@ const handlers = {get, ownKeys, set, deleteProperty}
 
 module.exports = {
   observe,
-  unobserve,
-  queue,
   observable,
   isObservable
 }
 
 function observe (fn, context, ...args) {
   if (typeof fn !== 'function') {
-    throw new TypeError('first argument must be a function')
+    throw new TypeError('First argument must be a function')
   }
   args = args.length ? args : undefined
-  const observer = {fn, context, args, observedKeys: []}
-  queueObserver(observer)
+  const observer = {fn, context, args, observing: new Map(), exec, unobserve, unqueue}
+  runObserver(observer)
   return observer
 }
 
-function unobserve (observer) {
-  if (typeof observer === 'object') {
-    if (observer.observedKeys) {
-      observer.observedKeys.forEach(unobserveKey, observer)
-    }
-    observer.fn = observer.context = observer.args = observer.observedKeys = undefined
+function exec () {
+  runObserver(this)
+}
+
+function unobserve () {
+  if (this.observing) {
+    this.observing.forEach(unobserveKey, this)
+    this.fn = this.context = this.args = this.observing = undefined
+    queuedObservers.delete(this)
   }
 }
 
-function queue (fn, context, ...args) {
-  if (typeof fn !== 'function') {
-    throw new TypeError('first argument must be a function')
-  }
-  args = args.length ? args : undefined
-  const observer = {fn, context, args, once: true}
-  queueObserver(observer)
-  return observer
+function unqueue () {
+  queuedObservers.delete(this)
 }
 
 function observable (obj) {
@@ -101,14 +96,16 @@ function registerObserver (target, key) {
   if (currentObserver) {
     const observersForTarget = observers.get(target)
     let observersForKey = observersForTarget.get(key)
-    if (!observersForKey) {
-      observersForKey = new Set()
-      observersForTarget.set(key, observersForKey)
-    }
-    if (!observersForKey.has(currentObserver)) {
+    if (observersForKey === currentObserver) {
+      return
+    } else if (!observersForKey) {
+      observersForTarget.set(key, currentObserver)
+    } else if (observersForKey.constructor !== Set) {
+      observersForTarget.set(key, new Set([observersForKey, currentObserver]))
+    } else if (!observersForKey.has(currentObserver)) {
       observersForKey.add(currentObserver)
-      currentObserver.observedKeys.push(observersForKey)
     }
+    currentObserver.observing.set(observersForTarget, key)
   }
 }
 
@@ -121,6 +118,7 @@ function set (target, key, value, receiver) {
   if (key === 'length' || value !== Reflect.get(target, key, receiver)) {
     queueObservers(target, key)
     queueObservers(target, enumerate)
+
   }
   if (typeof value === 'object' && value) {
     value = value.$raw || value
@@ -138,8 +136,10 @@ function deleteProperty (target, key) {
 
 function queueObservers (target, key) {
   const observersForKey = observers.get(target).get(key)
-  if (observersForKey) {
+  if (observersForKey && observersForKey.constructor === Set) {
     observersForKey.forEach(queueObserver)
+  } else if (observersForKey) {
+    queueObserver(observersForKey)
   }
 }
 
@@ -158,21 +158,19 @@ function runObservers () {
 }
 
 function runObserver (observer) {
-  if (observer.fn) {
-    if (observer.once) {
-      observer.fn.apply(observer.context, observer.args)
-      unobserve(observer)
-    } else {
-      try {
-        currentObserver = observer
-        observer.fn.apply(observer.context, observer.args)
-      } finally {
-        currentObserver = undefined
-      }
-    }
+  try {
+    currentObserver = observer
+    observer.fn.apply(observer.context, observer.args)
+  } finally {
+    currentObserver = undefined
   }
 }
 
-function unobserveKey (observersForKey) {
-  observersForKey.delete(this)
+function unobserveKey (key, observersForTarget) {
+  const observersForKey = observersForTarget.get(key)
+  if (observersForKey === this || observersForKey.size === 1) {
+    observersForTarget.delete(key)
+  } else if (observersForKey) {
+    observersForKey.delete(this)
+  }
 }

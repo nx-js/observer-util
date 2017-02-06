@@ -217,7 +217,7 @@ describe('nx-observe', () => {
         })
     })
 
-    it('should not run synchronously after registration', () => {
+    it('should run synchronously after registration', () => {
       let dummy
       const observable = observer.observable({prop: 'prop'})
 
@@ -227,14 +227,10 @@ describe('nx-observe', () => {
         numOfRuns++
       })
 
-      expect(numOfRuns).to.equal(0)
-      expect(dummy).to.equal(undefined)
+      expect(numOfRuns).to.equal(1)
+      expect(dummy).to.equal('prop')
 
       return Promise.resolve()
-        .then(() => {
-          expect(numOfRuns).to.equal(1)
-          expect(dummy).to.equal('prop')
-        })
         .then(() => {
           observable.prop = 'new prop'
         })
@@ -560,24 +556,7 @@ describe('nx-observe', () => {
     })
 
     describe('execution order', () => {
-      it('should run in registration order the first time', () => {
-        let dummy = ''
-        const observable = observer.observable({prop1: 'prop1', prop2: 'prop2', prop3: 'prop3'})
-
-        observer.observe(() => dummy += observable.prop1)
-        observer.queue(() => dummy += observable.prop2)
-        observer.observe(() => dummy += observable.prop3)
-
-        observable.prop2 = 'p'
-        observable.prop1 = 'p1'
-        observable.prop3 = 'p3'
-        observable.prop2 = 'p2'
-
-        return Promise.resolve()
-          .then(() => expect(dummy).to.equal('p1p2p3'))
-      })
-
-      it('should run in first-tigger order after the first time', () => {
+      it('should be first-tigger order', () => {
         let dummy = ''
         const observable = observer.observable({prop1: 'prop1', prop2: 'prop2', prop3: 'prop3'})
 
@@ -599,111 +578,100 @@ describe('nx-observe', () => {
     })
   })
 
-  describe('queue', () => {
-    it('should unobserve the observed function', () => {
-      let dummy
-      const observable = observer.observable({prop: 0})
+  describe('observer methods', () => {
+    describe('exec', () => {
+      it('should track the newly discovered function parts', () => {
+        let condition = false
+        let counter
 
-      let numOfRuns = 0
-      function test() {
-        dummy = observable.prop
-        numOfRuns++
-      }
-      const signal = observer.observe(test)
+        const observable = observer.observable({condition: false, counter: 0})
+        const signal = observer.observe(conditionalIncrement)
 
-      return Promise.resolve()
-        .then(() => observable.prop = 'Hello')
-        .then(() => observer.unobserve(signal))
-        .then(() => observable.prop = 'World')
-        .then(() => observable.prop = '!')
-        .then(() => expect(numOfRuns).to.equal(2))
+        function conditionalIncrement () {
+          if (condition) {
+            counter = observable.counter
+          }
+        }
+
+        return Promise.resolve()
+          .then(() => expect(counter).to.be.undefined)
+          .then(() => observable.counter++)
+          .then(() => expect(counter).to.be.undefined)
+          .then(() => {
+            condition = true
+            signal.exec()
+          })
+          .then(() => expect(counter).to.equal(1))
+          .then(() => observable.counter++)
+          .then(() => expect(counter).to.equal(2))
+      })
     })
 
-    it('should unobserve even if the function is registered for the stack', () => {
-      let dummy
-      const observable = observer.observable({prop: 0})
+    describe('unqueue', () => {
+      it('should remove the observed function from the queue', () => {
+        let dummy
+        const observable = observer.observable({prop: 0})
 
-      let numOfRuns = 0
-      function test() {
-        dummy = observable.prop
-        numOfRuns++
-      }
-      const signal = observer.observe(test)
+        let numOfRuns = 0
+        function test() {
+          dummy = observable.prop
+          numOfRuns++
+        }
+        const signal = observer.observe(test)
 
-      return Promise.resolve()
-        .then(() => {
-          observable.prop = 2
-          observer.unobserve(signal)
-        })
-        .then(() => expect(numOfRuns).to.equal(1))
-    })
-  })
-
-  describe('unobserve', () => {
-    it('should unobserve the observed function', () => {
-      let dummy
-      const observable = observer.observable({prop: 0})
-
-      let numOfRuns = 0
-      function test() {
-        dummy = observable.prop
-        numOfRuns++
-      }
-      const signal = observer.observe(test)
-
-      return Promise.resolve()
-        .then(() => observable.prop = 'Hello')
-        .then(() => observer.unobserve(signal))
-        .then(() => {
-          expect(signal.fn).to.be.undefined
-          expect(signal.context).to.be.undefined
-          expect(signal.args).to.be.undefined
-          expect(signal.observedKeys).to.be.undefined
-        })
-        .then(() => observable.prop = 'World')
-        .then(() => observable.prop = '!')
-        .then(() => expect(numOfRuns).to.equal(2))
+        return Promise.resolve()
+          .then(() => {
+            observable.prop = 2
+            signal.unqueue()
+          })
+          .then(() => expect(numOfRuns).to.equal(1))
+      })
     })
 
-    it('should unobserve even if the function is registered for the stack', () => {
-      let dummy
-      const observable = observer.observable({prop: 0})
+    describe('unobserve', () => {
+      it('should unobserve the observed function', () => {
+        let dummy
+        const observable = observer.observable({prop: 0})
 
-      let numOfRuns = 0
-      function test() {
-        dummy = observable.prop
-        numOfRuns++
-      }
-      const signal = observer.observe(test)
+        let numOfRuns = 0
+        function test() {
+          dummy = observable.prop
+          numOfRuns++
+        }
+        const signal = observer.observe(test)
 
-      return Promise.resolve()
-        .then(() => {
-          observable.prop = 2
-          observer.unobserve(signal)
-        })
-        .then(() => expect(numOfRuns).to.equal(1))
-    })
-
-    it('should remove queued function', () => {
-      let dummy
-      const observable = observer.observable({prop: 0})
-
-      let numOfRuns = 0
-      const signal = observer.queue(() => {
-        dummy = observable.prop
-        numOfRuns++
+        return Promise.resolve()
+          .then(() => observable.prop = 'Hello')
+          .then(() => signal.unobserve())
+          .then(() => {
+            expect(signal.fn).to.be.undefined
+            expect(signal.context).to.be.undefined
+            expect(signal.args).to.be.undefined
+            expect(signal.observedKeys).to.be.undefined
+          })
+          .then(() => observable.prop = 'World')
+          .then(() => observable.prop = '!')
+          .then(() => expect(numOfRuns).to.equal(2))
       })
 
-      observer.unobserve(signal)
+      it('should unobserve even if the function is registered for the stack', () => {
+        let dummy
+        const observable = observer.observable({prop: 0})
 
-      return Promise.resolve()
-        .then(() => expect(numOfRuns).to.equal(0))
-        .then(() => {
-          expect(signal.fn).to.be.undefined
-          expect(signal.context).to.be.undefined
-          expect(signal.args).to.be.undefined
-          expect(signal.observedKeys).to.be.undefined
-        })
+        let numOfRuns = 0
+        function test() {
+          dummy = observable.prop
+          numOfRuns++
+        }
+        const signal = observer.observe(test)
+
+        return Promise.resolve()
+          .then(() => {
+            observable.prop = 2
+            signal.unobserve()
+          })
+          .then(() => expect(numOfRuns).to.equal(1))
+      })
     })
   })
 })
