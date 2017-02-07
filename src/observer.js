@@ -23,7 +23,7 @@ function observe (fn, context, ...args) {
     throw new TypeError('First argument must be a function')
   }
   args = args.length ? args : undefined
-  const observer = {fn, context, args, observing: new Map(), exec, unobserve, unqueue}
+  const observer = {fn, context, args, observedKeys: [], exec, unobserve, unqueue}
   runObserver(observer)
   return observer
 }
@@ -33,9 +33,9 @@ function exec () {
 }
 
 function unobserve () {
-  if (this.observing) {
-    this.observing.forEach(unobserveKey, this)
-    this.fn = this.context = this.args = this.observing = undefined
+  if (this.fn) {
+    this.observedKeys.forEach(unobserveKey, this)
+    this.fn = this.context = this.args = this.observedKeys = undefined
     queuedObservers.delete(this)
   }
 }
@@ -96,16 +96,14 @@ function registerObserver (target, key) {
   if (currentObserver) {
     const observersForTarget = observers.get(target)
     let observersForKey = observersForTarget.get(key)
-    if (observersForKey === currentObserver) {
-      return
-    } else if (!observersForKey) {
-      observersForTarget.set(key, currentObserver)
-    } else if (observersForKey.constructor !== Set) {
-      observersForTarget.set(key, new Set([observersForKey, currentObserver]))
-    } else if (!observersForKey.has(currentObserver)) {
-      observersForKey.add(currentObserver)
+    if (!observersForKey) {
+      observersForKey = new Set()
+      observersForTarget.set(key, observersForKey)
     }
-    currentObserver.observing.set(observersForTarget, key)
+    if (!observersForKey.has(currentObserver)) {
+      observersForKey.add(currentObserver)
+      currentObserver.observedKeys.push(observersForKey)
+    }
   }
 }
 
@@ -166,11 +164,6 @@ function runObserver (observer) {
   }
 }
 
-function unobserveKey (key, observersForTarget) {
-  const observersForKey = observersForTarget.get(key)
-  if (observersForKey === this || observersForKey.size === 1) {
-    observersForTarget.delete(key)
-  } else if (observersForKey) {
-    observersForKey.delete(this)
-  }
+function unobserveKey (observersForKey) {
+  observersForKey.delete(this)
 }
