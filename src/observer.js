@@ -116,7 +116,6 @@ function set (target, key, value, receiver) {
   if (key === 'length' || value !== Reflect.get(target, key, receiver)) {
     queueObservers(target, key)
     queueObservers(target, enumerate)
-
   }
   if (typeof value === 'object' && value) {
     value = value.$raw || value
