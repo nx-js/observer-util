@@ -2,8 +2,8 @@
 
 This library is part of the [NX framework](http://nx-framework.com).
 
-The purpose of this library is to allow powerful data observation/binding without any special syntax and with a 100% language observability coverage.
-It uses ES6 Proxies internally to create seamless data binding with a minimal interface.
+The purpose of this library is to provide transparent reactivity without any special syntax and with a 100% language observability coverage.
+It uses ES6 Proxies internally to work seamlessly with a minimal interface.
 A blog post about the inner working of this library can be found
 [here](https://blog.risingstack.com/writing-a-javascript-framework-data-binding-es6-proxy/) and a comparison with MobX can be found [here](http://www.nx-framework.com/blog/public/mobx-vs-nx/).
 
@@ -34,7 +34,8 @@ const observer = require('@nx-js/observer-util')
 ### observer.observable([Object])
 
 This method creates and returns an observable object. If an object is passed as argument
-it wraps the passed object in an observable.
+it wraps the passed object in an observable. If an observable object is passed, it simply
+returns the passed observable object.
 
 ```js
 const observable = observer.observable({prop: 'someValue'})
@@ -51,24 +52,11 @@ const isObservable = observer.isObservable(observable)
 
 ### const signal = observer.observe(function, [context], ...[args])
 
-This method observes a function. An observed function automatically reruns when a property of an
-observable, which is used by the function changes (or is deleted). The function doesn't run
-immediately on property change, instead it runs after a small delay (when the current stack empties).
-Multiple synchronous changes won't cause the function to run multiple times. Changes that result in
-no value change (`state.prop = state.prop`) won't cause the function to run either.
-The function can observe any synchronous javascript code (nested data, iterations, function calls,
-getters/setters, etc.)
+This method observes the passed function. An observed function automatically reruns when a property of an observable - which is used by the function - changes (or is deleted). The function doesn't run immediately on property change, instead it runs after a small delay (when the current stack empties).
+Multiple synchronous changes won't cause the function to run multiple times. Changes that result in no value change - like `state.prop = state.prop` - won't cause the function to run either.
+The function can observe any synchronous javascript code (nested data, iterations, function calls, getters/setters, etc.)
 
-`observe()` returns a signal, which can later be used to stop the observation. This is similar to
-the `const signal = setTimeout()`, `clearTimeout(signal)` pair.
-
-```js
-const signal = observer.observe(() => console.log(observable.prop))
-```
-
-A `this` context and a list of argument can be passed after the observed function as arguments.
-In this case the observed function will always be called with the passed `this` context
-and arguments.
+A `this` context and a list of argument can be passed after the observed function as arguments. In this case the observed function will always be called with the passed `this` context and arguments.
 
 ```js
 observer.observe(printSum, context, arg1, arg2)
@@ -78,10 +66,15 @@ function printSum (arg1, arg2) {
 }
 ```
 
+`observe()` returns a signal object, which can be used to stop or modify the observation.
+
+```js
+const signal = observer.observe(() => console.log(observable.prop))
+```
+
 ### signal.unobserve()
 
-It unobserves the observed function associated with the passed signal.
-Unobserved functions won't be rerun by observable changes anymore.
+Calling `signal.unobserve()` unobserves the observed function associated with the passed signal. Unobserved functions won't be rerun by observable changes anymore.
 
 ```js
 const signal = observer.observe(() => console.log(observable.prop))
@@ -90,8 +83,7 @@ signal.unobserve()
 
 ### signal.unqueue()
 
-It removes the observed function from the set of triggered and queued observed functions,
-but it doesn't unobserve it. It can still be triggered and requeued by observable changes.
+Calling `signal.unqueue()` removes the observed function from the set of triggered and queued observed functions, but it doesn't unobserve it. It can still be triggered and requeued by later observable changes.
 
 ```js
 const signal = observer.observe(() => console.log(observable.prop))
@@ -116,8 +108,8 @@ const observer = require('@nx-js/observer-util')
 const observable1 = observer.observable({num: 0})
 const observable2 = observer.observable({num: 0})
 
-// outputs 0 to the console after the stack empties
-// the arguments are: observer func, observer func 'this' context, observer func arguments
+// outputs 0 to the console
+// the passed parameters are: observed func, injected 'this' context, injected arguments
 const signal = observer.observe(printSum, undefined, observable1, observable2)
 
 function printSum (obj1, obj2) {
@@ -130,7 +122,7 @@ setTimeout(() => observable1.num = 2, 100)
 // outputs 7 to the console
 setTimeout(() => observable2.num = 5, 200)
 
-// finish observing
+// finishes observing
 setTimeout(() => signal.unobserve(), 300)
 
 // observation is finished, doesn't trigger printSum, outputs nothing to the console
@@ -158,17 +150,16 @@ console.log(observable2 === observable3)
 
 #### when does the observed function run
 
-And observer runs after every stack in which the observable properties used by it changes value.
-An observer runs maximum once per stack. Multiple synchronous changes of the observable
-properties won't trigger it more than once. Setting on observable property without a value change
-won't trigger it either.
+Every observed function runs once synchronously when it is passed to `observer.observe`.
+
+After that an observed function runs after every stack in which the observable properties used by it changed value. It runs maximum once per stack and multiple synchronous changes of the observable properties won't trigger it more than once. Setting on observable property without a value change won't trigger it either.
 
 ```js
 const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({prop: 'value'})
 
-// outputs 'value' to the console after the stack empties
+// outputs 'value' to the console synchronously
 observer.observe(() => console.log(observable.prop))
 
 // causes only 1 rerun, outputs 'newer value' to the console
@@ -190,7 +181,7 @@ const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable()
 
-// outputs 'undefined' to the console after the current stack empties
+// outputs 'undefined' to the console
 observer.observe(() => console.log(observable.expando))
 
 // outputs 'dynamically added prop' to the console
@@ -210,7 +201,7 @@ const observable = observer.observable({
   prop2: 'hidden'
 })
 
-// outputs 'prop1' to the console after the current stack empties
+// outputs 'prop1' to the console
 observer.observe(() => console.log(observable.condition ? observable.prop1 : observable.prop2))
 
 // outputs 'hidden' to the console
@@ -229,7 +220,7 @@ const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({prop: {nested: 'nestedValue'}})
 
-// outputs 'nestedValue' to the console after the current stack empties
+// outputs 'nestedValue' to the console
 observer.observe(() => console.log(observable.prop.nested))
 
 // outputs 'otherValue' to the console
@@ -246,7 +237,7 @@ const observer = require('@nx-js/observer-util')
 
 const observable = observer.observable({words: ['Hello', 'World']})
 
-// outputs 'Hello World' to the console after the current stack empties
+// outputs 'Hello World' to the console
 observer.observe(() => console.log(observable.words.join(' ')))
 
 // outputs 'Hello World !' to the console
@@ -269,7 +260,7 @@ const observable = observer.observable({subject: 'World!'})
 
 Object.setPrototypeOf(observable, parentObservable)
 
-// outputs 'Hello World' to the console after the current stack empties
+// outputs 'Hello World' to the console
 observer.observe(() => console.log(observable.greeting + ' ' + observable.subject))
 
 // outputs 'Hello There!' to the console
@@ -302,7 +293,7 @@ const observable = observer.observable({
   }
 })
 
-// outputs 0  to the console after the current stack empties
+// outputs 0  to the console
 observer.observe(() => console.log(observable.sum))
 
 // outputs 1 to the console
@@ -353,7 +344,7 @@ const person = observer.observable({
   age: 25
 })
 
-// outputs 'name: John, age: 25' to the console after the current stack empties
+// outputs 'name: John, age: 25' to the console
 observer.observe(() => console.log(`name: ${person.name}, age: ${person.$raw.age}`))
 
 // will not cause a rerun, since the observer only uses person.$raw.age
