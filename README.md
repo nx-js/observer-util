@@ -4,7 +4,7 @@ This library is part of the [NX framework](http://nx-framework.com).
 
 The purpose of this library is to allow powerful data observation/binding without any special syntax and with a 100% language observability coverage.
 It uses ES6 Proxies internally to create seamless data binding with a minimal interface.
-A more detailed blog post about this library can be found
+A blog post about the inner working of this library can be found
 [here](https://blog.risingstack.com/writing-a-javascript-framework-data-binding-es6-proxy/) and a comparison with MobX can be found [here](http://www.nx-framework.com/blog/public/mobx-vs-nx/).
 
 ## Installation
@@ -40,6 +40,15 @@ it wraps the passed object in an observable.
 const observable = observer.observable({prop: 'someValue'})
 ```
 
+### observer.isObservable(Object)
+
+Returns true if the passed object is an observable, otherwise returns false.
+
+```js
+const observable = observer.observable()
+const isObservable = observer.isObservable(observable)
+```
+
 ### const signal = observer.observe(function, [context], ...[args])
 
 This method observes a function. An observed function automatically reruns when a property of an
@@ -69,42 +78,33 @@ function printSum (arg1, arg2) {
 }
 ```
 
-### const signal = observer.queue(function, [context], ...[args])
+### signal.unobserve()
 
-This method queues a function to be executed together with the currently triggered observed functions. `queue()` returns a signal, which can later be used to remove the function from the queue.
-
-```js
-const signal = observer.queue(() => console.log(observable.prop))
-```
-
-A `this` context and a list of argument can be passed after the queued function as arguments.
-In this case the queued function will be called with the passed `this` context and arguments.
-
-```js
-observer.queue(printSum, context, arg1, arg2)
-
-function printSum (arg1, arg2) {
-  console.log(arg1 + arg2)
-}
-```
-
-### observer.unobserve(signal)
-
-If unobserves the observed or queued function associated with the assed signal.
+It unobserves the observed function associated with the passed signal.
 Unobserved functions won't be rerun by observable changes anymore.
 
 ```js
 const signal = observer.observe(() => console.log(observable.prop))
-observer.unobserve(signal)
+signal.unobserve()
 ```
 
-### observer.isObservable(Object)
+### signal.unqueue()
 
-Returns true if the passed object is an observable, otherwise returns false.
+It removes the observed function from the set of triggered and queued observed functions,
+but it doesn't unobserve it. It can still be triggered and requeued by observable changes.
 
 ```js
-const observable = observer.observable()
-const isObservable = observer.isObservable(observable)
+const signal = observer.observe(() => console.log(observable.prop))
+signal.unqueue()
+```
+
+### signal.exec()
+
+Runs the observed function. Never run an observed function directly, use this method instead!
+
+```js
+const signal = observer.observe(() => console.log(observable.prop))
+signal.exec()
 ```
 
 ## Example
@@ -131,7 +131,7 @@ setTimeout(() => observable1.num = 2, 100)
 setTimeout(() => observable2.num = 5, 200)
 
 // finish observing
-setTimeout(() => observer.unobserve(signal), 300)
+setTimeout(() => signal.unobserve(), 300)
 
 // observation is finished, doesn't trigger printSum, outputs nothing to the console
 setTimeout(() => observable1.num = 6, 400)
@@ -387,7 +387,7 @@ with `npm run benchmark`. The result on a MacBook Pro with Node 6.2.0 can be see
 
 - 'Function trigger' tests the cost of intercepting observable property mutations and running the appropriate reactions. The 'no value change' test checks the same thing, in case of observable property mutations without a value change.
 
-- 'Function cleanup' tests the cost of disposing observer/listener functions with `disposeFn()` or `nx.unobserve(fn)`.
+- 'Function cleanup' tests the cost of disposing observer/listener functions with `disposeFn()` or `signal.unobserve()`.
 
 Do not worry about the large difference between the vanilla and nx-observe / MobX results.
 The operations tested above are some of the fastest ones in vanilla JS. The overhead would be a
