@@ -295,10 +295,10 @@ describe('nx-observe', () => {
         })
     })
 
-    it('should accept a context argument and set the observer "this" to it', () => {
+    it('should set the observer "this" to the passed "this" context', () => {
       let dummy
       const observable = observer.observable({counter: 0})
-      observer.observe(setDummy, observable)
+      observer.observe.call(observable, setDummy)
 
       function setDummy () {
         dummy = this.counter
@@ -315,7 +315,7 @@ describe('nx-observe', () => {
       let dummy
       const observable1 = observer.observable({counter: 0})
       const observable2 = observer.observable({counter: 0})
-      observer.observe(setDummy, undefined, observable1, observable2)
+      observer.observe(setDummy, observable1, observable2)
 
       function setDummy (state1, state2) {
         dummy = state1.counter + state2.counter

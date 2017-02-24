@@ -18,12 +18,16 @@ module.exports = {
   isObservable
 }
 
-function observe (fn, context, ...args) {
+function observe (fn, ...args) {
   if (typeof fn !== 'function') {
     throw new TypeError('First argument must be a function')
   }
-  args = args.length ? args : undefined
-  const observer = {fn, context, args, observedKeys: [], exec, unobserve, unqueue}
+  const observer = {
+    fn, exec, unobserve, unqueue,
+    context: this,
+    args: args.length ? args : undefined,
+    observedKeys: []
+  }
   runObserver(observer)
   return observer
 }
@@ -53,19 +57,22 @@ function observable (obj) {
 }
 
 function toObservable (obj) {
-  let observable
-  const builtIn = builtIns.get(obj.constructor)
-  if (typeof builtIn === 'function') {
-    observable = builtIn(obj, registerObserver, queueObservers)
-  } else if (!builtIn) {
-    observable = new Proxy(obj, handlers)
-  } else {
-    observable = obj
-  }
+  const observable = getObservable(obj)
   proxies.set(obj, observable)
   proxies.set(observable, observable)
   observers.set(obj, new Map())
   return observable
+}
+
+function getObservable (obj) {
+  const builtIn = builtIns.get(obj.constructor)
+  if (!builtIn) {
+    return new Proxy(obj, handlers)
+  }
+  if (typeof builtIn === 'function') {
+    return builtIn(obj, registerObserver, queueObservers)
+  }
+  return obj
 }
 
 function isObservable (obj) {
@@ -133,10 +140,8 @@ function deleteProperty (target, key) {
 
 function queueObservers (target, key) {
   const observersForKey = observers.get(target).get(key)
-  if (observersForKey && observersForKey.constructor === Set) {
+  if (observersForKey) {
     observersForKey.forEach(queueObserver)
-  } else if (observersForKey) {
-    queueObserver(observersForKey)
   }
 }
 

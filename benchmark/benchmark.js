@@ -6,7 +6,7 @@ const Canvas = require('canvas')
 const fs = require('fs')
 const Chart = require('nchart')
 
-const NUM_OF_RUNS = 2000
+const NUM_OF_RUNS = 10000
 
 const result = {
   vanilla: [],
@@ -226,7 +226,7 @@ updateResult('nx', 'observer function creation')
 Promise.resolve()
 
 // TRIGGER OBSERVER FUNCTIONS
-.then(() => mobx.transaction(() => {
+.then(() => mobx.runInAction(() => {
   mobxSum = 0
   for (let mobxObj of mobxObjs) {
     mobxObj.prop = 4
@@ -249,7 +249,7 @@ Promise.resolve()
 .then(() => updateResult('nx', 'observer function trigger'))
 
 // TRIGGER OBSERVER FUNCTIONS SECOND TIME
-.then(() => mobx.transaction(() => {
+.then(() => mobx.runInAction(() => {
   mobxSum = 0
   for (let mobxObj of mobxObjs) {
     mobxObj.prop = 1
@@ -271,7 +271,7 @@ Promise.resolve()
 .then(() => assert(`nxSum is ${NUM_OF_RUNS * 12}`, ()  => nxSum === (NUM_OF_RUNS * 12)))
 .then(() => updateResult('nx', 'observer function trigger (2nd time)'))
 
-.then(() => mobx.transaction(() => {
+.then(() => mobx.runInAction(() => {
   for (let mobxObj of mobxObjs) {
     mobxObj.prop = 1
     mobxObj.nested.prop = 2
