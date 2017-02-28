@@ -3,10 +3,10 @@
 const nextTick = require('./nextTick')
 const builtIns = require('./builtIns')
 const wellKnowSymbols = require('./wellKnownSymbols')
+const observerStore = require('./observerStore')
 
 const proxies = new WeakMap()
 const queuedObservers = new Set()
-const observers = Symbol('observers')
 const enumerate = Symbol('enumerate')
 let queued = false
 let currentObserver
@@ -49,7 +49,6 @@ function toObservable (obj) {
   const observable = createObservable(obj)
   proxies.set(obj, observable)
   proxies.set(observable, observable)
-  obj[observers] = Object.create(null)
   return observable
 }
 
@@ -80,7 +79,7 @@ function get (target, key, receiver) {
   const isObject = (typeof result === 'object' && result)
   const observable = isObject && proxies.get(result)
   if (currentObserver) {
-    registerObserver(target, key)
+    observerStore.register(target, key, currentObserver)
     if (isObject) {
       return observable || toObservable(result)
     }
@@ -89,18 +88,7 @@ function get (target, key, receiver) {
 }
 
 function registerObserver (target, key) {
-  if (currentObserver) {
-    const observersForTarget = target[observers]
-    let observersForKey = observersForTarget[key]
-    if (!observersForKey) {
-      observersForKey = new Set()
-      observersForTarget[key] = observersForKey
-    }
-    if (!observersForKey.has(currentObserver)) {
-      observersForKey.add(currentObserver)
-      currentObserver.observedKeys.push(observersForKey)
-    }
-  }
+  currentObserver && observerStore.register(target, key, currentObserver)
 }
 
 function ownKeys (target) {
@@ -128,10 +116,7 @@ function deleteProperty (target, key) {
 }
 
 function queueObservers (target, key) {
-  const observersForKey = target[observers][key]
-  if (observersForKey) {
-    observersForKey.forEach(queueObserver)
-  }
+  observerStore.forEach(target, key, queueObserver)
 }
 
 function queueObserver (observer) {
