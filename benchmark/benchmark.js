@@ -301,7 +301,7 @@ Promise.resolve()
 
 .then(() => {
   for (let nxSignal of nxSignals) {
-    nxSignal.unobserve()
+    nx.unobserve(nxSignal)
   }
 })
 .then(() => updateResult('nx', 'unobserve observer function'))
