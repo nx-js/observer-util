@@ -75,7 +75,7 @@ function isObservable (obj) {
 function get (target, key, receiver) {
   const rawTarget = proxyToRaw.get(target) || target
   if (key === '$raw') {
-    return raw
+    return rawTarget
   }
   const result = Reflect.get(target, key, receiver)
   if (typeof key === 'symbol') {
@@ -89,7 +89,7 @@ function get (target, key, receiver) {
 }
 
 function registerObserver (target, key) {
-  if (currentObserver) {
+  if (typeof currentObserver !== 'undefined') {
     store.register(target, key, currentObserver)
   }
 }

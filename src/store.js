@@ -35,11 +35,13 @@ function iterate (target, key, fn) {
 }
 
 function release (observer) {
-  for (let key of Object.getOwnPropertySymbols(observer)) {
-    const target = observer[key]
-    unregister(target, key, observer)
-    delete observer[key]
-  }
+  Object.getOwnPropertySymbols(observer).forEach(releaseKey, observer)
+}
+
+function releaseKey (key) {
+  const target = this[key]
+  unregister(target, key, this)
+  delete this[key]
 }
 
 function unregister (target, key, observer) {
@@ -54,12 +56,13 @@ function unregister (target, key, observer) {
 function toSymbol (key) {
   let symbolKey = symbolKeys[key]
   if (!symbolKey) {
-    symbolKey = Symbol()
-    symbolKeys[key] = symbolKey
+    symbolKeys[key] = symbolKey = Symbol()
   }
   return symbolKey
 }
 
 function getOwnProp (target, key) {
-  return hasOwnProperty.call(target, key) && target[key]
+  if (hasOwnProperty.call(target, key)) {
+    return target[key]
+  }
 }
