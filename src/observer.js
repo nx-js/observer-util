@@ -77,11 +77,11 @@ function get (target, key, receiver) {
   if (key === '$raw') {
     return rawTarget
   }
-  const result = Reflect.get(target, key, receiver)
   if (typeof key === 'symbol') {
-    return result
+    return Reflect.get(rawTarget, key, receiver)
   }
   registerObserver(rawTarget, key)
+  const result = Reflect.get(target, key, receiver)
   if (currentObserver && typeof result === 'object' && result) {
     return observable(result)
   }
