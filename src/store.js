@@ -41,14 +41,14 @@ function release (observer) {
 function releaseKey (key) {
   const target = this[key]
   unregister(target, key, this)
-  delete this[key]
+  this[key] = undefined
 }
 
 function unregister (target, key, observer) {
   const observers = getOwnProp(target, key)
-  if (observers === observer) {
-    delete target[key]
-  } else if (observers) {
+  if (observers === observer || observers.size <= 1) {
+    target[key] = undefined
+  } else {
     observers.delete(observer)
   }
 }

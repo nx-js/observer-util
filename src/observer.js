@@ -89,7 +89,7 @@ function get (target, key, receiver) {
 }
 
 function registerObserver (target, key) {
-  if (typeof currentObserver !== 'undefined') {
+  if (currentObserver) {
     store.register(target, key, currentObserver)
   }
 }
