@@ -6,10 +6,10 @@ const WeakMapShim = require('./WeakMap')
 const WeakSetShim = require('./WeakSet')
 
 module.exports = new Map([
-  [Map, MapShim],
-  [Set, SetShim],
-  [WeakMap, WeakMapShim],
-  [WeakSet, WeakSetShim],
-  [Date, true],
-  [RegExp, true]
+  [Map.prototype, MapShim],
+  [Set.prototype, SetShim],
+  [WeakMap.prototype, WeakMapShim],
+  [WeakSet.prototype, WeakSetShim],
+  [Date.prototype, true],
+  [RegExp.prototype, true]
 ])
