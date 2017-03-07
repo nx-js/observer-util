@@ -181,15 +181,30 @@ describe('nx-observe', () => {
         .then(() => expect(dummy).to.equal(9))
     })
 
-    it('should not observe well-known symbols', () => {
+    it('should not observe symbol keyed properties', () => {
+      const key = Symbol()
       let dummy
-      const observable = observer.observable({[Symbol.toStringTag]: 'myString'})
-      observer.observe(() => dummy = String(observable))
+      const observable = observer.observable({[key]: 'value'})
+      observer.observe(() => dummy = observable[key])
 
       return Promise.resolve()
-        .then(() => expect(dummy).to.equal('[object myString]'))
-        .then(() => observable[Symbol.toStringTag] = 'otherString')
-        .then(() => expect(dummy).to.equal('[object myString]'))
+        .then(() => expect(dummy).to.equal('value'))
+        .then(() => observable[key] = 'newValue')
+        .then(() => expect(dummy).to.equal('value'))
+    })
+
+    it('should not observe function valued properties', () => {
+      const oldFunc = () => {}
+      const newFunc = () => {}
+
+      let dummy
+      const observable = observer.observable({ prop: oldFunc })
+      observer.observe(() => dummy = observable.prop)
+
+      return Promise.resolve()
+        .then(() => expect(dummy).to.equal(oldFunc))
+        .then(() => observable.prop = newFunc)
+        .then(() => expect(dummy).to.equal(oldFunc))
     })
 
     it('should not observe set operations without a value change', () => {
@@ -582,6 +597,34 @@ describe('nx-observe', () => {
           })
           .then(() => expect(dummy).to.equal('p2p1p3'))
       })
+    })
+  })
+
+  describe('$raw', () => {
+    it('should track the newly discovered function parts', () => {
+      let condition = false
+      let counter
+
+      const observable = observer.observable({condition: false, counter: 0})
+      const signal = observer.observe(conditionalIncrement)
+
+      function conditionalIncrement () {
+        if (condition) {
+          counter = observable.counter
+        }
+      }
+
+      return Promise.resolve()
+        .then(() => expect(counter).to.be.undefined)
+        .then(() => observable.counter++)
+        .then(() => expect(counter).to.be.undefined)
+        .then(() => {
+          condition = true
+          observer.exec(signal)
+        })
+        .then(() => expect(counter).to.equal(1))
+        .then(() => observable.counter++)
+        .then(() => expect(counter).to.equal(2))
     })
   })
 
