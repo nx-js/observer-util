@@ -12,9 +12,20 @@ module.exports = function shim (target, registerObserver, queueObservers) {
 
   for (let method of all) {
     target.$raw[method] = function () {
-      native[method].apply(target, arguments)
+      return native[method].apply(target, arguments)
     }
   }
+
+  Object.defineProperty(target.$raw, 'size', {
+    get: () => Reflect.get(native, 'size', target)
+  })
+
+  Object.defineProperty(target, 'size', {
+    get: function () {
+      registerObserver(target, masterKey)
+      return Reflect.get(native, 'size', target)
+    }
+  })
 
   for (let getter of getters) {
     target[getter] = function (key) {

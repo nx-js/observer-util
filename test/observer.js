@@ -393,6 +393,19 @@ describe('nx-observe', () => {
           .then(() => expect(dummy).to.equal(0))
       })
 
+      it('should observe size mutations', () => {
+        let dummy
+        const observable = observer.observable(new Set())
+        observer.observe(() => dummy = observable.size)
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.add('value'))
+          .then(() => expect(dummy).to.equal(1))
+          .then(() => observable.delete('value'))
+          .then(() => expect(dummy).to.equal(0))
+      })
+
       it('should not observe non value changing mutations', () => {
         let dummy
         let numOfRuns = 0
@@ -419,6 +432,50 @@ describe('nx-observe', () => {
             expect(dummy).to.equal(false)
             expect(numOfRuns).to.equal(3)
           })
+      })
+
+      it('should not observe $raw mutations', () => {
+        let dummy
+        const observable = observer.observable(new Set())
+        observer.observe(() => dummy = observable.$raw.has('value'))
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(false))
+          .then(() => observable.add('value'))
+          .then(() => expect(dummy).to.equal(false))
+      })
+
+      it('should not be triggered by $raw mutations', () => {
+        let dummy
+        const observable = observer.observable(new Set())
+        observer.observe(() => dummy = observable.has('value'))
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(false))
+          .then(() => observable.$raw.add('value'))
+          .then(() => expect(dummy).to.equal(false))
+      })
+
+      it('should not observe $raw size mutations', () => {
+        let dummy
+        const observable = observer.observable(new Set())
+        observer.observe(() => dummy = observable.$raw.size)
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.add('value'))
+          .then(() => expect(dummy).to.equal(0))
+      })
+
+      it('should not be triggered by $raw size mutations', () => {
+        let dummy
+        const observable = observer.observable(new Set())
+        observer.observe(() => dummy = observable.size)
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.$raw.add('value'))
+          .then(() => expect(dummy).to.equal(0))
       })
     })
 
@@ -481,6 +538,19 @@ describe('nx-observe', () => {
           .then(() => expect(dummy).to.equal(undefined))
       })
 
+      it('should observe size mutations', () => {
+        let dummy
+        const observable = observer.observable(new Map())
+        observer.observe(() => dummy = observable.size)
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.set('key', 'value'))
+          .then(() => expect(dummy).to.equal(1))
+          .then(() => observable.delete('key'))
+          .then(() => expect(dummy).to.equal(0))
+      })
+
       it('should observe iteration', () => {
         let dummy
         const observable = observer.observable(new Map())
@@ -529,6 +599,50 @@ describe('nx-observe', () => {
             expect(dummy).to.equal(undefined)
             expect(numOfRuns).to.equal(3)
           })
+      })
+
+      it('should not observe $raw mutations', () => {
+        let dummy
+        const observable = observer.observable(new Map())
+        observer.observe(() => dummy = observable.$raw.get('key'))
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(undefined))
+          .then(() => observable.set('key', 'value'))
+          .then(() => expect(dummy).to.equal(undefined))
+      })
+
+      it('should not be triggered by $raw mutations', () => {
+        let dummy
+        const observable = observer.observable(new Map())
+        observer.observe(() => dummy = observable.get('key'))
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(undefined))
+          .then(() => observable.$raw.set('key', 'value'))
+          .then(() => expect(dummy).to.equal(undefined))
+      })
+
+      it('should not observe $raw size mutations', () => {
+        let dummy
+        const observable = observer.observable(new Map())
+        observer.observe(() => dummy = observable.$raw.size)
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.set('key', 'value'))
+          .then(() => expect(dummy).to.equal(0))
+      })
+
+      it('should not be triggered by $raw size mutations', () => {
+        let dummy
+        const observable = observer.observable(new Map())
+        observer.observe(() => dummy = observable.size)
+
+        return Promise.resolve()
+          .then(() => expect(dummy).to.equal(0))
+          .then(() => observable.$raw.set('key', 'value'))
+          .then(() => expect(dummy).to.equal(0))
       })
     })
 
