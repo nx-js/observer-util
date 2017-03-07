@@ -233,6 +233,28 @@ describe('nx-observe', () => {
         })
     })
 
+    it('should not observe $raw mutations', () => {
+      let dummy
+      const observable = observer.observable()
+      observer.observe(() => dummy = observable.$raw.prop)
+
+      return Promise.resolve()
+        .then(() => expect(dummy).to.equal(undefined))
+        .then(() => observable.prop = 'value')
+        .then(() => expect(dummy).to.equal(undefined))
+    })
+
+    it('should not be triggered by $raw mutations', () => {
+      let dummy
+      const observable = observer.observable()
+      observer.observe(() => dummy = observable.prop)
+
+      return Promise.resolve()
+        .then(() => expect(dummy).to.equal(undefined))
+        .then(() => observable.$raw.prop = 'value')
+        .then(() => expect(dummy).to.equal(undefined))
+    })
+
     it('should run synchronously after registration', () => {
       let dummy
       const observable = observer.observable({prop: 'prop'})
