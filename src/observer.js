@@ -100,13 +100,14 @@ function ownKeys (target) {
 }
 
 function set (target, key, value, receiver) {
+  // why is the old value not a proxy
   const oldValue = Reflect.get(target, key, receiver)
-  if (typeof key !== 'symbol' && (key === 'length' || value !== oldValue)) {
-    queueObservers(target, key)
-    queueObservers(target, enumerate)
-  }
   if (typeof value === 'object' && value) {
     value = getOwnProp(value, raw) || value
+  }
+  if (getOwnProp(receiver, raw) === target && typeof key !== 'symbol' && (key === 'length' || value !== oldValue)) {
+    queueObservers(target, key)
+    queueObservers(target, enumerate)
   }
   return Reflect.set(target, key, value, receiver)
 }
