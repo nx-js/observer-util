@@ -6,7 +6,7 @@ module.exports = {
   release
 }
 
-const getOwnProp = require('./getOwnProp')
+const hasOwnProp = Object.prototype.hasOwnProperty
 const symbolKeys = Object.create(null)
 
 function register (target, key, observer) {
@@ -59,4 +59,8 @@ function toSymbol (key) {
     symbolKeys[key] = symbolKey = Symbol()
   }
   return symbolKey
+}
+
+function getOwnProp (obj, key) {
+  return (hasOwnProp.call(obj, key) && obj[key])
 }

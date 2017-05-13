@@ -1,7 +1,7 @@
 'use strict'
 
 const native = Map.prototype
-const masterKey = Symbol('Map master key')
+const ITERATE = Symbol('iterate map')
 
 const getters = ['has', 'get']
 const iterators = ['forEach', 'keys', 'values', 'entries', Symbol.iterator]
@@ -22,7 +22,7 @@ module.exports = function shim (target, registerObserver, queueObservers) {
 
   Object.defineProperty(target, 'size', {
     get: function () {
-      registerObserver(target, masterKey)
+      registerObserver(target, ITERATE)
       return Reflect.get(native, 'size', target)
     }
   })
@@ -36,7 +36,7 @@ module.exports = function shim (target, registerObserver, queueObservers) {
 
   for (let iterator of iterators) {
     target[iterator] = function () {
-      registerObserver(this, masterKey)
+      registerObserver(this, ITERATE)
       return native[iterator].apply(this, arguments)
     }
   }
@@ -44,7 +44,7 @@ module.exports = function shim (target, registerObserver, queueObservers) {
   target.set = function (key, value) {
     if (this.get(key) !== value) {
       queueObservers(this, key)
-      queueObservers(this, masterKey)
+      queueObservers(this, ITERATE)
     }
     return native.set.apply(this, arguments)
   }
@@ -52,14 +52,14 @@ module.exports = function shim (target, registerObserver, queueObservers) {
   target.delete = function (key) {
     if (this.has(key)) {
       queueObservers(this, key)
-      queueObservers(this, masterKey)
+      queueObservers(this, ITERATE)
     }
     return native.delete.apply(this, arguments)
   }
 
   target.clear = function () {
     if (this.size) {
-      queueObservers(this, masterKey)
+      queueObservers(this, ITERATE)
     }
     return native.clear.apply(this, arguments)
   }

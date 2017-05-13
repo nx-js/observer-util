@@ -1,7 +1,7 @@
 'use strict'
 
 const native = Set.prototype
-const masterValue = Symbol('Set master value')
+const ITERATE = Symbol('iterate set')
 
 const getters = ['has']
 const iterators = ['forEach', 'keys', 'values', 'entries', Symbol.iterator]
@@ -22,7 +22,7 @@ module.exports = function shim (target, registerObserver, queueObservers) {
 
   Object.defineProperty(target, 'size', {
     get: function () {
-      registerObserver(target, masterValue)
+      registerObserver(target, ITERATE)
       return Reflect.get(native, 'size', target)
     }
   })
@@ -36,7 +36,7 @@ module.exports = function shim (target, registerObserver, queueObservers) {
 
   for (let iterator of iterators) {
     target[iterator] = function () {
-      registerObserver(this, masterValue)
+      registerObserver(this, ITERATE)
       return native[iterator].apply(this, arguments)
     }
   }
@@ -44,7 +44,7 @@ module.exports = function shim (target, registerObserver, queueObservers) {
   target.add = function (value) {
     if (!this.has(value)) {
       queueObservers(this, value)
-      queueObservers(this, masterValue)
+      queueObservers(this, ITERATE)
     }
     return native.add.apply(this, arguments)
   }
@@ -52,14 +52,14 @@ module.exports = function shim (target, registerObserver, queueObservers) {
   target.delete = function (value) {
     if (this.has(value)) {
       queueObservers(this, value)
-      queueObservers(this, masterValue)
+      queueObservers(this, ITERATE)
     }
     return native.delete.apply(this, arguments)
   }
 
   target.clear = function () {
     if (this.size) {
-      queueObservers(this, masterValue)
+      queueObservers(this, ITERATE)
     }
     return native.clear.apply(this, arguments)
   }

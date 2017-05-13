@@ -3,24 +3,21 @@
 const nextTick = require('./nextTick')
 const builtIns = require('./builtIns')
 const store = require('./store')
-const getOwnProp = require('./getOwnProp')
 
+const ENUMERATE = Symbol('enumerate')
 const queuedObservers = new Set()
-const enumerate = Symbol('enumerate')
-const proxy = Symbol('proxy')
-const raw = Symbol('raw')
+const proxyToRaw = new WeakMap()
+const rawToProxy = new WeakMap()
 let queued = false
 let currentObserver
 const handlers = {get, ownKeys, set, deleteProperty}
 
-module.exports = {
-  observe,
-  observable,
-  isObservable,
-  unobserve,
-  unqueue,
-  exec: runObserver
-}
+exports.observe = observe
+exports.observable = observable
+exports.isObservable = isObservable
+exports.unobserve = unobserve
+exports.unqueue = unqueue
+exports.exec = runObserver
 
 function observe (observer) {
   runObserver(observer)
@@ -42,13 +39,16 @@ function observable (obj) {
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object or undefined')
   }
-  return getOwnProp(obj, proxy) || toObservable(obj)
+  if (proxyToRaw.has(obj)) {
+    return obj
+  }
+  return rawToProxy.get(obj) || toObservable(obj)
 }
 
 function toObservable (obj) {
   const observable = createObservable(obj)
-  obj[proxy] = observable
-  obj[raw] = obj
+  proxyToRaw.set(observable, obj)
+  rawToProxy.set(obj, observable)
   return observable
 }
 
@@ -67,47 +67,43 @@ function isObservable (obj) {
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object')
   }
-  return (getOwnProp(obj, proxy) === obj)
+  return proxyToRaw.has(obj)
 }
 
 function get (target, key, receiver) {
   if (key === '$raw') {
-    return getOwnProp(target, raw)
+    return proxyToRaw.get(target) || target
   }
   const result = Reflect.get(target, key, receiver)
   if (typeof key === 'symbol' || typeof result === 'function') {
     return result
   }
   registerObserver(target, key)
-  const isObject = (typeof result === 'object' && result)
-  const observable = isObject && getOwnProp(result, proxy)
-  if (currentObserver && isObject) {
-    return observable || toObservable(result)
+  if (currentObserver && result && typeof result === 'object') {
+    return observable(result)
   }
-  return observable || result
+  return rawToProxy.get(result) || result
 }
 
 function registerObserver (target, key) {
   if (currentObserver) {
-    const rawTarget = getOwnProp(target, raw)
     store.register(target, key, currentObserver)
   }
 }
 
 function ownKeys (target) {
-  registerObserver(target, enumerate)
+  registerObserver(target, ENUMERATE)
   return Reflect.ownKeys(target)
 }
 
 function set (target, key, value, receiver) {
-  // why is the old value not a proxy
-  const oldValue = Reflect.get(target, key, receiver)
   if (typeof value === 'object' && value) {
-    value = getOwnProp(value, raw) || value
+    value = proxyToRaw.get(value) || value
   }
-  if (getOwnProp(receiver, raw) === target && typeof key !== 'symbol' && (key === 'length' || value !== oldValue)) {
+  const oldValue = Reflect.get(target, key, receiver)
+  if (typeof key !== 'symbol' && (key === 'length' || value !== oldValue)) {
     queueObservers(target, key)
-    queueObservers(target, enumerate)
+    queueObservers(target, ENUMERATE)
   }
   return Reflect.set(target, key, value, receiver)
 }
@@ -115,7 +111,7 @@ function set (target, key, value, receiver) {
 function deleteProperty (target, key) {
   if (typeof key !== 'symbol' && Reflect.has(target, key)) {
     queueObservers(target, key)
-    queueObservers(target, enumerate)
+    queueObservers(target, ENUMERATE)
   }
   return Reflect.deleteProperty(target, key)
 }
@@ -143,7 +139,7 @@ function runObserver (observer) {
     currentObserver = observer
     const fn = observer.fn || observer
     fn.apply(observer.ctx, observer.args)
-  } finally { // consider a catch here, finally behaves strangely and swallows things!
+  } finally {
     currentObserver = undefined
   }
 }
