@@ -6,7 +6,7 @@ const Canvas = require('canvas')
 const fs = require('fs')
 const Chart = require('nchart')
 
-const NUM_OF_RUNS = 2000
+const NUM_OF_RUNS = 10000
 
 const result = {
   vanilla: [],
