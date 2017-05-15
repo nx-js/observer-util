@@ -25,8 +25,8 @@ function observe (observer) {
 }
 
 function unobserve (observer) {
-  store.release(observer)
   queuedObservers.delete(observer)
+  observer.unobserved = true
   observer.fn = observer.ctx = observer.args = undefined
 }
 
@@ -128,7 +128,9 @@ function queueObservers (target, key) {
 }
 
 function queueObserver (observer) {
-  queuedObservers.add(observer)
+  if (!observer.unobserved) {
+    queuedObservers.add(observer)
+  }
 }
 
 function runObservers () {

@@ -2,8 +2,7 @@
 
 module.exports = {
   register,
-  iterate,
-  release
+  iterate
 }
 
 const hasOwnProp = Object.prototype.hasOwnProperty
@@ -20,7 +19,6 @@ function register (target, key, observer) {
     } else {
       target[key] = new Set().add(observers).add(observer)
     }
-    observer[key] = target
   }
 }
 
@@ -31,25 +29,6 @@ function iterate (target, key, fn) {
     observers.forEach(fn)
   } else if (observers) {
     fn(observers)
-  }
-}
-
-function release (observer) {
-  Object.getOwnPropertySymbols(observer).forEach(releaseKey, observer)
-}
-
-function releaseKey (key) {
-  const target = this[key]
-  unregister(target, key, this)
-  this[key] = undefined
-}
-
-function unregister (target, key, observer) {
-  const observers = getOwnProp(target, key)
-  if (observers === observer || observers.size <= 1) {
-    target[key] = undefined
-  } else {
-    observers.delete(observer)
   }
 }
 
