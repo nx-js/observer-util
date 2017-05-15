@@ -120,14 +120,14 @@ function deleteProperty (target, key) {
 }
 
 function queueObservers (target, key) {
-  store.iterate(target, key, queueObserver)
-}
-
-function queueObserver (observer) {
   if (!queued) {
     nextTick(runObservers)
     queued = true
   }
+  store.iterate(target, key, queueObserver)
+}
+
+function queueObserver (observer) {
   queuedObservers.add(observer)
 }
 
