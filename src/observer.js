@@ -79,7 +79,7 @@ function get (target, key, receiver) {
     return result
   }
   registerObserver(target, key)
-  if (currentObserver && result && typeof result === 'object') {
+  if (currentObserver && typeof result === 'object' && result !== null) {
     return observable(result)
   }
   return rawToProxy.get(result) || result
@@ -97,11 +97,14 @@ function ownKeys (target) {
 }
 
 function set (target, key, value, receiver) {
-  if (typeof value === 'object' && value) {
+  if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
   }
+  if (typeof key === 'symbol' || target !== proxyToRaw.get(receiver)) {
+    return Reflect.set(target, key, value, receiver)
+  }
   const oldValue = Reflect.get(target, key, receiver)
-  if (typeof key !== 'symbol' && (key === 'length' || value !== oldValue)) {
+  if (key === 'length' || value !== oldValue) {
     queueObservers(target, key)
     queueObservers(target, ENUMERATE)
   }
