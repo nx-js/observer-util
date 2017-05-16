@@ -78,9 +78,11 @@ function get (target, key, receiver) {
   if (typeof key === 'symbol' || typeof result === 'function') {
     return result
   }
-  registerObserver(target, key)
-  if (currentObserver && typeof result === 'object' && result !== null) {
-    return observable(result)
+  if (currentObserver) {
+    store.register(target, key, currentObserver)
+    if (typeof result === 'object' && result !== null) {
+      return observable(result)
+    }
   }
   return rawToProxy.get(result) || result
 }
