@@ -1,45 +1,37 @@
 'use strict'
 
 module.exports = {
-  register,
-  iterate
+  registerObservable,
+  registerObserver,
+  iterateObservers
 }
 
-const hasOwnProp = Object.prototype.hasOwnProperty
-const symbolKeys = Object.create(null)
+const observerStore = new WeakMap()
 
-function register (target, key, observer) {
-  key = toSymbol(key)
-  const observers = getOwnProp(target, key)
-  if (observers !== observer) {
-    if (!observers) {
-      target[key] = observer
-    } else if (observers instanceof Set) {
-      observers.add(observer)
+function registerObservable (target) {
+  observerStore.set(target, Object.create(null))
+}
+
+function registerObserver (target, key, observer) {
+  const observers = observerStore.get(target)
+  const observersForKey = observers[key]
+  if (observersForKey !== observer) {
+    if (!observersForKey) {
+      observers[key] = observer
+    } else if (observersForKey instanceof Set) {
+      observersForKey.add(observer)
     } else {
-      target[key] = new Set().add(observers).add(observer)
+      observers[key] = new Set().add(observersForKey).add(observer)
     }
   }
 }
 
-function iterate (target, key, fn) {
-  key = toSymbol(key)
-  const observers = getOwnProp(target, key)
-  if (observers instanceof Set) {
-    observers.forEach(fn)
-  } else if (observers) {
-    fn(observers)
+function iterateObservers (target, key, fn) {
+  const observers = observerStore.get(target)
+  const observersForKey = observers[key]
+  if (observersForKey instanceof Set) {
+    observersForKey.forEach(fn)
+  } else if (observersForKey) {
+    fn(observersForKey)
   }
-}
-
-function toSymbol (key) {
-  let symbolKey = symbolKeys[key]
-  if (!symbolKey) {
-    symbolKeys[key] = symbolKey = Symbol()
-  }
-  return symbolKey
-}
-
-function getOwnProp (obj, key) {
-  return (hasOwnProp.call(obj, key) && obj[key])
 }

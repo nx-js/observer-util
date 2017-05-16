@@ -47,6 +47,7 @@ function observable (obj) {
 
 function toObservable (obj) {
   const observable = createObservable(obj)
+  store.registerObservable(obj)
   proxyToRaw.set(observable, obj)
   rawToProxy.set(obj, observable)
   return observable
@@ -71,14 +72,15 @@ function isObservable (obj) {
 }
 
 function get (target, key, receiver) {
+  const rawTarget = proxyToRaw.get(target) || target
   if (key === '$raw') {
-    return proxyToRaw.get(target) || target
+    return rawTarget
   }
   const result = Reflect.get(target, key, receiver)
   if (typeof key === 'symbol' || typeof result === 'function') {
     return result
   }
-  registerObserver(target, key)
+  registerObserver(rawTarget, key)
   if (currentObserver && typeof result === 'object' && result !== null) {
     return observable(result)
   }
@@ -87,7 +89,7 @@ function get (target, key, receiver) {
 
 function registerObserver (target, key) {
   if (currentObserver) {
-    store.register(target, key, currentObserver)
+    store.registerObserver(target, key, currentObserver)
   }
 }
 
@@ -124,7 +126,7 @@ function queueObservers (target, key) {
     nextTick(runObservers)
     queued = true
   }
-  store.iterate(target, key, queueObserver)
+  store.iterateObservers(target, key, queueObserver)
 }
 
 function queueObserver (observer) {
