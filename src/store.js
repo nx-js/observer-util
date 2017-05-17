@@ -10,16 +10,13 @@ export function storeObserver (target, key, observer) {
   const observers = observerStore.get(target)
   const observersForKey = observers[key]
   if (observersForKey !== observer) {
-    if (!observersForKey || observersForKey[UNOBSERVED] || !observersForKey.size) {
-      observers[key] = observer
-    } else if (observersForKey instanceof Set) {
+    if (observersForKey instanceof Set && observersForKey.size > 0) {
       observersForKey.add(observer)
       observer[`_${key}_observers`] = observersForKey
+    } else if (typeof observersForKey === 'function' && !observersForKey[UNOBSERVED]) {
+      observers[key] = new Set().add(observer).add(observersForKey)
     } else {
-      observers[key] = new Set().add(observer)
-      if (!observersForKey[UNOBSERVED]) {
-        observers[key].add(observersForKey)
-      }
+      observers[key] = observer
     }
   }
 }
