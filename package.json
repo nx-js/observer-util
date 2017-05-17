@@ -2,13 +2,15 @@
   "name": "@nx-js/observer-util",
   "version": "2.0.0",
   "description": "An NX utility, responsible for powerful data observation with ES6 Proxies.",
-  "main": "src/observer.js",
+  "main": "dist/observer.js",
+  "module": "src/observer.js",
   "scripts": {
+    "build": "rollup src/observer.js -f cjs -o dist/observer.js",
     "build-benchmark-mac": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
     "build-benchmark-ubuntu": "sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++ && npm i canvas nchart mobx",
     "benchmark": "node benchmark/benchmark",
-    "test": "mocha test",
-    "lint": "standard"
+    "test": "npm run build && mocha test",
+    "lint": "standard src/* test/*"
   },
   "author": {
     "name": "Miklos Bertalan",
@@ -37,6 +39,7 @@
     "chai": "3.5.0",
     "mocha": "2.5.3",
     "pre-push": "0.1.1",
+    "rollup": "^0.41.6",
     "standard": "7.1.2"
   },
   "engines": {

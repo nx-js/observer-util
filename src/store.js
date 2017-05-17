@@ -1,18 +1,10 @@
-'use strict'
-
-module.exports = {
-  registerObservable,
-  registerObserver,
-  iterateObservers
-}
-
 const observerStore = new WeakMap()
 
-function registerObservable (target) {
+export function storeObservable (target) {
   observerStore.set(target, Object.create(null))
 }
 
-function registerObserver (target, key, observer) {
+export function storeObserver (target, key, observer) {
   const observers = observerStore.get(target)
   const observersForKey = observers[key]
   if (observersForKey !== observer) {
@@ -26,7 +18,7 @@ function registerObserver (target, key, observer) {
   }
 }
 
-function iterateObservers (target, key, fn) {
+export function iterateObservers (target, key, fn) {
   const observers = observerStore.get(target)
   const observersForKey = observers[key]
   if (observersForKey instanceof Set) {

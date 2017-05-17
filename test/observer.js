@@ -1,7 +1,7 @@
 'use strict'
 
 const expect = require('chai').expect
-const observer = require('../src/observer')
+const observer = require('../dist/observer')
 
 describe('nx-observe', () => {
   describe('observable', () => {
@@ -333,50 +333,12 @@ describe('nx-observe', () => {
         })
     })
 
-    it('should set the observer "this" to the passed "this" context', () => {
+    it('should return the passed function', () => {
       let dummy
       const observable = observer.observable({counter: 0})
-      observer.observe({
-        fn: setDummy,
-        ctx: observable
-      })
-
-      function setDummy () {
-        dummy = this.counter
-      }
-
-      return Promise.resolve()
-        .then(() => observable.counter = 2)
-        .then(() => expect(dummy).to.equal(2))
-        .then(() => observable.counter = undefined)
-        .then(() => expect(dummy).to.equal(undefined))
-    })
-
-    it('should accept a list of arguments and set the observer arguments to them', () => {
-      let dummy
-      const observable1 = observer.observable({counter: 0})
-      const observable2 = observer.observable({counter: 0})
-      observer.observe({
-        fn: setDummy,
-        args: [observable1, observable2]
-      })
-
-      function setDummy (state1, state2) {
-        dummy = state1.counter + state2.counter
-      }
-
-      return Promise.resolve()
-        .then(() => observable1.counter = 2)
-        .then(() => expect(dummy).to.equal(2))
-        .then(() => observable2.counter = 1)
-        .then(() => expect(dummy).to.equal(3))
-    })
-
-    it('should return a unique signal', () => {
-      let dummy
-      const observable = observer.observable({counter: 0})
-      const signal = observer.observe(() => dummy = observable.counter)
-      // expect(signal).to.be.an('object') or a function
+      const fn = () => dummy = observable.counter
+      const signal = observer.observe(fn)
+      expect(signal).to.equal(fn)
     })
 
     describe('Set', () => {

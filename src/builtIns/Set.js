@@ -1,13 +1,10 @@
-'use strict'
-
 const native = Set.prototype
 const ITERATE = Symbol('iterate set')
-
 const getters = ['has']
 const iterators = ['forEach', 'keys', 'values', 'entries', Symbol.iterator]
 const all = ['add', 'delete', 'clear'].concat(getters, iterators)
 
-module.exports = function shim (target, registerObserver, queueObservers) {
+export default function shim (target, registerObserver, queueObservers) {
   target.$raw = {}
 
   for (let method of all) {

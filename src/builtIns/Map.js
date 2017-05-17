@@ -1,13 +1,10 @@
-'use strict'
-
 const native = Map.prototype
 const ITERATE = Symbol('iterate map')
-
 const getters = ['has', 'get']
 const iterators = ['forEach', 'keys', 'values', 'entries', Symbol.iterator]
 const all = ['set', 'delete', 'clear'].concat(getters, iterators)
 
-module.exports = function shim (target, registerObserver, queueObservers) {
+export default function shim (target, registerObserver, queueObservers) {
   target.$raw = {}
 
   for (let method of all) {

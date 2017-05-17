@@ -1,11 +1,8 @@
-'use strict'
-
 const native = WeakMap.prototype
-
 const getters = ['has', 'get']
 const all = ['set', 'delete'].concat(getters)
 
-module.exports = function shim (target, registerObserver, queueObservers) {
+export default function shim (target, registerObserver, queueObservers) {
   target.$raw = {}
 
   for (let method of all) {

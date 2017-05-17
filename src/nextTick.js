@@ -1,15 +1,13 @@
-'use strict'
-
-let promise = Promise.resolve()
+const promise = Promise.resolve()
 let mutateWithTask
 let currTask
 
-module.exports = function nextTick (task) {
+export default function nextTick (task) {
   currTask = task
   if (mutateWithTask) {
     mutateWithTask()
   } else {
-    promise = promise.then(task)
+    promise.then(task)
   }
 }
 

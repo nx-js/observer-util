@@ -1,11 +1,9 @@
-'use strict'
+import MapShim from './Map'
+import SetShim from './Set'
+import WeakMapShim from './WeakMap'
+import WeakSetShim from './WeakSet'
 
-const MapShim = require('./Map')
-const SetShim = require('./Set')
-const WeakMapShim = require('./WeakMap')
-const WeakSetShim = require('./WeakSet')
-
-module.exports = new Map([
+export default new Map([
   [Map.prototype, MapShim],
   [Set.prototype, SetShim],
   [WeakMap.prototype, WeakMapShim],

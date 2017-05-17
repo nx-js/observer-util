@@ -1,8 +1,6 @@
-'use strict'
-
-const nextTick = require('./nextTick')
-const builtIns = require('./builtIns')
-const store = require('./store')
+import nextTick from './nextTick'
+import builtIns from './builtIns/index'
+import { storeObservable, storeObserver, iterateObservers } from './store'
 
 const UNOBSERVED = Symbol('unobserved')
 const ENUMERATE = Symbol('enumerate')
@@ -13,32 +11,36 @@ let queued = false
 let currentObserver
 const handlers = {get, ownKeys, set, deleteProperty}
 
-exports.observe = observe
-exports.observable = observable
-exports.isObservable = isObservable
-exports.unobserve = unobserve
-exports.unqueue = unqueue
-exports.exec = runObserver
-
-function observe (observer) {
+export function observe (observer) {
   if (typeof observer !== 'function') {
-    throw new Error('Observer must be a function.')
+    throw new TypeError('Observer must be a function.')
   }
   runObserver(observer)
   return observer
 }
 
-function unobserve (observer) {
+export function unobserve (observer) {
   queuedObservers.delete(observer)
   observer[UNOBSERVED] = true
-  // needs cleanup later this way!, observer arguments and context can't be wiped
+  // needs cleanup later this way! observer arguments and context can't be wiped
 }
 
-function unqueue (observer) {
+export function unqueue (observer) {
   queuedObservers.delete(observer)
 }
 
-function observable (obj) {
+export function exec (observer) {
+  runObserver(observer)
+}
+
+export function isObservable (obj) {
+  if (typeof obj !== 'object') {
+    throw new TypeError('first argument must be an object')
+  }
+  return proxyToRaw.has(obj)
+}
+
+export function observable (obj) {
   obj = obj || {}
   if (typeof obj !== 'object') {
     throw new TypeError('first argument must be an object or undefined')
@@ -51,7 +53,7 @@ function observable (obj) {
 
 function toObservable (obj) {
   const observable = createObservable(obj)
-  store.registerObservable(obj)
+  storeObservable(obj)
   proxyToRaw.set(observable, obj)
   rawToProxy.set(obj, observable)
   return observable
@@ -66,13 +68,6 @@ function createObservable (obj) {
     return builtIn(obj, registerObserver, queueObservers)
   }
   return obj
-}
-
-function isObservable (obj) {
-  if (typeof obj !== 'object') {
-    throw new TypeError('first argument must be an object')
-  }
-  return proxyToRaw.has(obj)
 }
 
 function get (target, key, receiver) {
@@ -93,7 +88,7 @@ function get (target, key, receiver) {
 
 function registerObserver (target, key) {
   if (currentObserver) {
-    store.registerObserver(target, key, currentObserver)
+    storeObserver(target, key, currentObserver)
   }
 }
 
@@ -130,7 +125,7 @@ function queueObservers (target, key) {
     nextTick(runObservers)
     queued = true
   }
-  store.iterateObservers(target, key, queueObserver)
+  iterateObservers(target, key, queueObserver)
 }
 
 function queueObserver (observer) {
