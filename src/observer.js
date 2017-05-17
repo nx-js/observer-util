@@ -1,15 +1,15 @@
 import nextTick from './nextTick'
 import builtIns from './builtIns/index'
-import { storeObservable, storeObserver, iterateObservers } from './store'
+import { storeObservable, storeObserver, iterateObservers, releaseObserver } from './store'
+import { UNOBSERVED } from './internals'
 
-const UNOBSERVED = Symbol('unobserved')
 const ENUMERATE = Symbol('enumerate')
 const queuedObservers = new Set()
 const proxyToRaw = new WeakMap()
 const rawToProxy = new WeakMap()
 let queued = false
 let currentObserver
-const handlers = {get, ownKeys, set, deleteProperty}
+const handlers = { get, ownKeys, set, deleteProperty }
 
 export function observe (observer) {
   if (typeof observer !== 'function') {
@@ -22,7 +22,7 @@ export function observe (observer) {
 export function unobserve (observer) {
   queuedObservers.delete(observer)
   observer[UNOBSERVED] = true
-  // needs cleanup later this way! observer arguments and context can't be wiped
+  releaseObserver(observer)
 }
 
 export function unqueue (observer) {

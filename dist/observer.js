@@ -248,6 +248,8 @@ var builtIns = new Map([
   [RegExp.prototype, true]
 ]);
 
+const UNOBSERVED = Symbol('unobserved');
+
 const observerStore = new WeakMap();
 
 function storeObservable (target) {
@@ -258,12 +260,16 @@ function storeObserver (target, key, observer) {
   const observers = observerStore.get(target);
   const observersForKey = observers[key];
   if (observersForKey !== observer) {
-    if (!observersForKey) {
+    if (!observersForKey || observersForKey[UNOBSERVED] || !observersForKey.size) {
       observers[key] = observer;
     } else if (observersForKey instanceof Set) {
       observersForKey.add(observer);
+      observer[`_${key}_observers`] = observersForKey;
     } else {
-      observers[key] = new Set().add(observersForKey).add(observer);
+      observers[key] = new Set().add(observer);
+      if (!observersForKey[UNOBSERVED]) {
+        observers[key].add(observersForKey);
+      }
     }
   }
 }
@@ -278,14 +284,19 @@ function iterateObservers (target, key, fn) {
   }
 }
 
-const UNOBSERVED = Symbol('unobserved');
+function releaseObserver (observer) {
+  for (let key in observer) {
+    observer[key].delete(observer);
+  }
+}
+
 const ENUMERATE = Symbol('enumerate');
 const queuedObservers = new Set();
 const proxyToRaw = new WeakMap();
 const rawToProxy = new WeakMap();
 let queued = false;
 let currentObserver;
-const handlers = {get, ownKeys, set, deleteProperty};
+const handlers = { get, ownKeys, set, deleteProperty };
 
 function observe (observer) {
   if (typeof observer !== 'function') {
@@ -298,7 +309,7 @@ function observe (observer) {
 function unobserve (observer) {
   queuedObservers.delete(observer);
   observer[UNOBSERVED] = true;
-  // needs cleanup later this way! observer arguments and context can't be wiped
+  releaseObserver(observer);
 }
 
 function unqueue (observer) {
