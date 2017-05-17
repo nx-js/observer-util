@@ -4,6 +4,7 @@ const nextTick = require('./nextTick')
 const builtIns = require('./builtIns')
 const store = require('./store')
 
+const UNOBSERVED = Symbol('unobserved')
 const ENUMERATE = Symbol('enumerate')
 const queuedObservers = new Set()
 const proxyToRaw = new WeakMap()
@@ -20,14 +21,17 @@ exports.unqueue = unqueue
 exports.exec = runObserver
 
 function observe (observer) {
+  if (typeof observer !== 'function') {
+    throw new Error('Observer must be a function.')
+  }
   runObserver(observer)
   return observer
 }
 
 function unobserve (observer) {
   queuedObservers.delete(observer)
-  observer.unobserved = true
-  observer.fn = observer.ctx = observer.args = undefined
+  observer[UNOBSERVED] = true
+  // needs cleanup later this way!, observer arguments and context can't be wiped
 }
 
 function unqueue (observer) {
@@ -130,7 +134,7 @@ function queueObservers (target, key) {
 }
 
 function queueObserver (observer) {
-  if (!observer.unobserved) {
+  if (!observer[UNOBSERVED]) {
     queuedObservers.add(observer)
   }
 }
@@ -144,8 +148,7 @@ function runObservers () {
 function runObserver (observer) {
   try {
     currentObserver = observer
-    const fn = observer.fn || observer
-    fn.apply(observer.ctx, observer.args)
+    observer()
   } finally {
     currentObserver = undefined
   }
