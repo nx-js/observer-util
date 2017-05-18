@@ -104,8 +104,7 @@ function set (target, key, value, receiver) {
   if (typeof key === 'symbol' || target !== proxyToRaw.get(receiver)) {
     return Reflect.set(target, key, value, receiver)
   }
-  const oldValue = Reflect.get(target, key, receiver)
-  if (key === 'length' || value !== oldValue) {
+  if (key === 'length' || value !== target[key]) {
     queueObservers(target, key)
     queueObservers(target, ENUMERATE)
   }
@@ -113,7 +112,7 @@ function set (target, key, value, receiver) {
 }
 
 function deleteProperty (target, key) {
-  if (typeof key !== 'symbol' && Reflect.has(target, key)) {
+  if (typeof key !== 'symbol' && (key in target)) {
     queueObservers(target, key)
     queueObservers(target, ENUMERATE)
   }
