@@ -10,7 +10,7 @@ export function storeObserver (target, key, observer) {
   const observers = observerStore.get(target)
   const observersForKey = observers[key]
   if (observersForKey !== observer) {
-    if (observersForKey instanceof Set && observersForKey.size > 0) {
+    if (typeof observersForKey === 'object' && observersForKey.size > 0) {
       observersForKey.add(observer)
       observer[`_${key}_observers`] = observersForKey
     } else if (typeof observersForKey === 'function' && !observersForKey[UNOBSERVED]) {
