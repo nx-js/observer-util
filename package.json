@@ -9,7 +9,7 @@
     "build-benchmark-mac": "brew install pkg-config cairo pango libpng jpeg giflib && npm i canvas nchart mobx",
     "build-benchmark-ubuntu": "sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++ && npm i canvas nchart mobx",
     "benchmark": "node benchmark/benchmark",
-    "test": "npm run build && mocha test",
+    "test": "nyc --reporter=lcov --reporter=text mocha test/*",
     "lint": "standard src/* test/*"
   },
   "author": {
@@ -38,7 +38,9 @@
   "devDependencies": {
     "chai": "3.5.0",
     "mocha": "2.5.3",
+    "nyc": "^10.3.2",
     "pre-push": "0.1.1",
+    "reify": "^0.11.0",
     "rollup": "^0.41.6",
     "standard": "7.1.2"
   },
@@ -56,6 +58,7 @@
   },
   "pre-push": [
     "lint",
-    "test"
+    "test",
+    "build"
   ]
 }
