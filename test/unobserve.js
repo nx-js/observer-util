@@ -42,6 +42,22 @@ describe('unobserve', () => {
       .then(() => expect(numOfRuns).to.equal(2))
   })
 
+  it('should unobserve multiple observers for the same target and key', () => {
+    let dummy
+    const observable = observer.observable({ ctr: 0 })
+
+    const signal1 = observer.observe(() => dummy = observable.ctr)
+    const signal2 = observer.observe(() => dummy = observable.ctr)
+    const signal3 = observer.observe(() => dummy = observable.ctr)
+    observer.unobserve(signal1)
+    observer.unobserve(signal2)
+    observer.unobserve(signal3)
+
+    return Promise.resolve()
+      .then(() => observable.ctr++)
+      .then(() => expect(dummy).to.equal(0))
+  })
+
   it('should unobserve even if the function is registered for the stack', () => {
     let dummy
     const observable = observer.observable({prop: 0})
