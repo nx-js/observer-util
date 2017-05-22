@@ -21,6 +21,35 @@ describe('observe', () => {
       .then(() => expect(dummy).to.equal(7))
   })
 
+  it('should observe multiple properties', () => {
+    let dummy
+    const observable = observer.observable({ctr1: 0, ctr2: 0, ctr3: 0})
+    observer.observe(() => dummy = observable.ctr1 + observable.ctr2 + observable.ctr3)
+
+    return Promise.resolve()
+      .then(() => expect(dummy).to.equal(0))
+      .then(() => observable.ctr1 = observable.ctr2 = observable.ctr3 = 7)
+      .then(() => expect(dummy).to.equal(21))
+  })
+
+  it('should handle multiple observers', () => {
+    let dummy1, dummy2
+    const observable = observer.observable({ctr: 0})
+    observer.observe(() => dummy1 = observable.ctr)
+    observer.observe(() => dummy2 = observable.ctr)
+
+    return Promise.resolve()
+      .then(() => {
+        expect(dummy1).to.equal(0)
+        expect(dummy2).to.equal(0)
+      })
+      .then(() => observable.ctr = 2)
+      .then(() => {
+        expect(dummy1).to.equal(2)
+        expect(dummy2).to.equal(2)
+      })
+  })
+
   it('should observe nested properties', () => {
     let dummy
     const observable = observer.observable({nested: {counter: 0}})
@@ -272,25 +301,23 @@ describe('observe', () => {
     expect(signal).to.equal(fn)
   })
 
-  describe('execution order', () => {
-    it('should be first-tigger order', () => {
-      let dummy = ''
-      const observable = observer.observable({prop1: 'prop1', prop2: 'prop2', prop3: 'prop3'})
+  it('should execute in first-tigger order', () => {
+    let dummy = ''
+    const observable = observer.observable({prop1: 'prop1', prop2: 'prop2', prop3: 'prop3'})
 
-      observer.observe(() => dummy += observable.prop1)
-      observer.observe(() => dummy += observable.prop2)
-      observer.observe(() => dummy += observable.prop3)
+    observer.observe(() => dummy += observable.prop1)
+    observer.observe(() => dummy += observable.prop2)
+    observer.observe(() => dummy += observable.prop3)
 
-      return Promise.resolve()
-        .then(() => expect(dummy).to.equal('prop1prop2prop3'))
-        .then(() => {
-          dummy = ''
-          observable.prop2 = 'p'
-          observable.prop1 = 'p1'
-          observable.prop3 = 'p3'
-          observable.prop2 = 'p2'
-        })
-        .then(() => expect(dummy).to.equal('p2p1p3'))
-    })
+    return Promise.resolve()
+      .then(() => expect(dummy).to.equal('prop1prop2prop3'))
+      .then(() => {
+        dummy = ''
+        observable.prop2 = 'p'
+        observable.prop1 = 'p1'
+        observable.prop3 = 'p3'
+        observable.prop2 = 'p2'
+      })
+      .then(() => expect(dummy).to.equal('p2p1p3'))
   })
 })

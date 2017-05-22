@@ -18,13 +18,27 @@ describe('unobserve', () => {
     return Promise.resolve()
       .then(() => observable.prop = 'Hello')
       .then(() => observer.unobserve(signal))
-      .then(() => {
-        expect(signal.fn).to.be.undefined
-        expect(signal.context).to.be.undefined
-        expect(signal.args).to.be.undefined
-      })
       .then(() => observable.prop = 'World')
       .then(() => observable.prop = '!')
+      .then(() => expect(numOfRuns).to.equal(2))
+  })
+
+  it('should unobserve when the same key is used multiple times', () => {
+    let dummy
+    const observable = observer.observable({prop: { prop: '' } })
+
+    let numOfRuns = 0
+    function test() {
+      dummy = observable.prop.prop
+      numOfRuns++
+    }
+    const signal = observer.observe(test)
+
+    return Promise.resolve()
+      .then(() => observable.prop.prop = 'Hello')
+      .then(() => observer.unobserve(signal))
+      .then(() => observable.prop.prop = 'World')
+      .then(() => observable.prop.prop = '!')
       .then(() => expect(numOfRuns).to.equal(2))
   })
 
