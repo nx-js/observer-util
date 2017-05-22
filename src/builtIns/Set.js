@@ -1,65 +1,16 @@
-const native = Set.prototype
-const ITERATE = Symbol('iterate set')
-const getters = ['has']
-const iterators = ['forEach', 'keys', 'values', 'entries', Symbol.iterator]
-const all = ['add', 'delete', 'clear'].concat(getters, iterators)
+import { has, add, deleteFn, clear,
+  forEach, keys, values, entries, iterator, getSize, setSize } from './collections'
 
-export default function shim (target, registerObserver, queueObservers) {
-  target.$raw = {}
-
-  for (let method of all) {
-    target.$raw[method] = function () {
-      return native[method].apply(target, arguments)
-    }
-  }
-
-  Object.defineProperty(target.$raw, 'size', {
-    get: () => Reflect.get(native, 'size', target)
-  })
-
-  Object.defineProperty(target, 'size', {
-    get: function () {
-      registerObserver(target, ITERATE)
-      return Reflect.get(native, 'size', target)
-    }
-  })
-
-  for (let getter of getters) {
-    target[getter] = function (value) {
-      registerObserver(this, value)
-      return native[getter].apply(this, arguments)
-    }
-  }
-
-  for (let iterator of iterators) {
-    target[iterator] = function () {
-      registerObserver(this, ITERATE)
-      return native[iterator].apply(this, arguments)
-    }
-  }
-
-  target.add = function (value) {
-    if (!this.has(value)) {
-      queueObservers(this, value)
-      queueObservers(this, ITERATE)
-    }
-    return native.add.apply(this, arguments)
-  }
-
-  target.delete = function (value) {
-    if (this.has(value)) {
-      queueObservers(this, value)
-      queueObservers(this, ITERATE)
-    }
-    return native.delete.apply(this, arguments)
-  }
-
-  target.clear = function () {
-    if (this.size) {
-      queueObservers(this, ITERATE)
-    }
-    return native.clear.apply(this, arguments)
-  }
-
+export default function shim (target) {
+  target.has = has
+  target.add = add
+  target.delete = deleteFn
+  target.clear = clear
+  target.forEach = forEach
+  target.keys = keys
+  target.values = values
+  target.entries = entries
+  target[Symbol.iterator] = iterator
+  Object.defineProperty(target, 'size', { get: getSize, set: setSize })
   return target
 }

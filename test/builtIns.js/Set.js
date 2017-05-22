@@ -1,7 +1,7 @@
 require('reify')
 
 const expect = require('chai').expect
-const observer = require('../../src/observer')
+const observer = require('../../src')
 
 describe('Set', () => {
   it('should observe mutations', () => {
@@ -22,9 +22,7 @@ describe('Set', () => {
     const observable = observer.observable(new Set())
     observer.observe(() => {
       dummy = 0
-      for (let num of observable) {
-        dummy += num
-      }
+      observable.forEach(num => dummy += num)
     })
 
     return Promise.resolve()

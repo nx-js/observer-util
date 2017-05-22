@@ -1,12 +1,10 @@
 import nextTick from './nextTick'
 import builtIns from './builtIns/index'
 import { storeObservable, storeObserver, iterateObservers, releaseObserver } from './store'
-import { UNOBSERVED } from './internals'
+import { proxyToRaw, rawToProxy, UNOBSERVED } from './internals'
 
 const ENUMERATE = Symbol('enumerate')
 const queuedObservers = new Set()
-const proxyToRaw = new WeakMap()
-const rawToProxy = new WeakMap()
 let queued = false
 let currentObserver
 const handlers = { get, ownKeys, set, deleteProperty }
@@ -65,7 +63,8 @@ function createObservable (obj) {
     return new Proxy(obj, handlers)
   }
   if (typeof builtIn === 'function') {
-    return builtIn(obj, registerObserver, queueObservers)
+    obj = builtIn(obj, registerObserver, queueObservers)
+    return new Proxy(obj, handlers)
   }
   return obj
 }
@@ -86,7 +85,7 @@ function get (target, key, receiver) {
   return rawToProxy.get(result) || result
 }
 
-function registerObserver (target, key) {
+export function registerObserver (target, key) {
   if (currentObserver) {
     storeObserver(target, key, currentObserver)
   }
@@ -119,7 +118,7 @@ function deleteProperty (target, key) {
   return Reflect.deleteProperty(target, key)
 }
 
-function queueObservers (target, key) {
+export function queueObservers (target, key) {
   if (!queued) {
     nextTick(runObservers)
     queued = true

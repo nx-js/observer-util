@@ -1,7 +1,7 @@
 require('reify')
 
 const expect = require('chai').expect
-const observer = require('../../src/observer')
+const observer = require('../../src')
 
 describe('Map', () => {
   it('should observe mutations', () => {

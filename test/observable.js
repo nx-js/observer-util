@@ -1,7 +1,7 @@
 require('reify')
 
 const expect = require('chai').expect
-const observer = require('../src/observer')
+const observer = require('../src')
 
 describe('observable', () => {
   it('should throw TypeError on invalid arguments', () => {
