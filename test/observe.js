@@ -301,6 +301,41 @@ describe('observe', () => {
     expect(signal).to.equal(fn)
   })
 
+  it('should simply run the function on multiple observation', () => {
+    let numOfRuns = 0
+    const observable = observer.observable({counter: 0})
+
+    function test () {
+      const value = observable.counter
+      numOfRuns++
+    }
+    const signal1 = observer.observe(test)
+    const signal2 = observer.observe(test)
+    expect(signal1).to.equal(signal2)
+
+    expect(numOfRuns).to.equal(2)
+    return Promise.resolve()
+      .then(() => observable.counter++)
+      .then(() => expect(numOfRuns).to.equal(3))
+  })
+
+  it('should be able to re-observe unobserved functions', () => {
+    let dummy = 0
+    const observable = observer.observable({counter: 0})
+    const signal = observer.observe(() => dummy = observable.counter)
+
+    return Promise.resolve()
+      .then(() => observable.counter++)
+      .then(() => expect(dummy).to.equal(1))
+      .then(() => observer.unobserve(signal))
+      .then(() => observable.counter++)
+      .then(() => expect(dummy).to.equal(1))
+      .then(() => observer.observe(signal))
+      .then(() => expect(dummy).to.equal(2))
+      .then(() => observable.counter++)
+      .then(() => expect(dummy).to.equal(3))
+  })
+
   it('should execute in first-tigger order', () => {
     let dummy = ''
     const observable = observer.observable({prop1: 'prop1', prop2: 'prop2', prop3: 'prop3'})

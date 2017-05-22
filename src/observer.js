@@ -13,6 +13,7 @@ export function observe (observer) {
   if (typeof observer !== 'function') {
     throw new TypeError('Observer must be a function.')
   }
+  observer[UNOBSERVED] = false
   runObserver(observer)
   return observer
 }
