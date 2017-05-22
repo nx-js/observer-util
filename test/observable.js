@@ -36,7 +36,7 @@ describe('observable', () => {
     expect(observable1).to.equal(observable2)
   })
 
-  it('should never modify the underlying plain object', () => {
+  it('should never let observables leak into the underlying raw object', () => {
     const obj = {}
     const observable = observer.observable(obj)
     obj.nested1 = {}
@@ -44,29 +44,5 @@ describe('observable', () => {
     expect(observer.isObservable(obj.nested1)).to.be.false
     expect(observer.isObservable(obj.nested2)).to.be.false
     expect(observer.isObservable(observable.nested2)).to.be.true
-  })
-})
-
-describe('isObservable', () => {
-  it('should throw a TypeError on invalid arguments', () => {
-    expect(() => observer.isObservable(12)).to.throw(TypeError)
-    expect(() => observer.isObservable('string')).to.throw(TypeError)
-    expect(() => observer.isObservable()).to.throw(TypeError)
-    expect(() => observer.isObservable({})).to.not.throw(TypeError)
-  })
-
-  it('should return true if an observable is passed as argument', () => {
-    const observable = observer.observable()
-    const isObservable = observer.isObservable(observable)
-    expect(isObservable).to.be.true
-  })
-
-  it('should return false if a non observable is passed as argument', () => {
-    const obj1 = {prop: 'value'}
-    const obj2 = new Proxy({}, {})
-    const isObservable1 = observer.isObservable(obj1)
-    const isObservable2 = observer.isObservable(obj2)
-    expect(isObservable1).to.be.false
-    expect(isObservable2).to.be.false
   })
 })
