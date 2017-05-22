@@ -134,13 +134,3 @@ export function getSize () {
   registerObserver(rawContext, ITERATE)
   return Reflect.get(proto, 'size', rawContext)
 }
-
-export function setSize () {
-  const rawContext = proxyToRaw.get(this)
-  const proto = getPrototypeOf(this)
-  if (!rawContext) {
-    return Reflect.set(proto, 'size', this)
-  }
-  queueObservers(rawContext, ITERATE)
-  return Reflect.get(proto, 'size', rawContext)
-}

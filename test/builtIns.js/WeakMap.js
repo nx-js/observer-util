@@ -76,6 +76,8 @@ describe('WeakMap', () => {
       .then(() => expect(dummy).to.equal(undefined))
       .then(() => observable.set(key, 'Hello'))
       .then(() => expect(dummy).to.equal(undefined))
+      .then(() => observable.delete('key'))
+      .then(() => expect(dummy).to.equal(undefined))
   })
 
   it('should not be triggered by $raw mutations', () => {
@@ -87,6 +89,8 @@ describe('WeakMap', () => {
     return Promise.resolve()
       .then(() => expect(dummy).to.equal(undefined))
       .then(() => observable.$raw.set(key, 'Hello'))
+      .then(() => expect(dummy).to.equal(undefined))
+      .then(() => observable.$raw.delete('key'))
       .then(() => expect(dummy).to.equal(undefined))
   })
 })

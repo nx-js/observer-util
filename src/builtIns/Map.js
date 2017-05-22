@@ -1,5 +1,5 @@
 import { has, get, set, deleteFn, clear,
-  forEach, keys, values, entries, iterator, getSize, setSize } from './collections'
+  forEach, keys, values, entries, iterator, getSize } from './collections'
 
 export default function instrumentMap (target) {
   target.has = has
@@ -12,5 +12,5 @@ export default function instrumentMap (target) {
   target.values = values
   target.entries = entries
   target[Symbol.iterator] = iterator
-  Object.defineProperty(target, 'size', { get: getSize, set: setSize })
+  Object.defineProperty(target, 'size', { get: getSize })
 }

@@ -4,6 +4,12 @@ const expect = require('chai').expect
 const observer = require('../../src')
 
 describe('Map', () => {
+  it('should be a proper JS Map', () => {
+    const observable = observer.observable(new Map())
+    expect(observable).to.be.instanceOf(Map)
+    expect(observable.$raw).to.be.instanceOf(Map)
+  })
+
   it('should observe mutations', () => {
     let dummy
     const observable = observer.observable(new Map())
@@ -30,7 +36,7 @@ describe('Map', () => {
       .then(() => expect(dummy).to.equal(0))
   })
 
-  it('should observe iteration', () => {
+  it('should observe for of iteration', () => {
     let dummy
     const observable = observer.observable(new Map())
     observer.observe(() => {
@@ -50,6 +56,105 @@ describe('Map', () => {
       .then(() => expect(dummy).to.equal(2))
       .then(() => observable.clear())
       .then(() => expect(dummy).to.equal(0))
+  })
+
+  it('should observe forEach iteration', () => {
+    let dummy
+    const observable = observer.observable(new Map())
+    observer.observe(() => {
+      dummy = 0
+      observable.forEach(num => dummy += num)
+    })
+
+    return Promise.resolve()
+      .then(() => expect(dummy).to.equal(0))
+      .then(() => observable.set('key0', 3))
+      .then(() => expect(dummy).to.equal(3))
+      .then(() => observable.set('key1', 2))
+      .then(() => expect(dummy).to.equal(5))
+      .then(() => observable.delete('key0'))
+      .then(() => expect(dummy).to.equal(2))
+      .then(() => observable.clear())
+      .then(() => expect(dummy).to.equal(0))
+  })
+
+  it('should observe keys iteration', () => {
+    let dummy
+    const observable = observer.observable(new Map())
+    observer.observe(() => {
+      dummy = 0
+      for (let key of observable.keys()) {
+        dummy += key
+      }
+    })
+
+    return Promise.resolve()
+      .then(() => expect(dummy).to.equal(0))
+      .then(() => observable.set(3, 3))
+      .then(() => expect(dummy).to.equal(3))
+      .then(() => observable.set(2, 2))
+      .then(() => expect(dummy).to.equal(5))
+      .then(() => observable.delete(3))
+      .then(() => expect(dummy).to.equal(2))
+      .then(() => observable.clear())
+      .then(() => expect(dummy).to.equal(0))
+  })
+
+  it('should observe values iteration', () => {
+    let dummy
+    const observable = observer.observable(new Map())
+    observer.observe(() => {
+      dummy = 0
+      for (let num of observable.values()) {
+        dummy += num
+      }
+    })
+
+    return Promise.resolve()
+      .then(() => expect(dummy).to.equal(0))
+      .then(() => observable.set('key0', 3))
+      .then(() => expect(dummy).to.equal(3))
+      .then(() => observable.set('key1', 2))
+      .then(() => expect(dummy).to.equal(5))
+      .then(() => observable.delete('key0'))
+      .then(() => expect(dummy).to.equal(2))
+      .then(() => observable.clear())
+      .then(() => expect(dummy).to.equal(0))
+  })
+
+  it('should observe entries iteration', () => {
+    let dummy
+    const observable = observer.observable(new Map())
+    observer.observe(() => {
+      dummy = 0
+      for (let [key, num] of observable.entries()) {
+        dummy += num
+      }
+    })
+
+    return Promise.resolve()
+      .then(() => expect(dummy).to.equal(0))
+      .then(() => observable.set('key0', 3))
+      .then(() => expect(dummy).to.equal(3))
+      .then(() => observable.set('key1', 2))
+      .then(() => expect(dummy).to.equal(5))
+      .then(() => observable.delete('key0'))
+      .then(() => expect(dummy).to.equal(2))
+      .then(() => observable.clear())
+      .then(() => expect(dummy).to.equal(0))
+  })
+
+  it('should observe custom property mutations', () => {
+    let dummy
+    const observable = observer.observable(new Map())
+    observer.observe(() => dummy = observable.customProp)
+
+    return Promise.resolve()
+      .then(() => expect(dummy).to.equal(undefined))
+      .then(() => observable.customProp = 'Hello World')
+      .then(() => expect(dummy).to.equal('Hello World'))
+      .then(() => delete observable.customProp)
+      .then(() => expect(dummy).to.equal(undefined))
   })
 
   it('should not observe non value changing mutations', () => {
@@ -89,6 +194,10 @@ describe('Map', () => {
       .then(() => expect(dummy).to.equal(undefined))
       .then(() => observable.set('key', 'value'))
       .then(() => expect(dummy).to.equal(undefined))
+      .then(() => observable.delete('key'))
+      .then(() => expect(dummy).to.equal(undefined))
+      .then(() => observable.clear())
+      .then(() => expect(dummy).to.equal(undefined))
   })
 
   it('should not be triggered by $raw mutations', () => {
@@ -99,6 +208,10 @@ describe('Map', () => {
     return Promise.resolve()
       .then(() => expect(dummy).to.equal(undefined))
       .then(() => observable.$raw.set('key', 'value'))
+      .then(() => expect(dummy).to.equal(undefined))
+      .then(() => observable.$raw.delete('key'))
+      .then(() => expect(dummy).to.equal(undefined))
+      .then(() => observable.$raw.clear())
       .then(() => expect(dummy).to.equal(undefined))
   })
 

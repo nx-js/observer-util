@@ -46,18 +46,10 @@ export function observable (obj) {
   if (proxyToRaw.has(obj)) {
     return obj
   }
-  return rawToProxy.get(obj) || toObservable(obj)
+  return rawToProxy.get(obj) || instrumentObservable(obj) || createObservable(obj)
 }
 
-function toObservable (obj) {
-  const observable = createObservable(obj)
-  storeObservable(obj)
-  proxyToRaw.set(observable, obj)
-  rawToProxy.set(obj, observable)
-  return observable
-}
-
-function createObservable (obj) {
+function instrumentObservable (obj) {
   const instrument = instrumentations.get(Object.getPrototypeOf(obj))
   if (typeof instrument === 'function') {
     instrument(obj)
@@ -65,7 +57,14 @@ function createObservable (obj) {
   if (instrument === false) {
     return obj
   }
-  return new Proxy(obj, handlers)
+}
+
+function createObservable (obj) {
+  const observable = new Proxy(obj, handlers)
+  storeObservable(obj)
+  proxyToRaw.set(observable, obj)
+  rawToProxy.set(obj, observable)
+  return observable
 }
 
 function get (target, key, receiver) {
