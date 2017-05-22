@@ -1,7 +1,7 @@
 import { has, add, deleteFn, clear,
   forEach, keys, values, entries, iterator, getSize, setSize } from './collections'
 
-export default function shim (target) {
+export default function instrumentSet (target) {
   target.has = has
   target.add = add
   target.delete = deleteFn
@@ -12,5 +12,4 @@ export default function shim (target) {
   target.entries = entries
   target[Symbol.iterator] = iterator
   Object.defineProperty(target, 'size', { get: getSize, set: setSize })
-  return target
 }

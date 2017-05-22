@@ -1,5 +1,5 @@
 import nextTick from './nextTick'
-import builtIns from './builtIns/index'
+import instrumentations from './builtIns'
 import { storeObservable, storeObserver, iterateObservers, releaseObserver } from './store'
 import { proxyToRaw, rawToProxy, UNOBSERVED } from './internals'
 
@@ -58,15 +58,14 @@ function toObservable (obj) {
 }
 
 function createObservable (obj) {
-  const builtIn = builtIns.get(Object.getPrototypeOf(obj))
-  if (!builtIn) {
-    return new Proxy(obj, handlers)
+  const instrument = instrumentations.get(Object.getPrototypeOf(obj))
+  if (typeof instrument === 'function') {
+    instrument(obj)
   }
-  if (typeof builtIn === 'function') {
-    obj = builtIn(obj, registerObserver, queueObservers)
-    return new Proxy(obj, handlers)
+  if (instrument === false) {
+    return obj
   }
-  return obj
+  return new Proxy(obj, handlers)
 }
 
 function get (target, key, receiver) {

@@ -1,13 +1,13 @@
-import MapShim from './Map'
-import SetShim from './Set'
-import WeakMapShim from './WeakMap'
-import WeakSetShim from './WeakSet'
+import InstrumentMap from './Map'
+import InstrumentSet from './Set'
+import InstrumentWeakMap from './WeakMap'
+import InstrumentWeakSet from './WeakSet'
 
 export default new Map([
-  [Map.prototype, MapShim],
-  [Set.prototype, SetShim],
-  [WeakMap.prototype, WeakMapShim],
-  [WeakSet.prototype, WeakSetShim],
-  [Date.prototype, true],
-  [RegExp.prototype, true]
+  [Map.prototype, InstrumentMap],
+  [Set.prototype, InstrumentSet],
+  [WeakMap.prototype, InstrumentWeakMap],
+  [WeakSet.prototype, InstrumentWeakSet],
+  [Date.prototype, false],
+  [RegExp.prototype, false]
 ])
