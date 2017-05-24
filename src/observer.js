@@ -1,5 +1,5 @@
 import nextTick from './nextTick'
-import instrumentations from './builtIns'
+import instrumentations from './builtIns/index'
 import { storeObservable, storeObserver, iterateObservers, releaseObserver } from './store'
 import { proxyToRaw, rawToProxy, UNOBSERVED } from './internals'
 
