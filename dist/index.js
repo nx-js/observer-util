@@ -2,29 +2,6 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const UNOBSERVED = Symbol('unobserved');
-const proxyToRaw = new WeakMap();
-const rawToProxy = new WeakMap();
-
-function instrumentConsole () {
-  const methodsToInstrument = ['debug', 'error', 'info', 'log', 'warn', 'dir'];
-  methodsToInstrument.forEach(instrumentMethod);
-}
-
-function instrumentMethod (method) {
-  const originalMethod = console[method];
-  console[method] = function (...args) {
-    originalMethod.apply(console, args.map(toRawArg));
-  };
-}
-
-function toRawArg (arg) {
-  if (typeof arg === 'object') {
-    return proxyToRaw(arg) || arg
-  }
-  return arg
-}
-
 const promise = Promise.resolve();
 let mutateWithTask;
 let currTask;
@@ -55,6 +32,10 @@ function onTask () {
     currTask();
   }
 }
+
+const UNOBSERVED = Symbol('unobserved');
+const proxyToRaw = new WeakMap();
+const rawToProxy = new WeakMap();
 
 const ITERATE = Symbol('iterate');
 const getPrototypeOf = Object.getPrototypeOf;
@@ -418,8 +399,6 @@ function runObserver (observer) {
     currentObserver = undefined;
   }
 }
-
-instrumentConsole();
 
 exports.observable = observable;
 exports.isObservable = isObservable;

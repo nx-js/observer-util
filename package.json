@@ -1,6 +1,6 @@
 {
   "name": "@nx-js/observer-util",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "An NX utility, responsible for powerful data observation with ES6 Proxies.",
   "main": "dist/index.js",
   "module": "src/index.js",
