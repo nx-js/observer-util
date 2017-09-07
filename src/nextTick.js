@@ -3,12 +3,12 @@ let mutateWithTask
 let currTask
 
 export default function nextTick (task) {
-  currTask = task
-  if (mutateWithTask) {
+  // currTask = task
+  /*if (mutateWithTask) {
     mutateWithTask()
-  } else {
-    promise.then(task)
-  }
+  } else {*/
+    return promise.then(task)
+  //}
 }
 
 if (typeof MutationObserver !== 'undefined') {
