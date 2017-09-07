@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { observable, observe, nextTick } from '../src'
+import { nextTask } from './utils'
 
 describe('nextTick', () => {
   it('should run the passed callback after the reactions run', () => {
@@ -27,16 +28,18 @@ describe('nextTick', () => {
 
   it('should interact properly with MutationObservers', async () => {
     let counter = 0
-    const textNode = document.createTextNode(String(counter))
+    const textNode = document.createTextNode('')
     new MutationObserver(nextMutation).observe(textNode, {characterData: true})
 
     function nextMutation () {
-      if (counter <= 20) {
+      if (counter < 20) {
         nextTick(() => textNode.textContent = counter++)
       }
     }
+    textNode.textContent = counter
 
     // all reactions and DOM mutations should be handled before the next task
-    setTimeout(() => expect(counter).to.equal(20))
+    await nextTask()
+    expect(counter).to.equal(20)
   })
 })

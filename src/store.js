@@ -1,38 +1,37 @@
 import { UNOBSERVED } from './internals'
 
+const connectionStore = new WeakMap()
 const observerStore = new WeakMap()
 
 export function storeObservable (target) {
   observerStore.set(target, Object.create(null))
 }
 
+export function initObserver (observer) {
+  connectionStore.set(observer, new Set())
+}
+
 export function storeObserver (target, key, observer) {
   const observers = observerStore.get(target)
-  const observersForKey = observers[key]
-  if (observersForKey !== observer) {
-    if (typeof observersForKey === 'object' && observersForKey.size > 0) {
-      observersForKey.add(observer)
-      observer[`_${key}_observers`] = observersForKey
-    } else if (typeof observersForKey === 'function' && !observersForKey[UNOBSERVED]) {
-      observers[key] = new Set().add(observer).add(observersForKey)
-    } else {
-      observers[key] = observer
-    }
+  let observersForKey = observers[key]
+  if (!observersForKey) {
+    observers[key] = observersForKey = new Set()
   }
+  observersForKey.add(observer)
+  connectionStore.get(observer).add(observersForKey)
 }
 
 export function iterateObservers (target, key, fn) {
-  const observers = observerStore.get(target)
-  const observersForKey = observers[key]
-  if (observersForKey instanceof Set) {
+  const observersForKey = observerStore.get(target)[key]
+  if (observersForKey) {
     observersForKey.forEach(fn)
-  } else if (observersForKey) {
-    fn(observersForKey)
   }
 }
 
 export function releaseObserver (observer) {
-  for (let key in observer) {
-    observer[key].delete(observer)
-  }
+  connectionStore.get(observer).forEach(releaseConnection, observer)
+}
+
+function releaseConnection (observersForKey) {
+  observersForKey.delete(this)
 }

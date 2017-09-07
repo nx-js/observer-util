@@ -6,3 +6,7 @@ export function spy (fn) {
   spyFn.callCount = 0
   return spyFn
 }
+
+export function nextTask () {
+  return new Promise(setTimeout)
+}

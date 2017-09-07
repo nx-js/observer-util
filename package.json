@@ -2,14 +2,15 @@
   "name": "@nx-js/observer-util",
   "version": "3.0.0",
   "description": "An NX utility, responsible for powerful data observation with ES6 Proxies.",
-  "main": "dist/index.js",
-  "module": "src/index.js",
+  "main": "dist/cjs.es6.js",
+  "module": "dist/esm.es6.js",
   "scripts": {
     "test": "karma start karma.conf.js",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "build": "rollup --config ./rollup.config.js && npm run minify",
-    "minify": "minify dist/cjs.es6.js --o dist/cjs.es6.min.js && minify dist/esm.es6.js --o dist/esm.es6.min.js"
+    "minify": "minify dist/cjs.es6.js --o dist/cjs.es6.min.js && minify dist/esm.es6.js --o dist/esm.es6.min.js",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "author": {
     "name": "Miklos Bertalan",

@@ -1,6 +1,6 @@
 import nextTick from './nextTick'
 import instrumentations from './builtIns/index'
-import { storeObservable, storeObserver, iterateObservers, releaseObserver } from './store'
+import { storeObservable, initObserver, storeObserver, iterateObservers, releaseObserver } from './store'
 import { proxyToRaw, rawToProxy, UNOBSERVED } from './internals'
 
 const ENUMERATE = Symbol('enumerate')
@@ -9,11 +9,14 @@ let queued = false
 let currentObserver
 const handlers = { get, ownKeys, set, deleteProperty }
 
+throw new Error('fuck')
+
 export function observe (observer) {
   if (typeof observer !== 'function') {
     throw new TypeError('Observer must be a function.')
   }
   observer[UNOBSERVED] = false
+  initObserver(observer)
   runObserver(observer)
   return observer
 }
