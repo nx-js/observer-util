@@ -4,6 +4,9 @@
   "description": "An NX utility, responsible for powerful transparent reactivity with ES6 Proxies.",
   "main": "dist/cjs.es6.js",
   "module": "dist/esm.es6.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "karma start karma.conf.js",
     "lint": "standard",
