@@ -4,7 +4,7 @@
 
 Transparent reactivity without special syntax and with a **100% language observability** coverage. It uses **ES6 Proxies** internally to work seamlessly with a minimal interface.
 
-This library is part of the [NX framework](https://nx-framework.com).
+[React Easy State](https://github.com/solkimicreb/react-easy-state) is a React state management solution - based on this library. This library is part of the [NX framework](https://nx-framework.com). 
 
 ## Table of contents
 
