@@ -1,4 +1,4 @@
-import { registerObserver, queueObservers } from '../observer'
+import { registerRunningReactionForKey, queueReactionsForKey } from '../observer'
 import { proxyToRaw } from '../internals'
 
 const ITERATE = Symbol('iterate')
@@ -10,17 +10,17 @@ export function has (value) {
   if (!rawContext) {
     return proto.has.apply(this, arguments)
   }
-  registerObserver(rawContext, value)
+  registerRunningReactionForKey(rawContext, value)
   return proto.has.apply(rawContext, arguments)
 }
 
-export function get (value) {
+export function get (key) {
   const rawContext = proxyToRaw.get(this)
   const proto = getPrototypeOf(this)
   if (!rawContext) {
     return proto.get.apply(this, arguments)
   }
-  registerObserver(rawContext, value)
+  registerRunningReactionForKey(rawContext, key)
   return proto.get.apply(rawContext, arguments)
 }
 
@@ -31,8 +31,8 @@ export function add (value) {
     return proto.add.apply(this, arguments)
   }
   if (!proto.has.call(rawContext, value)) {
-    queueObservers(rawContext, value)
-    queueObservers(rawContext, ITERATE)
+    queueReactionsForKey(rawContext, value)
+    queueReactionsForKey(rawContext, ITERATE)
   }
   return proto.add.apply(rawContext, arguments)
 }
@@ -44,8 +44,8 @@ export function set (key, value) {
     return proto.set.apply(this, arguments)
   }
   if (proto.get.call(rawContext, key) !== value) {
-    queueObservers(rawContext, key)
-    queueObservers(rawContext, ITERATE)
+    queueReactionsForKey(rawContext, key)
+    queueReactionsForKey(rawContext, ITERATE)
   }
   return proto.set.apply(rawContext, arguments)
 }
@@ -57,8 +57,8 @@ export function deleteFn (value) {
     return proto.delete.apply(this, arguments)
   }
   if (proto.has.call(rawContext, value)) {
-    queueObservers(rawContext, value)
-    queueObservers(rawContext, ITERATE)
+    queueReactionsForKey(rawContext, value)
+    queueReactionsForKey(rawContext, ITERATE)
   }
   return proto.delete.apply(rawContext, arguments)
 }
@@ -70,7 +70,7 @@ export function clear () {
     return proto.clear.apply(this, arguments)
   }
   if (rawContext.size) {
-    queueObservers(rawContext, ITERATE)
+    queueReactionsForKey(rawContext, ITERATE)
   }
   return proto.clear.apply(rawContext, arguments)
 }
@@ -81,7 +81,7 @@ export function forEach () {
   if (!rawContext) {
     return proto.forEach.apply(this, arguments)
   }
-  registerObserver(rawContext, ITERATE)
+  registerRunningReactionForKey(rawContext, ITERATE)
   return proto.forEach.apply(rawContext, arguments)
 }
 
@@ -91,7 +91,7 @@ export function keys () {
   if (!rawContext) {
     return proto.keys.apply(this, arguments)
   }
-  registerObserver(rawContext, ITERATE)
+  registerRunningReactionForKey(rawContext, ITERATE)
   return proto.keys.apply(rawContext, arguments)
 }
 
@@ -101,7 +101,7 @@ export function values () {
   if (!rawContext) {
     return proto.values.apply(this, arguments)
   }
-  registerObserver(rawContext, ITERATE)
+  registerRunningReactionForKey(rawContext, ITERATE)
   return proto.values.apply(rawContext, arguments)
 }
 
@@ -111,7 +111,7 @@ export function entries () {
   if (!rawContext) {
     return proto.entries.apply(this, arguments)
   }
-  registerObserver(rawContext, ITERATE)
+  registerRunningReactionForKey(rawContext, ITERATE)
   return proto.entries.apply(rawContext, arguments)
 }
 
@@ -121,7 +121,7 @@ export function iterator () {
   if (!rawContext) {
     return proto[Symbol.iterator].apply(this, arguments)
   }
-  registerObserver(rawContext, ITERATE)
+  registerRunningReactionForKey(rawContext, ITERATE)
   return proto[Symbol.iterator].apply(rawContext, arguments)
 }
 
@@ -131,6 +131,6 @@ export function getSize () {
   if (!rawContext) {
     return Reflect.get(proto, 'size', this)
   }
-  registerObserver(rawContext, ITERATE)
+  registerRunningReactionForKey(rawContext, ITERATE)
   return Reflect.get(proto, 'size', rawContext)
 }

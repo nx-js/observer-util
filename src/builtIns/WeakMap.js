@@ -1,8 +1,8 @@
 import { has, get, set, deleteFn } from './collections'
 
-export default function instrumentWeakMap (target) {
-  target.has = has
-  target.get = get
-  target.set = set
-  target.delete = deleteFn
+export default function instrumentWeakMap (map) {
+  map.has = has
+  map.get = get
+  map.set = set
+  map.delete = deleteFn
 }

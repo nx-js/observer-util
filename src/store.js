@@ -1,35 +1,37 @@
 const connectionStore = new WeakMap()
-const observerStore = new WeakMap()
+const cleanupStore = new WeakMap()
 
-export function storeObservable (target) {
-  observerStore.set(target, Object.create(null))
+export function storeObservable (obj) {
+  // this will be used to save (obj.key -> reaction) connections later
+  connectionStore.set(obj, Object.create(null))
 }
 
-export function initObserver (observer) {
-  connectionStore.set(observer, new Set())
+export function storeReaction (reaction) {
+  // this will be used to save data for cleaning up later
+  cleanupStore.set(reaction, new Set())
 }
 
-export function storeObserver (target, key, observer) {
-  const observers = observerStore.get(target)
-  let observersForKey = observers[key]
-  if (!observersForKey) {
-    observers[key] = observersForKey = new Set()
+export function registerReactionForKey (obj, key, reaction) {
+  const reactionsForObj = connectionStore.get(obj)
+  let reactionsForKey = reactionsForObj[key]
+  if (!reactionsForKey) {
+    reactionsForObj[key] = reactionsForKey = new Set()
   }
-  observersForKey.add(observer)
-  connectionStore.get(observer).add(observersForKey)
+  reactionsForKey.add(reaction)
+  cleanupStore.get(reaction).add(reactionsForKey)
 }
 
-export function iterateObservers (target, key, fn) {
-  const observersForKey = observerStore.get(target)[key]
-  if (observersForKey) {
-    observersForKey.forEach(fn)
+export function iterateReactionsForKey (obj, key, fn) {
+  const reactionsForKey = connectionStore.get(obj)[key]
+  if (reactionsForKey) {
+    reactionsForKey.forEach(fn)
   }
 }
 
-export function releaseObserver (observer) {
-  connectionStore.get(observer).forEach(releaseConnection, observer)
+export function releaseReaction (reaction) {
+  cleanupStore.get(reaction).forEach(releaseReactionKeyConnections, reaction)
 }
 
-function releaseConnection (observersForKey) {
-  observersForKey.delete(this)
+function releaseReactionKeyConnections (reactionsForKey) {
+  reactionsForKey.delete(this)
 }

@@ -12,16 +12,16 @@ import {
   getSize
 } from './collections'
 
-export default function instrumentMap (target) {
-  target.has = has
-  target.get = get
-  target.set = set
-  target.delete = deleteFn
-  target.clear = clear
-  target.forEach = forEach
-  target.keys = keys
-  target.values = values
-  target.entries = entries
-  target[Symbol.iterator] = iterator
-  Object.defineProperty(target, 'size', { get: getSize })
+export default function instrumentMap (map) {
+  map.has = has
+  map.get = get
+  map.set = set
+  map.delete = deleteFn
+  map.clear = clear
+  map.forEach = forEach
+  map.keys = keys
+  map.values = values
+  map.entries = entries
+  map[Symbol.iterator] = iterator
+  Object.defineProperty(map, 'size', { get: getSize })
 }

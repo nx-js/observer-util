@@ -11,15 +11,15 @@ import {
   getSize
 } from './collections'
 
-export default function instrumentSet (target) {
-  target.has = has
-  target.add = add
-  target.delete = deleteFn
-  target.clear = clear
-  target.forEach = forEach
-  target.keys = keys
-  target.values = values
-  target.entries = entries
-  target[Symbol.iterator] = iterator
-  Object.defineProperty(target, 'size', { get: getSize })
+export default function instrumentSet (set) {
+  set.has = has
+  set.add = add
+  set.delete = deleteFn
+  set.clear = clear
+  set.forEach = forEach
+  set.keys = keys
+  set.values = values
+  set.entries = entries
+  set[Symbol.iterator] = iterator
+  Object.defineProperty(set, 'size', { get: getSize })
 }

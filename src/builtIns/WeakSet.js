@@ -1,7 +1,7 @@
 import { has, add, deleteFn } from './collections'
 
-export default function instrumentWeakSet (target) {
-  target.has = has
-  target.add = add
-  target.delete = deleteFn
+export default function instrumentWeakSet (set) {
+  set.has = has
+  set.add = add
+  set.delete = deleteFn
 }
