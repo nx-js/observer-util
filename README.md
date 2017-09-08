@@ -2,7 +2,7 @@
 
 [![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/esm.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/esm.es6.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
 
-Provides transparent reactivity without special syntax and with a **100% language observability** coverage. It uses **ES6 Proxies** internally to work seamlessly with a minimal interface.
+Transparent reactivity without special syntax and with a **100% language observability** coverage. It uses **ES6 Proxies** internally to work seamlessly with a minimal interface.
 
 This library is part of the [NX framework](https://nx-framework.com).
 
@@ -12,7 +12,6 @@ This library is part of the [NX framework](https://nx-framework.com).
 - [Usage](#usage)
 - [Features](#key-features)
 - [API](#api)
-- [Observer Timing](#observer-timing)
 - [Platfrom Support](#platform-support)
 - [Examples](#examples)
 - [Contributing](#contributing)
@@ -25,10 +24,14 @@ $ npm install @nx-js/observer-util
 
 ## Usage
 
+This library has two main functions. `observable` turns the passed object into an observable object and `observe` turns the passed function into a reaction. A reaction is automatically executed whenever an observable property - which is used inside the reaction - changes value. Reactions are executed in an async batch, after a small delay.
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
-const data = observable({ firstName: 'Bob', lastName: 'Smith' })
+const person = observable({ firstName: 'Bob', lastName: 'Smith' })
+
+// this reaction automatically re-runs whenever person.firstName or person.lastName changes
 observe(() => console.log(`${person.firstName} ${person.lastName}`))
 
 // this logs 'John Smith' to the console
@@ -37,26 +40,24 @@ setTimeout(() =>  person.firstName = 'John')
 
 ## Key features
 
-- Any synchronous JavaScript code can be observed - including expando properties, loops, getters/setters, inheritance and ES6 collections. Check out the [examples](#examples) section for more.
+- Any JavaScript code is correctly observed in reactions - including expando properties, loops, getters/setters, inheritance and ES6 collections. Check out the [examples](#examples) section for more.
 
 - No special syntax or setup is required, you will likely use the `observable` and `observe` functions only.
 
-- Observable objects are not modified at all. Seamless proxies are used instead of getters/setters and array hacks. The underlying raw object can be easily retrieved and used when you don't want to trigger observers.
+- Observable objects are not modified at all. The underlying raw object can be easily retrieved and used when you don't want to trigger reactions.
 
-- You don't have to explicitly define observable properties. A minimal set of observable properties is automatically maintained based on the observer functions.
+- Triggered reactions run asynchronously, but always before the next repaint in browsers. Your reactions reach a stable and fresh state before repaints.
 
-- Triggered observers run asynchronously, but always before the next repaint in browsers. Your data always reaches a stable and fresh state before repaints.
-
-- Duplicates and loops are automatically removed from triggered observers. This ensures that your code won't run twice without a reason.
+- Duplicates and loops are automatically removed from triggered reactions. This ensures that your code won't run twice without a reason.
 
 ## API
 
-### const obj = observable([Object])
+### const object = observable(object)
 
 Creates and returns an observable object.
 
-- If no argument is provided, it returns an empty observable.
-- If an object is passed as argument it wraps the passed object in an observable.
+- If no argument is provided, it returns an empty observable object.
+- If an object is passed as argument, it wraps the passed object in an observable.
 - If an observable object is passed, it simply returns the passed observable object.
 
 ```js
@@ -65,7 +66,7 @@ import { observable } from '@nx-js/observer-util'
 const person = observable({ name: 'Ann' })
 ```
 
-### isObservable(Object)
+### const boolean = isObservable(object)
 
 Returns true if the passed object is an observable, otherwise returns false.
 
@@ -76,69 +77,96 @@ const person = observable()
 const isPersonObservable = isObservable(person)
 ```
 
-### const fn = observe(function)
+### const function = observe(function)
 
-Creates and returns an observer function. An observer automatically reruns when a property of an observable - which is used by the observer - changes.
+Turns the passed function into a reaction, then executes and returns it. A reaction automatically reruns when a property of an observable - which is used by the reaction - changes.
 
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
-const data = observable()
+const counter = observable({ num: 0 })
 
-// this logs the data whenever it changes
-const logger = observe(() => console.log(data))
+// this logs the value of counter.num whenever it changes
+const logger = observe(() => console.log(counter.num))
 ```
 
-### unobserve(fn)
+### unobserve(function)
 
-Unobserves the passed observer function.
+Unobserves the passed reaction. Unobserved reactions won't be automatically run anymore.
 
 ```js
-import { observe, unobserve } from '@nx-js/observer-util'
+import { observable,observe, unobserve } from '@nx-js/observer-util'
 
-const logger = observer.observe(() => console.log(observable.prop))
+const counter = observable({ num: 0 })
+const logger = observe(() => console.log(counter.num))
+
+// after this counter.num won't be automatically logged on changes
 unobserve(logger)
 ```
 
-### unqueue(fn)
+### unqueue(function)
 
-Removes the the observer function from the queue of triggered observers. This means that the observer won't run, unless another observable mutation triggers it.
+Removes the the reaction function from the queue of triggered reactions. This means that the reaction won't run in the next batch, unless another observable mutation triggers it.
 
 ```js
-import { observer, unqueue } from '@nx-js/observer-util'
+import { observe, unqueue } from '@nx-js/observer-util'
 
-const logger = observe(() => console.log(data))
+const counter = observable({ num: 0 })
+const logger = observe(() => console.log(counter.num))
+
+// counter.num is changed and it queues the logger reaction
+counter.num++
+
+// this removes the logger reaction from the queue, so it won't run
 unqueue(logger)
 ```
 
-### exec(fn)
+### exec(function)
 
-Immediately runs the observer function. Never run an observer function directly, use this method instead.
+Immediately runs the passed reaction. Never run a reaction directly, use this method instead. Running the reaction with a direct call may cause it to not discover observable property access in some of its parts.
 
 ```js
-import { observe, exec } from '@nx-js/observer-util'
+import { observable, observe, exec } from '@nx-js/observer-util'
 
-const logger = observe(() => console.log(data))
+const person = observable({ name: 'Bob' })
+const logger = observe(() => console.log(person.name))
 exec(logger)
+```
+
+### const promise = nextTick(function)
+
+Runs the passed callback after the queued reactions run. It also returns a Promise, which resolves after the reactions. This comes handy for testing.
+
+```js
+import { observable, observe, nextTick } from '@nx-js/observer-util'
+
+let dummy
+const counter = observable({num: 0})
+observe(() => dummy = counter.num)
+
+counter.num = 7
+await nextTick()
+// the reactions ran during the tick, the 'dummy' is already updated to be 7
+expect(dummy).to.equal(7)
 ```
 
 ### observable.$raw
 
-Every observable object receives the `$raw` virtual property. It can be used to access the underlying non-observable object. Modifying and accessing the raw object doesn't trigger observers.
+Every observable object has a `$raw` virtual property. It can be used to access the underlying non-observable object. Modifying and accessing the raw object doesn't trigger reactions.
 
-#### Using `$raw` for property access in observers
+#### Using `$raw` for property access in reactions
 
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
 const person = observable()
-const logger = observe(() => console.log(person.age))
+const logger = observe(() => console.log(person.name))
 
 // this logs 'Bob'
-person.name = 'Bob'
+setTimeout(() => person.name = 'Bob')
 
 // this won't log anything
-person.$raw.name = 'John'
+setTimeout(() => person.$raw.name = 'John')
 ```
 
 #### Using `$raw` at observable mutations
@@ -150,38 +178,11 @@ const person = observable({ age: 20 })
 observe(() => console.log(`${person.name}: ${person.$raw.age}`))
 
 // this logs 'Bob: 20'
-person.name = 'Bob'
+setTimeout(() => person.name = 'Bob')
 
 // this won't log anything
-person.age = 33
+setTimeout(() => person.age = 33)
 ```
-
-### const promise = nextTick(fn)
-
-Runs the passed callback after the queued observers run. It returns a Promise, which resolves after the observers run. This comes handy for testing.
-
-```js
-import { observable, observe, nextTick } from '@nx-js/observer-util'
-
-let dummy
-const counter = observable({num: 0})
-observe(() => dummy = counter.num)
-
-counter.num = 7
-await nextTick()
-// the observers ran during the tick, the 'dummy' is updated to be 7
-expect(dummy).to.equal(7)
-```
-
-## Observer timing
-
-Observer functions run once immediately when they are defined with `observe`.
-
-After that, triggered observer functions do not run synchronously. Instead they are saved in a queue and executed in a batch after a small delay. This always happens before the next paint event in the browser.
-
-Observers may trigger other observers by mutating observable objects. In this case the new observers are added to the end of the queue. Infinite loops are automatically resolved and duplicates are removed. This guarantees that observers run only once per batch. A stable and fresh state is always reached when the observer queue empties.
-
-Non mutating operations on observables don't trigger observers. As an example the `observable.name = observable.name` set operation won't trigger observer functions.
 
 ## Platform support
 
@@ -203,8 +204,8 @@ import { observable, observe } from '@nx-js/observer-util'
 const profile = observer.observable()
 observe(() => console.log(profile.name))
 
-// outputs 'Bob' to the console
-setTimeout(() => profile.name = 'Bob', 100)
+// logs 'Bob'
+setTimeout(() => profile.name = 'Bob')
 ```
 
 #### Observing conditionals
@@ -226,7 +227,7 @@ observe(() => {
 })
 
 // logs 'Ms. Potato'
-setTimeout(() => person.gender = 'female', 100)
+setTimeout(() => person.gender = 'female')
 ```
 
 #### Observing nested properties
@@ -246,7 +247,7 @@ const person = observable({
 observe(() => console.log(`${person.name.first} ${person.name.last}`))
 
 // logs 'Bob Smith'
-setTimeout(() => person.name.first = 'Bob', 100)
+setTimeout(() => person.name.first = 'Bob')
 ```
 
 #### Observing native getters/setters
@@ -254,7 +255,7 @@ setTimeout(() => person.name.first = 'Bob', 100)
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
-const person = observer.observable({
+const person = observable({
   firstName: 'Bob',
   lastName: 'Smith',
   get name () {
@@ -325,10 +326,10 @@ observe(() => console.log(`${user.name} is a ${user.job}`))
 setTimeout(() => user.name = 'Bob')
 
 // logs 'Bob is a stylist'
-setTimeout(() => user.job = 'stylist', 100)
+setTimeout(() => user.job = 'stylist')
 
 // logs 'Unknown is a stylist'
-setTimeout(() => delete user.name, 200)
+setTimeout(() => delete user.name)
 ```
 
 ## Contributing
