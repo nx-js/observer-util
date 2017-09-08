@@ -1,7 +1,7 @@
 {
   "name": "@nx-js/observer-util",
-  "version": "3.0.0",
-  "description": "An NX utility, responsible for powerful data observation with ES6 Proxies.",
+  "version": "3.1.0",
+  "description": "An NX utility, responsible for powerful transparent reactivity with ES6 Proxies.",
   "main": "dist/cjs.es6.js",
   "module": "dist/esm.es6.js",
   "scripts": {
