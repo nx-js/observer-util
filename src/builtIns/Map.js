@@ -1,5 +1,16 @@
-import { has, get, set, deleteFn, clear,
-  forEach, keys, values, entries, iterator, getSize } from './collections'
+import {
+  has,
+  get,
+  set,
+  deleteFn,
+  clear,
+  forEach,
+  keys,
+  values,
+  entries,
+  iterator,
+  getSize
+} from './collections'
 
 export default function instrumentMap (target) {
   target.has = has

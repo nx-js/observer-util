@@ -7,7 +7,7 @@ describe('nextTick', () => {
     let dummy
 
     const counter = observable({ num: 0 })
-    observe(() => dummy = counter.num)
+    observe(() => (dummy = counter.num))
 
     counter.num = 2
     expect(dummy).to.equal(0)
@@ -18,7 +18,7 @@ describe('nextTick', () => {
     let dummy
 
     const counter = observable({ num: 0 })
-    observe(() => dummy = counter.num)
+    observe(() => (dummy = counter.num))
 
     counter.num = 2
     expect(dummy).to.equal(0)
@@ -29,11 +29,13 @@ describe('nextTick', () => {
   it('should interact properly with MutationObservers', async () => {
     let counter = 0
     const textNode = document.createTextNode('')
-    new MutationObserver(nextMutation).observe(textNode, {characterData: true})
+    new MutationObserver(nextMutation).observe(textNode, {
+      characterData: true
+    })
 
     function nextMutation () {
       if (counter < 20) {
-        nextTick(() => textNode.textContent = counter++)
+        nextTick(() => (textNode.textContent = counter++))
       }
     }
     textNode.textContent = counter

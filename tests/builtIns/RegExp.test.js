@@ -6,6 +6,6 @@ describe('Date', () => {
     const regex = new RegExp()
     const obsRegex = observable(regex)
     expect(obsRegex).to.equal(regex)
-    expect(isObservable(obsRegex)).to.be.false
+    expect(isObservable(obsRegex)).to.equal(false)
   })
 })

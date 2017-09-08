@@ -7,7 +7,7 @@
   "scripts": {
     "test": "karma start karma.conf.js",
     "lint": "standard",
-    "lint:fix": "standard --fix",
+    "lint:fix": "prettier-standard tests/**/*.js src/**/*.js",
     "build": "rollup --config ./rollup.config.js && npm run minify",
     "minify": "minify dist/cjs.es6.js --o dist/cjs.es6.min.js && minify dist/esm.es6.js --o dist/esm.es6.min.js",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
@@ -62,7 +62,8 @@
     "nyc": "11.1.0",
     "pre-push": "^0.1.1",
     "standard": "^10.0.3",
-    "coveralls": "^2.13.1"
+    "coveralls": "^2.13.1",
+    "prettier-standard": "^6.0.0"
   },
   "engines": {
     "node": ">=6.0.0"

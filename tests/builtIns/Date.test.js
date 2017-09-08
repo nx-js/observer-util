@@ -6,6 +6,6 @@ describe('Date', () => {
     const date = new Date()
     const obsDate = observable(date)
     expect(obsDate).to.equal(date)
-    expect(isObservable(obsDate)).to.be.false
+    expect(isObservable(obsDate)).to.equal(false)
   })
 })

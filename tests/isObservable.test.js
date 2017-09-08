@@ -12,15 +12,15 @@ describe('isObservable', () => {
   it('should return true if an observable is passed as argument', () => {
     const obs = observable()
     const isObs = isObservable(obs)
-    expect(isObs).to.be.true
+    expect(isObs).to.equal(true)
   })
 
   it('should return false if a non observable is passed as argument', () => {
-    const obj1 = {prop: 'value'}
+    const obj1 = { prop: 'value' }
     const obj2 = new Proxy({}, {})
     const isObs1 = isObservable(obj1)
     const isObs2 = isObservable(obj2)
-    expect(isObs1).to.be.false
-    expect(isObs2).to.be.false
+    expect(isObs1).to.equal(false)
+    expect(isObs2).to.equal(false)
   })
 })

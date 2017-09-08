@@ -16,10 +16,10 @@ describe('exec', () => {
     }
 
     await nextTick()
-    expect(dummy).to.be.undefined
+    expect(dummy).to.equal(undefined)
     counter.num++
     await nextTick()
-    expect(dummy).to.be.undefined
+    expect(dummy).to.equal(undefined)
     condition = true
     exec(observer)
     await nextTick()

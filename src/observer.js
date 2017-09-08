@@ -1,7 +1,13 @@
 import nextTick from './nextTick'
 import instrumentations from './builtIns/index'
-import { storeObservable, initObserver, storeObserver, iterateObservers, releaseObserver } from './store'
-import { proxyToRaw, rawToProxy, UNOBSERVED } from './internals'
+import {
+  storeObservable,
+  initObserver,
+  storeObserver,
+  iterateObservers,
+  releaseObserver
+} from './store'
+import { proxyToRaw, rawToProxy } from './internals'
 
 const ENUMERATE = Symbol('enumerate')
 const queuedObservers = new Set()
@@ -9,13 +15,10 @@ let queued = false
 let currentObserver
 const handlers = { get, ownKeys, set, deleteProperty }
 
-throw new Error('fuck')
-
 export function observe (observer) {
   if (typeof observer !== 'function') {
     throw new TypeError('Observer must be a function.')
   }
-  observer[UNOBSERVED] = false
   initObserver(observer)
   runObserver(observer)
   return observer
@@ -23,7 +26,6 @@ export function observe (observer) {
 
 export function unobserve (observer) {
   queuedObservers.delete(observer)
-  observer[UNOBSERVED] = true
   releaseObserver(observer)
 }
 
@@ -50,7 +52,9 @@ export function observable (obj) {
   if (proxyToRaw.has(obj)) {
     return obj
   }
-  return rawToProxy.get(obj) || instrumentObservable(obj) || createObservable(obj)
+  return (
+    rawToProxy.get(obj) || instrumentObservable(obj) || createObservable(obj)
+  )
 }
 
 function instrumentObservable (obj) {
@@ -113,7 +117,7 @@ function set (target, key, value, receiver) {
 }
 
 function deleteProperty (target, key) {
-  if (typeof key !== 'symbol' && (key in target)) {
+  if (typeof key !== 'symbol' && key in target) {
     queueObservers(target, key)
     queueObservers(target, ENUMERATE)
   }
@@ -129,9 +133,7 @@ export function queueObservers (target, key) {
 }
 
 function queueObserver (observer) {
-  if (!observer[UNOBSERVED]) {
-    queuedObservers.add(observer)
-  }
+  queuedObservers.add(observer)
 }
 
 function runObservers () {

@@ -6,10 +6,10 @@ const coverage = require('rollup-plugin-coverage')
 module.exports = function (config) {
   config.set({
     frameworks: ['mocha', 'chai', 'source-map-support'],
-    files: ['test/**/*.test.js'],
+    files: ['tests/**/*.test.js'],
     reporters: ['progress', 'coverage'],
     preprocessors: {
-      'test/**/*.test.js': ['rollup']
+      'tests/**/*.test.js': ['rollup']
     },
     rollupPreprocessor: {
       plugins: [

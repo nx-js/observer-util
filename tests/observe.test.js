@@ -11,8 +11,8 @@ describe('observe', () => {
 
   it('should observe basic properties', async () => {
     let dummy
-    const counter = observable({num: 0})
-    observe(() => dummy = counter.num)
+    const counter = observable({ num: 0 })
+    observe(() => (dummy = counter.num))
 
     await nextTick()
     expect(dummy).to.equal(0)
@@ -23,8 +23,8 @@ describe('observe', () => {
 
   it('should observe multiple properties', async () => {
     let dummy
-    const counter = observable({num1: 0, num2: 0, num3: 0})
-    observe(() => dummy = counter.num1 + counter.num2 + counter.num3)
+    const counter = observable({ num1: 0, num2: 0, num3: 0 })
+    observe(() => (dummy = counter.num1 + counter.num2 + counter.num3))
 
     await nextTick()
     expect(dummy).to.equal(0)
@@ -35,9 +35,9 @@ describe('observe', () => {
 
   it('should handle multiple observers', async () => {
     let dummy1, dummy2
-    const counter = observable({num: 0})
-    observe(() => dummy1 = counter.num)
-    observe(() => dummy2 = counter.num)
+    const counter = observable({ num: 0 })
+    observe(() => (dummy1 = counter.num))
+    observe(() => (dummy2 = counter.num))
 
     await nextTick()
     expect(dummy1).to.equal(0)
@@ -50,8 +50,8 @@ describe('observe', () => {
 
   it('should observe nested properties', async () => {
     let dummy
-    const counter = observable({nested: {num: 0}})
-    observe(() => dummy = counter.nested.num)
+    const counter = observable({ nested: { num: 0 } })
+    observe(() => (dummy = counter.nested.num))
 
     await nextTick()
     expect(dummy).to.equal(0)
@@ -62,8 +62,8 @@ describe('observe', () => {
 
   it('should observe delete operations', async () => {
     let dummy
-    const obj = observable({prop: 'value'})
-    observe(() => dummy = obj.prop)
+    const obj = observable({ prop: 'value' })
+    observe(() => (dummy = obj.prop))
 
     await nextTick()
     expect(dummy).to.equal('value')
@@ -74,10 +74,10 @@ describe('observe', () => {
 
   it('should observe properties on the prototype chain', async () => {
     let dummy
-    const counter = observable({num: 0})
-    const parentCounter = observable({num: 2})
+    const counter = observable({ num: 0 })
+    const parentCounter = observable({ num: 2 })
     Object.setPrototypeOf(counter, parentCounter)
-    observe(() => dummy = counter.num)
+    observe(() => (dummy = counter.num))
 
     await nextTick()
     expect(dummy).to.equal(0)
@@ -94,8 +94,8 @@ describe('observe', () => {
 
   it('should observe function call chains', async () => {
     let dummy
-    const counter = observable({num: 0})
-    observe(() => dummy = getNum())
+    const counter = observable({ num: 0 })
+    observe(() => (dummy = getNum()))
 
     function getNum () {
       return counter.num
@@ -111,7 +111,7 @@ describe('observe', () => {
   it('should observe iteration', async () => {
     let dummy
     const list = observable(['Hello'])
-    observe(() => dummy = list.join(' '))
+    observe(() => (dummy = list.join(' ')))
 
     await nextTick()
     expect(dummy).to.equal('Hello')
@@ -125,7 +125,7 @@ describe('observe', () => {
 
   it('should observe enumeration', async () => {
     let dummy = 0
-    const numbers = observable({num1: 3})
+    const numbers = observable({ num1: 3 })
     observe(() => {
       dummy = 0
       for (let key in numbers) {
@@ -144,14 +144,17 @@ describe('observe', () => {
   })
 
   it('should not observe symbol keyed properties', async () => {
-    const key = Symbol()
+    const key = Symbol('symbol keyed prop')
     let dummy
-    const obj = observable({[key]: 'value'})
-    observe(() => dummy = obj[key])
+    const obj = observable({ [key]: 'value' })
+    observe(() => (dummy = obj[key]))
 
     await nextTick()
     expect(dummy).to.equal('value')
     obj[key] = 'newValue'
+    await nextTick()
+    expect(dummy).to.equal('value')
+    delete obj[key]
     await nextTick()
     expect(dummy).to.equal('value')
   })
@@ -162,7 +165,7 @@ describe('observe', () => {
 
     let dummy
     const obj = observable({ func: oldFunc })
-    observe(() => dummy = obj.func)
+    observe(() => (dummy = obj.func))
 
     await nextTick()
     expect(dummy).to.equal(oldFunc)
@@ -173,9 +176,9 @@ describe('observe', () => {
 
   it('should not observe set operations without a value change', async () => {
     let dummy
-    const obj = observable({prop: 'value'})
+    const obj = observable({ prop: 'value' })
 
-    const propSpy = spy(() => dummy = obj.prop)
+    const propSpy = spy(() => (dummy = obj.prop))
     observe(propSpy)
 
     await nextTick()
@@ -189,7 +192,7 @@ describe('observe', () => {
   it('should not observe $raw mutations', async () => {
     let dummy
     const obj = observable()
-    observe(() => dummy = obj.$raw.prop)
+    observe(() => (dummy = obj.$raw.prop))
 
     await nextTick()
     expect(dummy).to.equal(undefined)
@@ -201,7 +204,7 @@ describe('observe', () => {
   it('should not be triggered by $raw mutations', async () => {
     let dummy
     const obj = observable()
-    observe(() => dummy = obj.prop)
+    observe(() => (dummy = obj.prop))
 
     await nextTick()
     expect(dummy).to.equal(undefined)
@@ -212,9 +215,9 @@ describe('observe', () => {
 
   it('should run once synchronously after registration', () => {
     let dummy
-    const obj = observable({prop: 'value'})
+    const obj = observable({ prop: 'value' })
 
-    const objSpy = spy(() => dummy = obj.prop)
+    const objSpy = spy(() => (dummy = obj.prop))
     observe(objSpy)
 
     expect(objSpy.callCount).to.equal(1)
@@ -223,9 +226,9 @@ describe('observe', () => {
 
   it('should rerun maximum once per stack', async () => {
     let dummy
-    const nums = observable({num1: 0, num2: 0})
+    const nums = observable({ num1: 0, num2: 0 })
 
-    const numsSpy = spy(() => dummy = nums.num1 + nums.num2)
+    const numsSpy = spy(() => (dummy = nums.num1 + nums.num2))
     observe(numsSpy)
 
     await nextTick()
@@ -240,11 +243,11 @@ describe('observe', () => {
   })
 
   it('should avoid infinite loops', async () => {
-    const obj1 = observable({prop: 'value1'})
-    const obj2 = observable({prop: 'value2'})
+    const obj1 = observable({ prop: 'value1' })
+    const obj2 = observable({ prop: 'value2' })
 
-    const spy1 = spy(() => obj1.prop = obj2.prop)
-    const spy2 = spy(() => obj2.prop = obj1.prop)
+    const spy1 = spy(() => (obj1.prop = obj2.prop))
+    const spy2 = spy(() => (obj2.prop = obj1.prop))
     observe(spy1)
     observe(spy2)
 
@@ -273,8 +276,8 @@ describe('observe', () => {
 
   it('should simply run the function once on multiple observation of the same function', async () => {
     let dummy
-    const counter = observable({num: 0})
-    const counterSpy = spy(() => dummy = counter.num)
+    const counter = observable({ num: 0 })
+    const counterSpy = spy(() => (dummy = counter.num))
     const observer1 = observe(counterSpy)
     const observer2 = observe(counterSpy)
     expect(observer1).to.equal(observer2)
@@ -282,13 +285,14 @@ describe('observe', () => {
     expect(counterSpy.callCount).to.equal(2)
     counter.num++
     await nextTick()
+    expect(dummy).to.equal(1)
     expect(counterSpy.callCount).to.equal(3)
   })
 
   it('should be able to re-observe unobserved functions', async () => {
     let dummy = 0
-    const counter = observable({num: 0})
-    const observer = observe(() => dummy = counter.num)
+    const counter = observable({ num: 0 })
+    const observer = observe(() => (dummy = counter.num))
 
     await nextTick()
     expect(dummy).to.equal(0)
@@ -308,11 +312,11 @@ describe('observe', () => {
 
   it('should execute in first-tigger order', async () => {
     let dummy = ''
-    const obj = observable({prop1: 'val1', prop2: 'val2', prop3: 'val3'})
+    const obj = observable({ prop1: 'val1', prop2: 'val2', prop3: 'val3' })
 
-    observe(() => dummy += obj.prop1)
-    observe(() => dummy += obj.prop2)
-    observe(() => dummy += obj.prop3)
+    observe(() => (dummy += obj.prop1))
+    observe(() => (dummy += obj.prop2))
+    observe(() => (dummy += obj.prop3))
 
     await nextTick()
     expect(dummy).to.equal('val1val2val3')

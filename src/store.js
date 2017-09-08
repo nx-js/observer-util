@@ -1,5 +1,3 @@
-import { UNOBSERVED } from './internals'
-
 const connectionStore = new WeakMap()
 const observerStore = new WeakMap()
 
