@@ -1,18 +1,18 @@
 # The observer utility
 
-[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/esm.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/esm.es6.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
+[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
 
 Transparent reactivity without special syntax and with a **100% language observability** coverage. It uses **ES6 Proxies** internally to work seamlessly with a minimal interface.
 
-[React Easy State](https://github.com/solkimicreb/react-easy-state) is a React state management solution - based on this library. This library is part of the [NX framework](https://nx-framework.com). 
+[React Easy State](https://github.com/solkimicreb/react-easy-state) is a React state management solution - based on this library. This library is part of the [NX framework](https://nx-framework.com).
 
 ## Table of contents
 
 - [Installation](#installation)  
 - [Usage](#usage)
 - [Features](#key-features)
-- [API](#api)
 - [Platfrom Support](#platform-support)
+- [API](#api)
 - [Examples](#examples)
 - [Contributing](#contributing)
 
@@ -49,6 +49,16 @@ setTimeout(() =>  person.firstName = 'John')
 - Triggered reactions run asynchronously, but always before the next repaint in browsers. Your reactions reach a stable and fresh state before repaints.
 
 - Duplicates and loops are automatically removed from triggered reactions. This ensures that your code won't run twice without a reason.
+
+## Platform support
+
+- Node: 6.5 and above
+- Chrome: 49 and above
+- Firefox: 38 and above
+- Safari: 10 and above
+- Edge: 12 and above
+- Opera: 36 and above
+- IE is not supported
 
 ## API
 
@@ -183,16 +193,6 @@ setTimeout(() => person.name = 'Bob')
 // this won't log anything
 setTimeout(() => person.age = 33)
 ```
-
-## Platform support
-
-- Node: 6 and above
-- Chrome: 49 and above
-- Firefox: 38 and above
-- Safari: 10 and above
-- Edge: 12 and above
-- Opera: 36 and above
-- IE is not supported
 
 ## Examples
 

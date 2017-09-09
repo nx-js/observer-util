@@ -2,8 +2,8 @@
   "name": "@nx-js/observer-util",
   "version": "3.1.1",
   "description": "An NX utility, responsible for powerful transparent reactivity with ES6 Proxies.",
-  "main": "dist/cjs.es6.js",
-  "module": "dist/esm.es6.js",
+  "main": "dist/cjs.es5",
+  "module": "dist/esm.es5",
   "files": [
     "dist"
   ],
@@ -11,9 +11,12 @@
     "test": "karma start karma.conf.js",
     "lint": "standard",
     "lint:fix": "prettier-standard tests/**/*.js src/**/*.js",
-    "build": "rollup --config ./rollup.config.js && npm run minify",
-    "minify": "minify dist/cjs.es6.js --o dist/cjs.es6.min.js && minify dist/esm.es6.js --o dist/esm.es6.min.js",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "bundle": "rollup --config ./rollup.config.js",
+    "transpile:es6": "babel src --out-dir dist/esm.es6 && babel src --out-dir dist/cjs.es6 --plugins=transform-es2015-modules-commonjs",
+    "transpile:es5": "buble dist/umd.es6.js --yes dangerousForOf -o dist/umd.es5.js && buble dist/esm.es6 --yes dangerousForOf --no modules -o dist/esm.es5 && buble dist/cjs.es6 --yes dangerousForOf -o dist/cjs.es5",
+    "minify": "minify dist/umd.es6.js --o dist/umd.es6.min.js && minify dist/umd.es5.js --o dist/umd.es5.min.js",
+    "build": "rm -rf dist && npm run bundle && npm run transpile:es6 && npm run transpile:es5 && npm run minify"
   },
   "author": {
     "name": "Miklos Bertalan",
@@ -41,35 +44,35 @@
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-core": "6.25.0",
-    "babel-eslint": "^7.2.3",
     "babel-minify": "^0.2.0",
-    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
     "babel-preset-es2016": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "buble": "^0.15.2",
     "chai": "^4.1.1",
+    "coveralls": "^2.13.1",
     "karma": "^1.7.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-mocha": "^1.3.0",
     "karma-coverage": "^1.1.1",
+    "karma-mocha": "^1.3.0",
     "karma-rollup-preprocessor": "^5.0.1",
     "karma-source-map-support": "^1.2.0",
-    "rollup": "^0.49.0",
-    "rollup-plugin-commonjs": "^8.2.0",
-    "rollup-plugin-babel": "^3.0.2",
-    "rollup-plugin-coverage": "^0.1.4",
-    "rollup-plugin-node-resolve": "^3.0.0",
     "mocha": "^3.5.0",
     "nyc": "11.1.0",
     "pre-push": "^0.1.1",
-    "standard": "^10.0.3",
-    "coveralls": "^2.13.1",
-    "prettier-standard": "^6.0.0"
+    "prettier-standard": "^6.0.0",
+    "rollup": "^0.49.0",
+    "rollup-plugin-babel": "^3.0.2",
+    "rollup-plugin-commonjs": "^8.2.0",
+    "rollup-plugin-coverage": "^0.1.4",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "standard": "^10.0.3"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=6.5.0"
   },
   "standard": {
     "env": [
