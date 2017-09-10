@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observable, observe, unqueue, nextTick } from '../src'
+import { observable, observe, unqueue, nextTick } from '@nx-js/observer-util'
 
 describe('unqueue', () => {
   it('should remove the observed function from the queue', async () => {

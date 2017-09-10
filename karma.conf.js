@@ -2,12 +2,17 @@ const resolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
 const babel = require('rollup-plugin-babel')
 const coverage = require('rollup-plugin-coverage')
+const alias = require('rollup-plugin-alias')
+const path = require('path')
+
+const bundleType = process.env.BUNDLE_TYPE
+const bundlePath = bundleType ? `dist/${bundleType}.js` : 'src/index.js'
 
 module.exports = function (config) {
   config.set({
     frameworks: ['mocha', 'chai', 'source-map-support'],
     files: ['tests/**/*.test.js'],
-    reporters: ['progress', 'coverage'],
+    reporters: bundleType ? ['progress'] : ['progress', 'coverage'],
     preprocessors: {
       'tests/**/*.test.js': ['rollup']
     },
@@ -19,6 +24,9 @@ module.exports = function (config) {
             'node_modules/chai/index.js': ['expect']
           }
         }),
+        alias({
+          '@nx-js/observer-util': path.resolve(bundlePath)
+        }),
         coverage({
           include: ['src/**/*.js']
         }),
@@ -27,7 +35,7 @@ module.exports = function (config) {
         })
       ],
       format: 'iife',
-      name: 'observerUtil',
+      name: 'observer',
       sourcemap: 'inline'
     },
     coverageReporter: {

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, isObservable } from '../../src'
+import { observable, isObservable } from '@nx-js/observer-util'
 
 describe('Date', () => {
   it('should not be converted to observable', () => {

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, isObservable } from '../src'
+import { observable, isObservable } from '@nx-js/observer-util'
 
 describe('isObservable', () => {
   it('should throw a TypeError on invalid arguments', () => {

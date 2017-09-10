@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observable, observe, unobserve, nextTick } from '../src'
+import { observable, observe, unobserve, nextTick } from '@nx-js/observer-util'
 
 describe('unobserve', () => {
   it('should unobserve the observed function', async () => {

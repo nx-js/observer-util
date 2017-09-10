@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, unobserve, observable, nextTick } from '../src'
+import { observe, unobserve, observable, nextTick } from '@nx-js/observer-util'
 
 describe('observe', () => {
   it('should throw TypeError on invalid first argument', () => {

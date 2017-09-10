@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observe, exec, observable, nextTick } from '../src'
+import { observe, exec, observable, nextTick } from '@nx-js/observer-util'
 
 describe('exec', () => {
   it('should track the newly discovered function parts', async () => {

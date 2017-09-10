@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, nextTick } from '../../src'
+import { observable, observe, nextTick } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('Set', () => {
