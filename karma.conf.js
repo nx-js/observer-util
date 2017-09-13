@@ -5,6 +5,7 @@ const coverage = require('rollup-plugin-coverage')
 const alias = require('rollup-plugin-alias')
 const path = require('path')
 
+process.env.NODE_ENV = 'test'
 const bundleType = process.env.BUNDLE_TYPE
 const bundlePath = bundleType ? `dist/${bundleType}.js` : 'src/index.js'
 
@@ -40,10 +41,7 @@ module.exports = function (config) {
     },
     coverageReporter: {
       dir: 'coverage',
-      reporters: [
-        { type: 'lcov', subdir: '.' },
-        { type: 'text-summary' }
-      ]
+      reporters: [{ type: 'lcov', subdir: '.' }, { type: 'text-summary' }]
     },
     port: 9876,
     colors: true,

@@ -146,7 +146,7 @@ function set (obj, key, value, receiver) {
 
 function deleteProperty (obj, key) {
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
-  if (typeof key !== 'symbol' && (key in obj)) {
+  if (typeof key !== 'symbol' && key in obj) {
     queueReactionsForKey(obj, key)
     queueReactionsForKey(obj, ENUMERATE)
   }
