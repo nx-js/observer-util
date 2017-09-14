@@ -6,15 +6,32 @@ Transparent reactivity without special syntax and with a **100% language observa
 
 [React Easy State](https://github.com/solkimicreb/react-easy-state) is a React state management solution - based on this library. This library is part of the [NX framework](https://nx-framework.com).
 
-## Table of contents
+<details>
+<summary><strong>Table of Contents</strong></summary>
+<!-- Do not edit the Table of Contents, instead regenerate with `npm run build-toc` -->
 
-- [Installation](#installation)  
-- [Usage](#usage)
-- [Features](#key-features)
-- [Platfrom Support](#platform-support)
-- [API](#api)
-- [Examples](#examples)
-- [Contributing](#contributing)
+<!-- toc -->
+
+* [Installation](#installation)
+* [Usage](#usage)
+* [Key features](#key-features)
+* [Platform support](#platform-support)
+* [API](#api)
+  + [const object = observable(object)](#const-object--observableobject)
+  + [const boolean = isObservable(object)](#const-boolean--isobservableobject)
+  + [const function = observe(function)](#const-function--observefunction)
+  + [unobserve(function)](#unobservefunction)
+  + [unqueue(function)](#unqueuefunction)
+  + [exec(function)](#execfunction)
+  + [const promise = nextTick(function)](#const-promise--nexttickfunction)
+  + [observable.$raw](#observableraw)
+* [Examples](#examples)
+* [Alternative builds](#alternative-builds)
+* [Contributing](#contributing)
+
+<!-- tocstop -->
+
+</details>
 
 ## Installation
 
@@ -331,6 +348,17 @@ setTimeout(() => user.job = 'stylist')
 // logs 'Unknown is a stylist'
 setTimeout(() => delete user.name)
 ```
+
+## Alternative builds
+
+This library detects if you use ES6 or commonJS modules and serve the right format to you. The exposed bundles are transpiled to ES5 to support common tools - like UglifyJS minifying. If you would like a finer control over the provided build, you can specify them in your imports.
+
+- `@nx-js/observer-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
+- `@nx-js/observer-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
+- `@nx-js/observer-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
+- `@nx-js/observer-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
+
+If you use a bundler, set up an alias for `@nx-js/observer-util` to point to your desired build. You can learn how to do it with webpack [here](https://webpack.js.org/configuration/resolve/#resolve-alias) and with rollup [here](https://github.com/rollup/rollup-plugin-alias#usage).
 
 ## Contributing
 

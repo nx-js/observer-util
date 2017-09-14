@@ -8,12 +8,13 @@
     "dist"
   ],
   "scripts": {
-    "test": "karma start karma.conf.js",
+    "test": "node ./scripts/test.js",
     "test-builds": "node ./scripts/testBuilds.js",
     "lint": "standard",
-    "lint-fix": "prettier --ignore-path '.gitignore' --write '**/*.js' && standard --fix",
+    "lint-fix": "prettier --ignore-path '.gitignore' --write '**/!(bundle).js' && standard --fix",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "build": "node ./scripts/build.js"
+    "build": "node ./scripts/build.js",
+    "build-toc": "node ./scripts/buildToc.js"
   },
   "author": {
     "name": "Miklos Bertalan",
@@ -55,6 +56,7 @@
     "karma-mocha": "^1.3.0",
     "karma-rollup-preprocessor": "^5.0.1",
     "karma-source-map-support": "^1.2.0",
+    "markdown-toc": "^1.1.0",
     "mocha": "^3.5.0",
     "nyc": "11.1.0",
     "pre-push": "^0.1.1",
