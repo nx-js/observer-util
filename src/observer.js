@@ -168,7 +168,6 @@ function queueReaction (reaction) {
 
 function runQueuedReactions () {
   queuedReactions.forEach(runReaction)
-  queuedReactions.clear()
 }
 
 // set the reaction as the currently running one
@@ -180,6 +179,8 @@ function runReaction (reaction) {
     runningReaction = reaction
     // and reconstruct them in the get trap while the reaction is running
     reaction()
+    // remove the reaction from the queue, it can be requeued again by observable mutations
+    queuedReactions.delete(reaction)
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined
