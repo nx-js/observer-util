@@ -328,4 +328,26 @@ describe('observe', () => {
     await nextTick()
     expect(dummy).to.equal('p2p1p3')
   })
+
+  it('should not be triggered by mutating a property, which is used in an inactive branch', async () => {
+    let dummy
+    const obj = observable({ prop: 'value', run: true })
+
+    const conditionalSpy = spy(() => {
+      dummy = obj.run ? obj.prop : 'other'
+    })
+    observe(conditionalSpy)
+
+    await nextTick()
+    expect(dummy).to.equal('value')
+    expect(conditionalSpy.callCount).to.equal(1)
+    obj.run = false
+    await nextTick()
+    expect(dummy).to.equal('other')
+    expect(conditionalSpy.callCount).to.equal(2)
+    obj.prop = 'value2'
+    await nextTick()
+    expect(dummy).to.equal('other')
+    expect(conditionalSpy.callCount).to.equal(2)
+  })
 })

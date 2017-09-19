@@ -175,7 +175,10 @@ function runQueuedReactions () {
 // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
 function runReaction (reaction) {
   try {
+    // delete all existing (obj.key -> reaction) connections
+    releaseReaction(reaction)
     runningReaction = reaction
+    // and reconstruct them in the get trap while the reaction is running
     reaction()
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
