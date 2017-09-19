@@ -29,7 +29,9 @@ export function iterateReactionsForKey (obj, key, fn) {
 }
 
 export function releaseReaction (reaction) {
-  cleanupStore.get(reaction).forEach(releaseReactionKeyConnections, reaction)
+  const connections = cleanupStore.get(reaction)
+  connections.forEach(releaseReactionKeyConnections, reaction)
+  connections.clear()
 }
 
 function releaseReactionKeyConnections (reactionsForKey) {
