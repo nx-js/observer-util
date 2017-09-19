@@ -12,6 +12,7 @@ import { proxyToRaw, rawToProxy } from './internals'
 const ENUMERATE = Symbol('enumerate')
 const queuedReactions = new Set()
 let runningReaction
+let reactionProcessingQueued = false
 const handlers = { get, ownKeys, set, deleteProperty }
 
 export function observe (reaction) {
@@ -155,8 +156,9 @@ function deleteProperty (obj, key) {
 
 export function queueReactionsForKey (obj, key) {
   // register a new reaction running task, if there are no reactions queued yet
-  if (!queuedReactions.size) {
+  if (!reactionProcessingQueued) {
     nextTick(runQueuedReactions)
+    reactionProcessingQueued = true
   }
   // iterate and queue every reaction, which is triggered by obj.key mutation
   iterateReactionsForKey(obj, key, queueReaction)
@@ -168,6 +170,7 @@ function queueReaction (reaction) {
 
 function runQueuedReactions () {
   queuedReactions.forEach(runReaction)
+  reactionProcessingQueued = false
 }
 
 // set the reaction as the currently running one
