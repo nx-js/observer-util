@@ -1,5 +1,5 @@
-import nextTick from './nextTick'
 import instrumentations from './builtIns'
+import { proxyToRaw, rawToProxy } from './internals'
 import {
   storeObservable,
   storeReaction,
@@ -7,35 +7,41 @@ import {
   iterateReactionsForKey,
   releaseReaction
 } from './store'
-import { proxyToRaw, rawToProxy } from './internals'
+import {
+  priorities,
+  queueTask as queueReaction,
+  unqueueTask as unqueueReaction,
+  setTaskPriority as setReactionPriority
+} from './priorityQueue'
 
 const ENUMERATE = Symbol('enumerate')
-const queuedReactions = new Set()
 let runningReaction
-let reactionProcessingQueued = false
 const handlers = { get, ownKeys, set, deleteProperty }
 
-export function observe (reaction) {
+export function observe (reaction, priority) {
   if (typeof reaction !== 'function') {
     throw new TypeError('Reactions must be functions.')
   }
   // init basic data structures to save and cleanup (observable.prop -> reaction) connections later
   storeReaction(reaction)
+  // set up a priority for reaction processing
+  setReactionPriority(reaction, priority)
   // run the reaction once to discover what observable properties it uses
   runReaction(reaction)
+  //queueReaction(reaction)
   return reaction
 }
 
 export function unobserve (reaction) {
   // do not run this reaction anymore, even if it is already queued
-  queuedReactions.delete(reaction)
+  unqueueReaction(reaction)
   // release every (observable.prop -> reaction) connections
   releaseReaction(reaction)
 }
 
 export function unqueue (reaction) {
   // do not run this reaction, if it is not queued again by a prop mutation
-  queuedReactions.delete(reaction)
+  unqueueReaction(reaction)
 }
 
 export function exec (reaction) {
@@ -155,35 +161,19 @@ function deleteProperty (obj, key) {
 }
 
 export function queueReactionsForKey (obj, key) {
-  // register a new reaction running task, if there are no reactions queued yet
-  if (!reactionProcessingQueued) {
-    nextTick(runQueuedReactions)
-    reactionProcessingQueued = true
-  }
   // iterate and queue every reaction, which is triggered by obj.key mutation
   iterateReactionsForKey(obj, key, queueReaction)
 }
 
-function queueReaction (reaction) {
-  queuedReactions.add(reaction)
-}
-
-function runQueuedReactions () {
-  queuedReactions.forEach(runReaction)
-  reactionProcessingQueued = false
-}
-
 // set the reaction as the currently running one
 // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
-function runReaction (reaction) {
+export function runReaction (reaction) {
   try {
     // delete all existing (obj.key -> reaction) connections
     releaseReaction(reaction)
     runningReaction = reaction
     // and reconstruct them in the get trap while the reaction is running
     reaction()
-    // remove the reaction from the queue, it can be requeued again by observable mutations
-    queuedReactions.delete(reaction)
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined
