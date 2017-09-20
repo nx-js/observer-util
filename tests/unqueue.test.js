@@ -8,9 +8,9 @@ describe('unqueue', () => {
     const counter = observable({ num: 0 })
     const counterSpy = spy(() => (dummy = counter.num))
     const observer = observe(counterSpy)
-    expect(counterSpy.callCount).to.equal(1)
 
     await nextTick()
+    expect(counterSpy.callCount).to.equal(1)
     counter.num = 2
     unqueue(observer)
     await nextTick()

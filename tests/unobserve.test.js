@@ -8,9 +8,9 @@ describe('unobserve', () => {
     const counter = observable({ num: 0 })
     const counterSpy = spy(() => (dummy = counter.num))
     const observer = observe(counterSpy)
-    expect(counterSpy.callCount).to.equal(1)
 
     await nextTick()
+    expect(counterSpy.callCount).to.equal(1)
     counter.num = 'Hello'
     await nextTick()
     expect(counterSpy.callCount).to.equal(2)
@@ -27,9 +27,9 @@ describe('unobserve', () => {
     const user = observable({ name: { name: 'Bob' } })
     const nameSpy = spy(() => (dummy = user.name.name))
     const observer = observe(nameSpy)
-    expect(nameSpy.callCount).to.equal(1)
 
     await nextTick()
+    expect(nameSpy.callCount).to.equal(1)
     user.name.name = 'Dave'
     await nextTick()
     expect(nameSpy.callCount).to.equal(2)
@@ -48,11 +48,12 @@ describe('unobserve', () => {
     const observer1 = observe(() => (dummy = counter.num))
     const observer2 = observe(() => (dummy = counter.num))
     const observer3 = observe(() => (dummy = counter.num))
+
+    await nextTick()
+    expect(dummy).to.equal(0)
     unobserve(observer1)
     unobserve(observer2)
     unobserve(observer3)
-
-    await nextTick()
     counter.num++
     await nextTick()
     expect(dummy).to.equal(0)
@@ -63,9 +64,9 @@ describe('unobserve', () => {
     const counter = observable({ num: 0 })
     const counterSpy = spy(() => (dummy = counter.num))
     const observer = observe(counterSpy)
-    expect(counterSpy.callCount).to.equal(1)
 
     await nextTick()
+    expect(counterSpy.callCount).to.equal(1)
     counter.num = 'Hello'
     await nextTick()
     expect(dummy).to.equal('Hello')

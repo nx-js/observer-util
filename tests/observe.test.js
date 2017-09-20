@@ -213,17 +213,6 @@ describe('observe', () => {
     expect(dummy).to.equal(undefined)
   })
 
-  it('should run once synchronously after registration', () => {
-    let dummy
-    const obj = observable({ prop: 'value' })
-
-    const objSpy = spy(() => (dummy = obj.prop))
-    observe(objSpy)
-
-    expect(objSpy.callCount).to.equal(1)
-    expect(dummy).to.equal('value')
-  })
-
   it('should rerun maximum once per stack', async () => {
     let dummy
     const nums = observable({ num1: 0, num2: 0 })
@@ -282,11 +271,12 @@ describe('observe', () => {
     const observer2 = observe(counterSpy)
     expect(observer1).to.equal(observer2)
 
-    expect(counterSpy.callCount).to.equal(2)
+    await nextTick()
+    expect(counterSpy.callCount).to.equal(1)
     counter.num++
     await nextTick()
     expect(dummy).to.equal(1)
-    expect(counterSpy.callCount).to.equal(3)
+    expect(counterSpy.callCount).to.equal(2)
   })
 
   it('should be able to re-observe unobserved functions', async () => {
@@ -304,6 +294,7 @@ describe('observe', () => {
     await nextTick()
     expect(dummy).to.equal(1)
     observe(observer)
+    await nextTick()
     expect(dummy).to.equal(2)
     counter.num++
     await nextTick()
