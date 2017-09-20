@@ -41,10 +41,7 @@ export function queueTask (task) {
 
 export function unqueueTask (task) {
   const priority = task[PRIORITY]
-  const queueWithPriority = queue[priority]
-  if (queueWithPriority) {
-    queueWithPriority.delete(task)
-  }
+  queue[priority].delete(task)
 }
 
 export function runQueuedTasks () {
