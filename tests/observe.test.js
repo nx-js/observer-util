@@ -272,11 +272,11 @@ describe('observe', () => {
     expect(observer1).to.equal(observer2)
 
     await nextTick()
-    expect(counterSpy.callCount).to.equal(1)
+    expect(counterSpy.callCount).to.equal(2)
     counter.num++
     await nextTick()
     expect(dummy).to.equal(1)
-    expect(counterSpy.callCount).to.equal(2)
+    expect(counterSpy.callCount).to.equal(3)
   })
 
   it('should be able to re-observe unobserved functions', async () => {

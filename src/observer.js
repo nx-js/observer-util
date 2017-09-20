@@ -7,12 +7,7 @@ import {
   iterateReactionsForKey,
   releaseReaction
 } from './store'
-import {
-  priorities,
-  queueTask as queueReaction,
-  unqueueTask as unqueueReaction,
-  setTaskPriority as setReactionPriority
-} from './priorityQueue'
+import { priorities, initReaction, queueReaction, unqueueReaction, setReactionPriority } from './priorityQueue'
 
 const ENUMERATE = Symbol('enumerate')
 let runningReaction
@@ -24,11 +19,9 @@ export function observe (reaction, priority) {
   }
   // init basic data structures to save and cleanup (observable.prop -> reaction) connections later
   storeReaction(reaction)
-  // set up a priority for reaction processing
-  setReactionPriority(reaction, priority)
-  // run the reaction once to discover what observable properties it uses
-  queueReaction(reaction)
-  //queueReaction(reaction)
+  // set up a priority for reaction processing and
+  // queue/run the reaction once to discover which observable properties it uses
+  initReaction(reaction, priority)
   return reaction
 }
 

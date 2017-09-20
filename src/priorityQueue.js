@@ -1,9 +1,9 @@
 import nextTick from './nextTick'
-import { runReaction as taskRunner } from './observer'
+import { runReaction as reactionRunner } from './observer'
 
 export const TARGET_FPS = 60
-const PRIORITY = Symbol('task priority')
-let taskProcessingQueued = false
+const PRIORITY = Symbol('reaction priority')
+let reactionProcessingQueued = false
 
 export const priorities = {
   CRITICAL: 'critical',
@@ -21,59 +21,85 @@ const queue = {
   [priorities.LOW]: new Set()
 }
 
-export function setTaskPriority (task, priority) {
-  // remove task from previous queue and add to new priority queue
-  priority = priority || DEFAULT_PRIORITY
+export function initReaction (reaction, priority) {
+  reaction[PRIORITY] = priority = priority || DEFAULT_PRIORITY
+  validatePriority(priority)
+
+  if (priority === priorities.CRITICAL) {
+    // critical reactions execute once synchronously on init
+    reactionRunner(reaction)
+  } else {
+    // otherwise queue it to run later
+    queueReaction(reaction)
+  }
+}
+
+export function queueReaction (reaction) {
+  const priority = reaction[PRIORITY]
+  queue[priority].add(reaction)
+  if (!reactionProcessingQueued) {
+    nextTick(runQueuedReactions)
+    reactionProcessingQueued = true
+  }
+}
+
+export function getReactionPriority (reaction, priority) {
+  return reaction[PRIORITY]
+}
+
+export function setReactionPriority (reaction, priority) {
+  validatePriority(priority)
+  const prevPriority = reaction[PRIORITY]
+  const prevQueue = queue[prevPriority]
+  if (prevQueue.has(reaction)) {
+    const nextQueue = queue[priority]
+    nextQueue.add(reaction)
+    prevQueue.delete(reaction)
+  }
+  reaction[PRIORITY] = priority
+}
+
+function validatePriority (priority) {
   if (!validPriorities.has(priority)) {
     throw new Error(`Invalid priority: ${priority}`)
   }
-  task[PRIORITY] = priority
 }
 
-export function queueTask (task) {
-  const priority = task[PRIORITY]
-  queue[priority].add(task)
-  if (!taskProcessingQueued) {
-    nextTick(runQueuedTasks)
-    taskProcessingQueued = true
-  }
+export function unqueueReaction (reaction) {
+  const priority = reaction[PRIORITY]
+  queue[priority].delete(reaction)
 }
 
-export function unqueueTask (task) {
-  const priority = task[PRIORITY]
-  queue[priority].delete(task)
-}
-
-export function runQueuedTasks () {
+export function runQueuedReactions () {
   const startDate = Date.now()
   const interval = 1000 / TARGET_FPS
 
-  // critical tasks must all execute before the next frame
-  const criticalTasks = queue[priorities.CRITICAL]
-  criticalTasks.forEach(taskRunner)
-  criticalTasks.clear()
-  // high-prio tasks can run if there is free time remaining
+  // critical reactions must all execute before the next frame
+  const criticalReactions = queue[priorities.CRITICAL]
+  criticalReactions.forEach(reactionRunner)
+  criticalReactions.clear()
+  // high-prio reactions can run if there is free time remaining
   const isHighPrioEmpty = processQueue(priorities.HIGH, startDate, interval)
-  // low-prio tasks can run if there is free time and no more high-prio tasks
+  // low-prio reactions can run if there is free time and no more high-prio reactions
   const isLowPrioEmpty = processQueue(priorities.LOW, startDate, interval)
 
   if (isHighPrioEmpty && isLowPrioEmpty) {
-    taskProcessingQueued = false
+    reactionProcessingQueued = false
   } else {
-    nextTick(processQueuedTasks)
+    nextTick(processQueuedReactions)
   }
 }
 
 function processQueue (priority, startDate, interval) {
   const queueWithPriority = queue[priority]
   const iterator = queueWithPriority[Symbol.iterator]()
-  let task = iterator.next()
+  let reaction = iterator.next()
   while (startDate - Date.now() < interval) {
-    if (task.done) {
+    if (reaction.done) {
       return true
     }
-    taskRunner(task.value)
-    queueWithPriority.delete(task)
-    task = iterator.next()
+    reactionRunner(reaction.value)
+    queueWithPriority.delete(reaction)
+    reaction = iterator.next()
   }
 }
