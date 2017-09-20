@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, nextTick } from '@nx-js/observer-util'
+import { observable, observe, nextRun } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('WeakSet', () => {
@@ -13,30 +13,30 @@ describe('WeakSet', () => {
     let dummy
     const value = {}
     const set = observable(new WeakSet())
-    observe(() => (dummy = set.has(value)))
+    const reaction = observe(() => (dummy = set.has(value)))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     set.add(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
     set.delete(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
   })
 
   it('should observe custom property mutations', async () => {
     let dummy
     const set = observable(new WeakSet())
-    observe(() => (dummy = set.customProp))
+    const reaction = observe(() => (dummy = set.customProp))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     set.customProp = 'Hello World'
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('Hello World')
     delete set.customProp
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
@@ -46,25 +46,25 @@ describe('WeakSet', () => {
     const set = observable(new WeakSet())
 
     const setSpy = spy(() => (dummy = set.has(value)))
-    observe(setSpy)
+    const reaction = observe(setSpy)
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(1)
     set.add(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
     expect(setSpy.callCount).to.equal(2)
     set.add(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
     expect(setSpy.callCount).to.equal(2)
     set.delete(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(3)
     set.delete(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(3)
   })
@@ -73,12 +73,12 @@ describe('WeakSet', () => {
     const value = {}
     let dummy
     const set = observable(new WeakSet())
-    observe(() => (dummy = set.$raw.has(value)))
+    const reaction = observe(() => (dummy = set.$raw.has(value)))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     set.add(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
   })
 
@@ -86,12 +86,12 @@ describe('WeakSet', () => {
     const value = {}
     let dummy
     const set = observable(new WeakSet())
-    observe(() => (dummy = set.has(value)))
+    const reaction = observe(() => (dummy = set.has(value)))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     set.$raw.add(value)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
   })
 })

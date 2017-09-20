@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, nextTick } from '@nx-js/observer-util'
+import { observable, observe, nextRun } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('Set', () => {
@@ -12,116 +12,116 @@ describe('Set', () => {
   it('should observe mutations', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.has('value')))
+    const reaction = observe(() => (dummy = set.has('value')))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     set.add('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
     set.delete('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
   })
 
   it('should observe for of iteration', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => {
+    const reaction = observe(() => {
       dummy = 0
       for (let num of set) {
         dummy += num
       }
     })
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add(2)
     set.add(1)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
     set.delete(2)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
     set.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
   it('should observe forEach iteration', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => {
+    const reaction = observe(() => {
       dummy = 0
       set.forEach(num => (dummy += num))
     })
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add(2)
     set.add(1)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
     set.delete(2)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
     set.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
   it('should observe values iteration', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => {
+    const reaction = observe(() => {
       dummy = 0
       for (let num of set.values()) {
         dummy += num
       }
     })
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add(2)
     set.add(1)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
     set.delete(2)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
     set.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
   it('should observe keys iteration', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => {
+    const reaction = observe(() => {
       dummy = 0
       for (let num of set.keys()) {
         dummy += num
       }
     })
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add(2)
     set.add(1)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
     set.delete(2)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
     set.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
   it('should observe entries iteration', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => {
+    const reaction = observe(() => {
       dummy = 0
       // eslint-disable-next-line no-unused-vars
       for (let [key, num] of set.entries()) {
@@ -129,51 +129,51 @@ describe('Set', () => {
       }
     })
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add(2)
     set.add(1)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
     set.delete(2)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
     set.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
   it('should observe custom property mutations', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.customProp))
+    const reaction = observe(() => (dummy = set.customProp))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     set.customProp = 'Hello World'
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('Hello World')
     delete set.customProp
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
   it('should observe size mutations', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.size))
+    const reaction = observe(() => (dummy = set.size))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add('value')
     set.add('value2')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(2)
     set.delete('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
     set.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
@@ -181,29 +181,29 @@ describe('Set', () => {
     let dummy
     const set = observable(new Set())
     const setSpy = spy(() => (dummy = set.has('value')))
-    observe(setSpy)
+    const reaction = observe(setSpy)
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(1)
     set.add('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
     expect(setSpy.callCount).to.equal(2)
     set.add('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
     expect(setSpy.callCount).to.equal(2)
     set.delete('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(3)
     set.delete('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(3)
     set.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(3)
   })
@@ -211,19 +211,19 @@ describe('Set', () => {
   it('should not observe $raw data', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.$raw.has('value')))
+    const reaction = observe(() => (dummy = set.$raw.has('value')))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     set.add('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
   })
 
   it('should not observe $raw iterations', async () => {
     let dummy = 0
     const set = observable(new Set())
-    observe(() => {
+    const reaction = observe(() => {
       dummy = 0
       for (let [num] of set.$raw.entries()) {
         dummy += num
@@ -242,57 +242,57 @@ describe('Set', () => {
       }
     })
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add(2)
     set.add(3)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.delete(2)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
   it('should not be triggered by $raw mutations', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.has('value')))
+    const reaction = observe(() => (dummy = set.has('value')))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     set.$raw.add('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(false)
     dummy = true
     set.$raw.delete('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
     set.$raw.clear()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(true)
   })
 
   it('should not observe $raw size mutations', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.$raw.size))
+    const reaction = observe(() => (dummy = set.$raw.size))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.add('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 
   it('should not be triggered by $raw size mutations', async () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.size))
+    const reaction = observe(() => (dummy = set.size))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     set.$raw.add('value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
   })
 })

@@ -65,6 +65,11 @@ function validatePriority (priority) {
   }
 }
 
+export function isReactionQueued (reaction) {
+  const priority = reaction[PRIORITY]
+  return queue[priority].has(reaction)
+}
+
 export function unqueueReaction (reaction) {
   const priority = reaction[PRIORITY]
   queue[priority].delete(reaction)

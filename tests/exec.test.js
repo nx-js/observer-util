@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observe, exec, observable, nextTick } from '@nx-js/observer-util'
+import { observe, exec, observable, nextRun } from '@nx-js/observer-util'
 
 describe('exec', () => {
   it('should track the newly discovered function parts', async () => {
@@ -7,7 +7,7 @@ describe('exec', () => {
     let dummy
 
     const counter = observable({ condition: false, num: 0 })
-    const observer = observe(conditionalIncrement)
+    const reaction = observe(conditionalIncrement)
 
     function conditionalIncrement () {
       if (condition) {
@@ -15,17 +15,17 @@ describe('exec', () => {
       }
     }
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     counter.num++
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     condition = true
-    exec(observer)
-    await nextTick()
+    exec(reaction)
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
     counter.num++
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(2)
   })
 })

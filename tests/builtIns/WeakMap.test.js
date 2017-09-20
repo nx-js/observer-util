@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, nextTick } from '@nx-js/observer-util'
+import { observable, observe, nextRun } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('WeakMap', () => {
@@ -13,30 +13,30 @@ describe('WeakMap', () => {
     let dummy
     const key = {}
     const map = observable(new WeakMap())
-    observe(() => (dummy = map.get(key)))
+    const reaction = observe(() => (dummy = map.get(key)))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     map.set(key, 'value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     map.delete(key)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
   it('should observe custom property mutations', async () => {
     let dummy
     const map = observable(new WeakMap())
-    observe(() => (dummy = map.customProp))
+    const reaction = observe(() => (dummy = map.customProp))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     map.customProp = 'Hello World'
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('Hello World')
     delete map.customProp
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
@@ -45,25 +45,25 @@ describe('WeakMap', () => {
     const key = {}
     const map = observable(new WeakMap())
     const mapSpy = spy(() => (dummy = map.get(key)))
-    observe(mapSpy)
+    const reaction = observe(mapSpy)
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     expect(mapSpy.callCount).to.equal(1)
     map.set(key, 'value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     expect(mapSpy.callCount).to.equal(2)
     map.set(key, 'value')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     expect(mapSpy.callCount).to.equal(2)
     map.delete(key)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     expect(mapSpy.callCount).to.equal(3)
     map.delete(key)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     expect(mapSpy.callCount).to.equal(3)
   })
@@ -72,15 +72,15 @@ describe('WeakMap', () => {
     const key = {}
     let dummy
     const map = observable(new WeakMap())
-    observe(() => (dummy = map.$raw.get(key)))
+    const reaction = observe(() => (dummy = map.$raw.get(key)))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     map.set(key, 'Hello')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     map.delete(key)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
@@ -88,15 +88,15 @@ describe('WeakMap', () => {
     const key = {}
     let dummy
     const map = observable(new WeakMap())
-    observe(() => (dummy = map.get(key)))
+    const reaction = observe(() => (dummy = map.get(key)))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     map.$raw.set(key, 'Hello')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     map.$raw.delete(key)
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 })

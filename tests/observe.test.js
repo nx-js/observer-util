@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, unobserve, observable, nextTick } from '@nx-js/observer-util'
+import { observe, unobserve, observable, nextRun } from '@nx-js/observer-util'
 
 describe('observe', () => {
   it('should throw TypeError on invalid first argument', () => {
@@ -12,38 +12,38 @@ describe('observe', () => {
   it('should observe basic properties', async () => {
     let dummy
     const counter = observable({ num: 0 })
-    observe(() => (dummy = counter.num))
+    const reaction = observe(() => (dummy = counter.num))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     counter.num = 7
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(7)
   })
 
   it('should observe multiple properties', async () => {
     let dummy
     const counter = observable({ num1: 0, num2: 0, num3: 0 })
-    observe(() => (dummy = counter.num1 + counter.num2 + counter.num3))
+    const reaction = observe(() => (dummy = counter.num1 + counter.num2 + counter.num3))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     counter.num1 = counter.num2 = counter.num3 = 7
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(21)
   })
 
-  it('should handle multiple observers', async () => {
+  it('should handle multiple reactions', async () => {
     let dummy1, dummy2
     const counter = observable({ num: 0 })
-    observe(() => (dummy1 = counter.num))
-    observe(() => (dummy2 = counter.num))
+    const reaction1 = observe(() => (dummy1 = counter.num))
+    const reaction2 = observe(() => (dummy2 = counter.num))
 
-    await nextTick()
+    await Promise.all([nextRun(reaction1), nextRun(reaction2)])
     expect(dummy1).to.equal(0)
     expect(dummy2).to.equal(0)
     counter.num++
-    await nextTick()
+    await Promise.all([nextRun(reaction1), nextRun(reaction2)])
     expect(dummy1).to.equal(1)
     expect(dummy2).to.equal(1)
   })
@@ -51,24 +51,24 @@ describe('observe', () => {
   it('should observe nested properties', async () => {
     let dummy
     const counter = observable({ nested: { num: 0 } })
-    observe(() => (dummy = counter.nested.num))
+    const reaction = observe(() => (dummy = counter.nested.num))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     counter.nested.num = 8
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(8)
   })
 
   it('should observe delete operations', async () => {
     let dummy
     const obj = observable({ prop: 'value' })
-    observe(() => (dummy = obj.prop))
+    const reaction = observe(() => (dummy = obj.prop))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     delete obj.prop
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
@@ -77,69 +77,69 @@ describe('observe', () => {
     const counter = observable({ num: 0 })
     const parentCounter = observable({ num: 2 })
     Object.setPrototypeOf(counter, parentCounter)
-    observe(() => (dummy = counter.num))
+    const reaction = observe(() => (dummy = counter.num))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     delete counter.num
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(2)
     parentCounter.num = 4
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(4)
     counter.num = 3
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
   })
 
   it('should observe function call chains', async () => {
     let dummy
     const counter = observable({ num: 0 })
-    observe(() => (dummy = getNum()))
+    const reaction = observe(() => (dummy = getNum()))
 
     function getNum () {
       return counter.num
     }
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     counter.num = 2
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(2)
   })
 
   it('should observe iteration', async () => {
     let dummy
     const list = observable(['Hello'])
-    observe(() => (dummy = list.join(' ')))
+    const reaction = observe(() => (dummy = list.join(' ')))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('Hello')
     list.push('World!')
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('Hello World!')
     list.shift()
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('World!')
   })
 
   it('should observe enumeration', async () => {
     let dummy = 0
     const numbers = observable({ num1: 3 })
-    observe(() => {
+    const reaction = observe(() => {
       dummy = 0
       for (let key in numbers) {
         dummy += numbers[key]
       }
     })
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
     numbers.num2 = 4
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(7)
     delete numbers.num1
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(4)
   })
 
@@ -147,15 +147,15 @@ describe('observe', () => {
     const key = Symbol('symbol keyed prop')
     let dummy
     const obj = observable({ [key]: 'value' })
-    observe(() => (dummy = obj[key]))
+    const reaction = observe(() => (dummy = obj[key]))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     obj[key] = 'newValue'
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     delete obj[key]
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
   })
 
@@ -165,12 +165,12 @@ describe('observe', () => {
 
     let dummy
     const obj = observable({ func: oldFunc })
-    observe(() => (dummy = obj.func))
+    const reaction = observe(() => (dummy = obj.func))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(oldFunc)
     obj.func = newFunc
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(oldFunc)
   })
 
@@ -179,12 +179,12 @@ describe('observe', () => {
     const obj = observable({ prop: 'value' })
 
     const propSpy = spy(() => (dummy = obj.prop))
-    observe(propSpy)
+    const reaction = observe(propSpy)
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     obj.prop = 'value'
-    await nextTick()
+    await nextRun(reaction)
     expect(propSpy.callCount).to.equal(1)
     expect(dummy).to.equal('value')
   })
@@ -192,24 +192,24 @@ describe('observe', () => {
   it('should not observe $raw mutations', async () => {
     let dummy
     const obj = observable()
-    observe(() => (dummy = obj.$raw.prop))
+    const reaction = observe(() => (dummy = obj.$raw.prop))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     obj.prop = 'value'
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
   it('should not be triggered by $raw mutations', async () => {
     let dummy
     const obj = observable()
-    observe(() => (dummy = obj.prop))
+    const reaction = observe(() => (dummy = obj.prop))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
     obj.$raw.prop = 'value'
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(undefined)
   })
 
@@ -218,15 +218,15 @@ describe('observe', () => {
     const nums = observable({ num1: 0, num2: 0 })
 
     const numsSpy = spy(() => (dummy = nums.num1 + nums.num2))
-    observe(numsSpy)
+    const reaction = observe(numsSpy)
 
-    await nextTick()
+    await nextRun(reaction)
     expect(numsSpy.callCount).to.equal(1)
     expect(dummy).to.equal(0)
     nums.num1 = 1
     nums.num2 = 3
     nums.num1 = 2
-    await nextTick()
+    await nextRun(reaction)
     expect(numsSpy.callCount).to.equal(2)
     expect(dummy).to.equal(5)
   })
@@ -237,21 +237,21 @@ describe('observe', () => {
 
     const spy1 = spy(() => (obj1.prop = obj2.prop))
     const spy2 = spy(() => (obj2.prop = obj1.prop))
-    observe(spy1)
-    observe(spy2)
+    const reaction1 = observe(spy1)
+    const reaction2 = observe(spy2)
 
-    await nextTick()
+    await Promise.all([nextRun(reaction1), nextRun(reaction2)])
     expect(obj1.prop).to.equal('value2')
     expect(obj2.prop).to.equal('value2')
     expect(spy1.callCount).to.equal(1)
     expect(spy2.callCount).to.equal(1)
     obj1.prop = 'Hello'
-    await nextTick()
+    await Promise.all([nextRun(reaction1), nextRun(reaction2)])
     expect(obj2.prop).to.equal('Hello')
     expect(spy1.callCount).to.equal(2)
     expect(spy2.callCount).to.equal(2)
     obj2.prop = 'World!'
-    await nextTick()
+    await Promise.all([nextRun(reaction1), nextRun(reaction2)])
     expect(obj1.prop).to.equal('World!')
     expect(spy1.callCount).to.equal(3)
     expect(spy2.callCount).to.equal(3)
@@ -259,22 +259,22 @@ describe('observe', () => {
 
   it('should return the passed function', () => {
     const fn = () => {}
-    const observer = observe(fn)
-    expect(observer).to.equal(fn)
+    const reaction = observe(fn)
+    expect(reaction).to.equal(fn)
   })
 
   it('should simply run the function once on multiple observation of the same function', async () => {
     let dummy
     const counter = observable({ num: 0 })
     const counterSpy = spy(() => (dummy = counter.num))
-    const observer1 = observe(counterSpy)
-    const observer2 = observe(counterSpy)
-    expect(observer1).to.equal(observer2)
+    const reaction1 = observe(counterSpy)
+    const reaction2 = observe(counterSpy)
+    expect(reaction1).to.equal(reaction2)
 
-    await nextTick()
+    await nextRun(reaction1)
     expect(counterSpy.callCount).to.equal(2)
     counter.num++
-    await nextTick()
+    await nextRun(reaction1)
     expect(dummy).to.equal(1)
     expect(counterSpy.callCount).to.equal(3)
   })
@@ -282,22 +282,22 @@ describe('observe', () => {
   it('should be able to re-observe unobserved functions', async () => {
     let dummy = 0
     const counter = observable({ num: 0 })
-    const observer = observe(() => (dummy = counter.num))
+    const reaction = observe(() => (dummy = counter.num))
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(0)
     counter.num++
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
-    unobserve(observer)
+    unobserve(reaction)
     counter.num++
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(1)
-    observe(observer)
-    await nextTick()
+    observe(reaction)
+    await nextRun(reaction)
     expect(dummy).to.equal(2)
     counter.num++
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal(3)
   })
 
@@ -305,18 +305,18 @@ describe('observe', () => {
     let dummy = ''
     const obj = observable({ prop1: 'val1', prop2: 'val2', prop3: 'val3' })
 
-    observe(() => (dummy += obj.prop1))
-    observe(() => (dummy += obj.prop2))
-    observe(() => (dummy += obj.prop3))
+    const reaction1 = observe(() => (dummy += obj.prop1))
+    const reaction2 = observe(() => (dummy += obj.prop2))
+    const reaction3 = observe(() => (dummy += obj.prop3))
 
-    await nextTick()
+    await Promise.all([nextRun(reaction1), nextRun(reaction2), nextRun(reaction3)])
     expect(dummy).to.equal('val1val2val3')
     dummy = ''
     obj.prop2 = 'p'
     obj.prop1 = 'p1'
     obj.prop3 = 'p3'
     obj.prop2 = 'p2'
-    await nextTick()
+    await Promise.all([nextRun(reaction1), nextRun(reaction2), nextRun(reaction3)])
     expect(dummy).to.equal('p2p1p3')
   })
 
@@ -327,17 +327,17 @@ describe('observe', () => {
     const conditionalSpy = spy(() => {
       dummy = obj.run ? obj.prop : 'other'
     })
-    observe(conditionalSpy)
+    const reaction = observe(conditionalSpy)
 
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('value')
     expect(conditionalSpy.callCount).to.equal(1)
     obj.run = false
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('other')
     expect(conditionalSpy.callCount).to.equal(2)
     obj.prop = 'value2'
-    await nextTick()
+    await nextRun(reaction)
     expect(dummy).to.equal('other')
     expect(conditionalSpy.callCount).to.equal(2)
   })
