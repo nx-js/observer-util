@@ -27,7 +27,7 @@ export function observe (reaction, priority) {
   // set up a priority for reaction processing
   setReactionPriority(reaction, priority)
   // run the reaction once to discover what observable properties it uses
-  runReaction(reaction)
+  queueReaction(reaction)
   //queueReaction(reaction)
   return reaction
 }
