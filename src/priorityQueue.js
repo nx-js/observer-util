@@ -6,7 +6,6 @@ const PRIORITY = Symbol('task priority')
 let taskProcessingQueued = false
 
 export const priorities = {
-  SYNC: 'sync',
   CRITICAL: 'critical',
   HIGH: 'high',
   LOW: 'low'
@@ -14,7 +13,7 @@ export const priorities = {
 
 const DEFAULT_PRIORITY = priorities.CRITICAL
 
-const validPriorities = new Set(['sync', 'critical', 'high', 'low'])
+const validPriorities = new Set(['critical', 'high', 'low'])
 
 const queue = {
   [priorities.CRITICAL]: new Set(),
@@ -24,7 +23,6 @@ const queue = {
 
 export function setTaskPriority (task, priority) {
   // remove task from previous queue and add to new priority queue
-  // if it is set to sync -> run the task right away??!
   priority = priority || DEFAULT_PRIORITY
   if (!validPriorities.has(priority)) {
     throw new Error(`Invalid priority: ${priority}`)
@@ -34,14 +32,10 @@ export function setTaskPriority (task, priority) {
 
 export function queueTask (task) {
   const priority = task[PRIORITY]
-  if (priority === priorities.SYNC) {
-    task()
-  } else {
-    queue[priority].add(task)
-    if (!taskProcessingQueued) {
-      nextTick(runQueuedTasks)
-      taskProcessingQueued = true
-    }
+  queue[priority].add(task)
+  if (!taskProcessingQueued) {
+    nextTick(runQueuedTasks)
+    taskProcessingQueued = true
   }
 }
 
