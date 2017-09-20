@@ -1,4 +1,4 @@
-const nextTick = (typeof window === 'undefined') ? process.nextTick : requestAnimationFrame
+const nextTick = (typeof requestAnimationFrame !== 'undefined') ? requestAnimationFrame : setTimeout
 
 export default function (task) {
   if (!task) {
