@@ -91,7 +91,7 @@ export function runQueuedReactions () {
   if (isHighPrioEmpty && isLowPrioEmpty) {
     reactionProcessingQueued = false
   } else {
-    nextTick(processQueuedReactions)
+    nextTick(runQueuedReactions)
   }
 }
 

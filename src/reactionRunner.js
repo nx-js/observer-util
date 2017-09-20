@@ -1,4 +1,8 @@
-import { registerReactionForKey, iterateReactionsForKey, releaseReaction } from './store'
+import {
+  registerReactionForKey,
+  iterateReactionsForKey,
+  releaseReaction
+} from './store'
 import { queueReaction, isReactionQueued } from './priorityQueue'
 
 const AFTER_REACTION = Symbol('after reaction')

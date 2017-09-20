@@ -1,4 +1,7 @@
-import { registerRunningReactionForKey, queueReactionsForKey } from '../reactionRunner'
+import {
+  registerRunningReactionForKey,
+  queueReactionsForKey
+} from '../reactionRunner'
 import { proxyToRaw } from '../internals'
 
 const ITERATE = Symbol('iterate')

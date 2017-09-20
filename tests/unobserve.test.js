@@ -49,13 +49,21 @@ describe('unobserve', () => {
     const reaction2 = observe(() => (dummy = counter.num))
     const reaction3 = observe(() => (dummy = counter.num))
 
-    await Promise.all([nextRun(reaction1), nextRun(reaction2), nextRun(reaction3)])
+    await Promise.all([
+      nextRun(reaction1),
+      nextRun(reaction2),
+      nextRun(reaction3)
+    ])
     expect(dummy).to.equal(0)
     unobserve(reaction1)
     unobserve(reaction2)
     unobserve(reaction3)
     counter.num++
-    await Promise.all([nextRun(reaction1), nextRun(reaction2), nextRun(reaction3)])
+    await Promise.all([
+      nextRun(reaction1),
+      nextRun(reaction2),
+      nextRun(reaction3)
+    ])
     expect(dummy).to.equal(0)
   })
 

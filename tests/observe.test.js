@@ -24,7 +24,9 @@ describe('observe', () => {
   it('should observe multiple properties', async () => {
     let dummy
     const counter = observable({ num1: 0, num2: 0, num3: 0 })
-    const reaction = observe(() => (dummy = counter.num1 + counter.num2 + counter.num3))
+    const reaction = observe(
+      () => (dummy = counter.num1 + counter.num2 + counter.num3)
+    )
 
     await nextRun(reaction)
     expect(dummy).to.equal(0)
@@ -309,14 +311,22 @@ describe('observe', () => {
     const reaction2 = observe(() => (dummy += obj.prop2))
     const reaction3 = observe(() => (dummy += obj.prop3))
 
-    await Promise.all([nextRun(reaction1), nextRun(reaction2), nextRun(reaction3)])
+    await Promise.all([
+      nextRun(reaction1),
+      nextRun(reaction2),
+      nextRun(reaction3)
+    ])
     expect(dummy).to.equal('val1val2val3')
     dummy = ''
     obj.prop2 = 'p'
     obj.prop1 = 'p1'
     obj.prop3 = 'p3'
     obj.prop2 = 'p2'
-    await Promise.all([nextRun(reaction1), nextRun(reaction2), nextRun(reaction3)])
+    await Promise.all([
+      nextRun(reaction1),
+      nextRun(reaction2),
+      nextRun(reaction3)
+    ])
     expect(dummy).to.equal('p2p1p3')
   })
 

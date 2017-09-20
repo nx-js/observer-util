@@ -2,7 +2,6 @@ import { expect } from 'chai'
 import { observable, observe, nextRun } from '@nx-js/observer-util'
 
 describe('nextRun', () => {
-
   it('should return a Promise, which resolves after the reactions run', async () => {
     let dummy
 

@@ -1,6 +1,10 @@
 import { observable } from './observable'
 import { proxyToRaw, rawToProxy } from './internals'
-import { registerRunningReactionForKey, queueReactionsForKey, hasRunningReaction } from './reactionRunner'
+import {
+  registerRunningReactionForKey,
+  queueReactionsForKey,
+  hasRunningReaction
+} from './reactionRunner'
 
 const ENUMERATE = Symbol('enumerate')
 
