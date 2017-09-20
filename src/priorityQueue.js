@@ -1,5 +1,5 @@
 import nextTick from './nextTick'
-import { runReaction as reactionRunner } from './observer'
+import { runReaction } from './reactionRunner'
 
 export const TARGET_FPS = 60
 const PRIORITY = Symbol('reaction priority')
@@ -27,7 +27,7 @@ export function initReaction (reaction, priority) {
 
   if (priority === priorities.CRITICAL) {
     // critical reactions execute once synchronously on init
-    reactionRunner(reaction)
+    runReaction(reaction)
   } else {
     // otherwise queue it to run later
     queueReaction(reaction)
@@ -43,11 +43,11 @@ export function queueReaction (reaction) {
   }
 }
 
-export function getReactionPriority (reaction, priority) {
+export function getPriority (reaction) {
   return reaction[PRIORITY]
 }
 
-export function setReactionPriority (reaction, priority) {
+export function setPriority (reaction, priority) {
   validatePriority(priority)
   const prevPriority = reaction[PRIORITY]
   const prevQueue = queue[prevPriority]
@@ -76,7 +76,7 @@ export function runQueuedReactions () {
 
   // critical reactions must all execute before the next frame
   const criticalReactions = queue[priorities.CRITICAL]
-  criticalReactions.forEach(reactionRunner)
+  criticalReactions.forEach(runReaction)
   criticalReactions.clear()
   // high-prio reactions can run if there is free time remaining
   const isHighPrioEmpty = processQueue(priorities.HIGH, startDate, interval)
@@ -98,7 +98,7 @@ function processQueue (priority, startDate, interval) {
     if (reaction.done) {
       return true
     }
-    reactionRunner(reaction.value)
+    runReaction(reaction.value)
     queueWithPriority.delete(reaction)
     reaction = iterator.next()
   }

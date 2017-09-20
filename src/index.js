@@ -1,11 +1,6 @@
 import nextTick from './nextTick'
 
-export {
-  observable,
-  isObservable,
-  observe,
-  unobserve,
-  unqueue,
-  exec
-} from './observer'
+export { observe, unobserve, unqueue, exec } from './observer'
+export { observable, isObservable } from './observable'
+export { getPriority, setPriority } from './priorityQueue'
 export { nextTick }
