@@ -53,14 +53,14 @@ export function runQueuedTasks () {
   criticalTasks.forEach(taskRunner)
   criticalTasks.clear()
   // high-prio tasks can run if there is free time remaining
-  processQueue(priorities.HIGH, startDate, interval)
+  const isHighPrioEmpty = processQueue(priorities.HIGH, startDate, interval)
   // low-prio tasks can run if there is free time and no more high-prio tasks
-  const isQueueEmpty = processQueue(priorities.LOW, startDate, interval)
+  const isLowPrioEmpty = processQueue(priorities.LOW, startDate, interval)
 
-  if (!isQueueEmpty) {
-    nextTick(processQueuedTasks)
-  } else {
+  if (isHighPrioEmpty && isLowPrioEmpty) {
     taskProcessingQueued = false
+  } else {
+    nextTick(processQueuedTasks)
   }
 }
 
