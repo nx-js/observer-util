@@ -1,7 +1,7 @@
 import nextTick from './nextTick'
 import { runReaction } from './reactionRunner'
 
-export const TARGET_FPS = 30
+export const TARGET_FPS = 60
 const PRIORITY = Symbol('reaction priority')
 let reactionProcessingQueued = false
 let lastRun = Date.now()
