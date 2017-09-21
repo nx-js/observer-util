@@ -49,8 +49,12 @@ export function getPriority (reaction) {
 }
 
 export function setPriority (reaction, priority) {
-  validatePriority(priority)
   const prevPriority = reaction[PRIORITY]
+  if (priority === prevPriority) {
+    return
+  }
+  validatePriority(priority)
+  
   const prevQueue = queue[prevPriority]
   if (prevQueue.has(reaction)) {
     const nextQueue = queue[priority]

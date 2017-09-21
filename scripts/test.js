@@ -18,6 +18,9 @@ const config = {
   },
   rollupPreprocessor: {
     plugins: [
+      babel({
+        exclude: 'node_modules/**'
+      }),
       resolve(),
       commonjs({
         namedExports: {
@@ -29,9 +32,6 @@ const config = {
       }),
       coverage({
         include: ['src/**/*.js']
-      }),
-      babel({
-        exclude: 'node_modules/**'
       })
     ],
     format: 'iife',
