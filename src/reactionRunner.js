@@ -17,6 +17,7 @@ export function runReaction (reaction) {
     runningReaction = reaction
     // and reconstruct them in the get trap while the reaction is running
     reaction()
+    // resolve promises for nextRun
     afterReaction(reaction)
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
