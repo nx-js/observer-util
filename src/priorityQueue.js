@@ -106,7 +106,7 @@ function processQueue (priority, interval) {
       return true
     }
     runReaction(reaction.value)
-    queueWithPriority.delete(reaction)
+    queueWithPriority.delete(reaction.value)
     reaction = iterator.next()
   }
 }
