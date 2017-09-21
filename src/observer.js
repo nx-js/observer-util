@@ -1,5 +1,5 @@
 import { storeReaction, releaseReaction } from './store'
-import { initReaction, unqueueReaction } from './priorityQueue'
+import { initReaction, queueReaction, unqueueReaction } from './priorityQueue'
 import { runReaction } from './reactionRunner'
 
 export function observe (reaction, priority) {
@@ -19,6 +19,11 @@ export function unobserve (reaction) {
   unqueueReaction(reaction)
   // release every (observable.prop -> reaction) connections
   releaseReaction(reaction)
+}
+
+export function queue (reaction) {
+  // queue the reaction to run later
+  queueReaction(reaction)
 }
 
 export function unqueue (reaction) {
