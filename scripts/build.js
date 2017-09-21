@@ -16,7 +16,7 @@ const bundles = [
         babelPlugin({
           exclude: 'node_modules/**'
         }),
-        babelPlugin(),
+        resolvePlugin(),
         externalsPlugin({ dependencies: true, peerDependecies: true })
       ]
     },
