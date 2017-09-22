@@ -30,7 +30,3 @@ export function unqueue (reaction) {
   // do not run this reaction, if it is not queued again by a prop mutation
   unqueueReaction(reaction)
 }
-
-export function exec (reaction) {
-  runReaction(reaction)
-}
