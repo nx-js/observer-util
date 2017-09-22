@@ -3,7 +3,7 @@ import { runReaction } from './reactionRunner'
 
 export const TARGET_FPS = 60
 const PRIORITY = Symbol('reaction priority')
-let lastRun = Date.now()
+let lastRun
 
 export const priorities = {
   CRITICAL: 'critical',
@@ -89,19 +89,19 @@ function runQueuedCriticalReactions () {
 }
 
 function runQueuedIdleReactions () {
+  lastRun = lastRun || Date.now()
   const interval = 1000 / TARGET_FPS
   // high-prio reactions can run if there is free time remaining
   const isHighPrioEmpty = processQueue(priorities.HIGH, interval)
   // low-prio reactions can run if there is free time and no more high-prio reactions
   const isLowPrioEmpty = processQueue(priorities.LOW, interval)
 
-  if (!(isHighPrioEmpty && isLowPrioEmpty)) {
+  if (isHighPrioEmpty && isLowPrioEmpty) {
+    lastRun = undefined
+  } else {
     nextIdlePeriod(runQueuedIdleReactions)
+    lastRun = Date.now()
   }
-
-  // issue with lastRun -> if there were frames in between this is messed up!
-  // lastRun sould be before the last animationFrame!
-  lastRun = Date.now()
 }
 
 function processQueue (priority, interval) {
