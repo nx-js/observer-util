@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { observable, observe, nextRun, priorities } from '@nx-js/observer-util'
+import { spy } from './utils'
 
 for (let key in priorities) {
   const priority = priorities[key]
@@ -22,25 +23,31 @@ for (let key in priorities) {
       let dummy
 
       const counter = observable({ num: 0 })
-      const reaction = observe(() => (dummy = counter.num), priority)
+      const counterSpy = spy(() => (dummy = counter.num))
+      const reaction = observe(counterSpy, priority)
 
       await nextRun(reaction)
       expect(dummy).to.equal(0)
+      expect(reaction.callCount).to.equal(1)
       await nextRun(reaction)
       expect(dummy).to.equal(0)
+      expect(reaction.callCount).to.equal(1)
     })
 
     it('should return the same Promise for multiple calls before the next run', async () => {
       let dummy
 
       const counter = observable({ num: 0 })
-      const reaction = observe(() => (dummy = counter.num), priority)
+      const counterSpy = spy(() => (dummy = counter.num))
+      const reaction = observe(counterSpy, priority)
 
       await nextRun(reaction)
+      expect(reaction.callCount).to.equal(1)
       counter.num++
       await nextRun(reaction)
       await nextRun(reaction)
       expect(dummy).to.equal(1)
+      expect(reaction.callCount).to.equal(2)
     })
   })
 }
