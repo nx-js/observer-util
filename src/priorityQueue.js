@@ -1,9 +1,8 @@
-import nextTick from './nextTick'
+import { nextTick, nextIdlePeriod } from './timers'
 import { runReaction } from './reactionRunner'
 
 export const TARGET_FPS = 60
 const PRIORITY = Symbol('reaction priority')
-let reactionProcessingQueued = false
 let lastRun = Date.now()
 
 export const priorities = {
@@ -38,9 +37,11 @@ export function initReaction (reaction, priority) {
 export function queueReaction (reaction) {
   const priority = reaction[PRIORITY]
   queue[priority].add(reaction)
-  if (!reactionProcessingQueued) {
-    nextTick(runQueuedReactions)
-    reactionProcessingQueued = true
+
+  if (priority === priorities.CRITICAL) {
+    nextTick(runQueuedCriticalReactions)
+  } else {
+    nextIdlePeriod(runQueuedIdleReactions)
   }
 }
 
@@ -80,23 +81,26 @@ export function unqueueReaction (reaction) {
   queue[priority].delete(reaction)
 }
 
-export function runQueuedReactions () {
+function runQueuedCriticalReactions () {
   // critical reactions must all execute before the next frame
   const criticalReactions = queue[priorities.CRITICAL]
   criticalReactions.forEach(runReaction)
   criticalReactions.clear()
+}
 
+function runQueuedIdleReactions () {
   const interval = 1000 / TARGET_FPS
   // high-prio reactions can run if there is free time remaining
   const isHighPrioEmpty = processQueue(priorities.HIGH, interval)
   // low-prio reactions can run if there is free time and no more high-prio reactions
   const isLowPrioEmpty = processQueue(priorities.LOW, interval)
 
-  if (isHighPrioEmpty && isLowPrioEmpty) {
-    reactionProcessingQueued = false
-  } else {
-    nextTick(runQueuedReactions)
+  if (!(isHighPrioEmpty && isLowPrioEmpty)) {
+    nextIdlePeriod(runQueuedIdleReactions)
   }
+
+  // issue with lastRun -> if there were frames in between this is messed up!
+  // lastRun sould be before the last animationFrame!
   lastRun = Date.now()
 }
 
