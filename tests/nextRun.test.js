@@ -44,8 +44,7 @@ for (let key in priorities) {
       await nextRun(reaction)
       expect(reaction.callCount).to.equal(1)
       counter.num++
-      await nextRun(reaction)
-      await nextRun(reaction)
+      await Promise.all([nextRun(reaction), nextRun(reaction)])
       expect(dummy).to.equal(1)
       expect(reaction.callCount).to.equal(2)
     })
