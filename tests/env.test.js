@@ -1,3 +1,5 @@
+// this is a hacky way of mocking requestAnimationFrame before the observer loads
+import './removeRAF'
 import { expect } from 'chai'
 import { observe, observable, nextRun, priorities } from '@nx-js/observer-util'
 
@@ -5,14 +7,8 @@ for (let key in priorities) {
   const priority = priorities[key]
 
   describe(`env with ${key} priority`, () => {
-    const rAF = requestAnimationFrame
-
-    before(() => {
-      window.requestAnimationFrame = undefined
-    })
-
     after(() => {
-      window.requestAnimationFrame = rAF
+      window.requestAnimationFrame = window.originalRAF
     })
 
     it('should observe basic properties in node', async () => {
