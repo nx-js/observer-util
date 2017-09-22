@@ -1,5 +1,5 @@
 const connectionStore = new WeakMap()
-const cleanupStore = new WeakMap()
+const CLEANERS = Symbol('reaction cleaners')
 
 export function storeObservable (obj) {
   // this will be used to save (obj.key -> reaction) connections later
@@ -8,7 +8,7 @@ export function storeObservable (obj) {
 
 export function storeReaction (reaction) {
   // this will be used to save data for cleaning up later
-  cleanupStore.set(reaction, new Set())
+  reaction[CLEANERS] = new Set()
 }
 
 export function registerReactionForKey (obj, key, reaction) {
@@ -18,7 +18,7 @@ export function registerReactionForKey (obj, key, reaction) {
     reactionsForObj[key] = reactionsForKey = new Set()
   }
   reactionsForKey.add(reaction)
-  cleanupStore.get(reaction).add(reactionsForKey)
+  reaction[CLEANERS].add(reactionsForKey)
 }
 
 export function iterateReactionsForKey (obj, key, fn) {
@@ -29,9 +29,9 @@ export function iterateReactionsForKey (obj, key, fn) {
 }
 
 export function releaseReaction (reaction) {
-  const connections = cleanupStore.get(reaction)
-  connections.forEach(releaseReactionKeyConnections, reaction)
-  connections.clear()
+  const cleaners = reaction[CLEANERS]
+  cleaners.forEach(releaseReactionKeyConnections, reaction)
+  cleaners.clear()
 }
 
 function releaseReactionKeyConnections (reactionsForKey) {

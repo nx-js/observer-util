@@ -54,7 +54,7 @@ export function setPriority (reaction, priority) {
     return
   }
   validatePriority(priority)
-  
+
   const prevQueue = queue[prevPriority]
   if (prevQueue.has(reaction)) {
     const nextQueue = queue[priority]
@@ -81,13 +81,12 @@ export function unqueueReaction (reaction) {
 }
 
 export function runQueuedReactions () {
-  const interval = 1000 / TARGET_FPS
-
   // critical reactions must all execute before the next frame
   const criticalReactions = queue[priorities.CRITICAL]
   criticalReactions.forEach(runReaction)
   criticalReactions.clear()
 
+  const interval = 1000 / TARGET_FPS
   // high-prio reactions can run if there is free time remaining
   const isHighPrioEmpty = processQueue(priorities.HIGH, interval)
   // low-prio reactions can run if there is free time and no more high-prio reactions
