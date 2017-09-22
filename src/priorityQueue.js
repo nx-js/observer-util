@@ -37,20 +37,22 @@ export function initReaction (reaction, priority) {
 export function queueReaction (reaction) {
   const priority = reaction[PRIORITY]
   queue[priority].add(reaction)
-
-  if (priority === priorities.CRITICAL) {
-    nextTick(runQueuedCriticalReactions)
-  } else {
-    nextIdlePeriod(runQueuedIdleReactions)
-  }
+  queueReactionProcessing(priority)
 }
 
 export function getPriority (reaction) {
-  return reaction[PRIORITY]
+  const priority = reaction[PRIORITY]
+  if (!priority) {
+    throw new TypeError('The first argument must be an active reaction.')
+  }
+  return priority
 }
 
 export function setPriority (reaction, priority) {
   const prevPriority = reaction[PRIORITY]
+  if (!prevPriority) {
+    throw new TypeError('The first argument must be an active reaction.')
+  }
   if (priority === prevPriority) {
     return
   }
@@ -59,10 +61,11 @@ export function setPriority (reaction, priority) {
   const prevQueue = queue[prevPriority]
   if (prevQueue.has(reaction)) {
     const nextQueue = queue[priority]
-    nextQueue.add(reaction)
     prevQueue.delete(reaction)
+    nextQueue.add(reaction)
   }
   reaction[PRIORITY] = priority
+  queueReactionProcessing(priority)
 }
 
 function validatePriority (priority) {
@@ -79,6 +82,14 @@ export function isReactionQueued (reaction) {
 export function unqueueReaction (reaction) {
   const priority = reaction[PRIORITY]
   queue[priority].delete(reaction)
+}
+
+function queueReactionProcessing (priority) {
+  if (priority === priorities.CRITICAL) {
+    nextTick(runQueuedCriticalReactions)
+  } else {
+    nextIdlePeriod(runQueuedIdleReactions)
+  }
 }
 
 function runQueuedCriticalReactions () {
