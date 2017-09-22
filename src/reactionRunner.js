@@ -5,7 +5,8 @@ import {
 } from './store'
 import { queueReaction, isReactionQueued } from './priorityQueue'
 
-const AFTER_REACTION = Symbol('after reaction')
+const AFTER = Symbol('after reaction')
+const RESOLVE_AFTER = Symbol('resolve after reaction')
 let runningReaction
 
 // set the reaction as the currently running one
@@ -26,9 +27,9 @@ export function runReaction (reaction) {
 }
 
 function afterReaction (reaction) {
-  if (reaction[AFTER_REACTION]) {
-    reaction[AFTER_REACTION]()
-    reaction[AFTER_REACTION] = undefined
+  if (reaction[RESOLVE_AFTER]) {
+    reaction[RESOLVE_AFTER]()
+    reaction[AFTER] = reaction[RESOLVE_AFTER] = undefined
   }
 }
 
@@ -36,7 +37,10 @@ export function nextRun (reaction) {
   if (!isReactionQueued(reaction)) {
     return Promise.resolve()
   }
-  return new Promise(resolve => (reaction[AFTER_REACTION] = resolve))
+  if (!reaction[AFTER]) {
+    reaction[AFTER] = new Promise(resolve => (reaction[RESOLVE_AFTER] = resolve))
+  }
+  return reaction[AFTER]
 }
 
 // register the currently running reaction to be queued again on obj.key mutations
