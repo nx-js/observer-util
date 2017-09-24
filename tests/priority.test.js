@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { spy, beforeNextFrame, heavyCalculation } from './utils'
+import { beforeNextFrame, heavyCalculation } from './utils'
 import {
   observe,
   observable,
@@ -28,8 +28,7 @@ describe('reaction priority', () => {
       for (let i = 0; i < 10; i++) {
         reactions.push(
           observe(() => {
-            const duration = heavyCalculation()
-            const dummy = counter.num
+            counter.num = heavyCalculation()
             runs++
           }, priorities.CRITICAL)
         )
@@ -51,24 +50,21 @@ describe('reaction priority', () => {
       for (let i = 0; i < 10; i++) {
         criticalReactions.push(
           observe(() => {
-            const duration = heavyCalculation()
-            const dummy = counter.num
+            counter.num = heavyCalculation()
             criticalRuns++
           }, priorities.CRITICAL)
         )
 
         highPrioReactions.push(
           observe(() => {
-            const duration = heavyCalculation()
-            const dummy = counter.num
+            counter.num = heavyCalculation()
             highPrioRuns++
           }, priorities.HIGH)
         )
 
         lowPrioReactions.push(
           observe(() => {
-            const duration = heavyCalculation()
-            const dummy = counter.num
+            counter.num = heavyCalculation()
             lowPrioRuns++
           }, priorities.LOW)
         )
@@ -114,8 +110,7 @@ describe('reaction priority', () => {
       for (let i = 0; i < 10; i++) {
         reactions.push(
           observe(() => {
-            const duration = heavyCalculation()
-            const dummy = counter.num
+            counter.num = heavyCalculation()
             runs++
           }, priorities.LOW)
         )
