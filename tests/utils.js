@@ -16,10 +16,10 @@ export function beforeNextFrame () {
 export function heavyCalculation () {
   const start = Date.now()
   const parent = document.createElement('div')
-  while ((Date.now() - start) < HEAVY_INTERVAL) {
+  while (Date.now() - start < HEAVY_INTERVAL) {
     const child = document.createElement('div')
     parent.appendChild(child)
     parent.removeChild(child)
   }
-  return (Date.now() - start)
+  return Date.now() - start
 }

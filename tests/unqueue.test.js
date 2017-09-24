@@ -1,6 +1,12 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observable, observe, unqueue, nextRun, priorities } from '@nx-js/observer-util'
+import {
+  observable,
+  observe,
+  unqueue,
+  nextRun,
+  priorities
+} from '@nx-js/observer-util'
 
 for (let key in priorities) {
   const priority = priorities[key]

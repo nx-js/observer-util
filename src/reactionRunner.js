@@ -38,7 +38,9 @@ export function nextRun (reaction) {
     return Promise.resolve()
   }
   if (!reaction[AFTER]) {
-    reaction[AFTER] = new Promise(resolve => (reaction[RESOLVE_AFTER] = resolve))
+    reaction[AFTER] = new Promise(
+      resolve => (reaction[RESOLVE_AFTER] = resolve)
+    )
   }
   return reaction[AFTER]
 }

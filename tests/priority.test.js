@@ -1,6 +1,13 @@
 import { expect } from 'chai'
 import { spy, beforeNextFrame, heavyCalculation } from './utils'
-import { observe, observable, nextRun, getPriority, setPriority, priorities } from '@nx-js/observer-util'
+import {
+  observe,
+  observable,
+  nextRun,
+  getPriority,
+  setPriority,
+  priorities
+} from '@nx-js/observer-util'
 
 describe('reaction priority', () => {
   describe('observe', () => {
@@ -19,42 +26,64 @@ describe('reaction priority', () => {
 
       const reactions = []
       for (let i = 0; i < 10; i++) {
-        reactions.push(observe(() => {
-          const duration = heavyCalculation()
-          const dummy = counter.num
-          runs++
-        }, priorities.CRITICAL))
+        reactions.push(
+          observe(() => {
+            const duration = heavyCalculation()
+            const dummy = counter.num
+            runs++
+          }, priorities.CRITICAL)
+        )
       }
 
       await beforeNextFrame()
       expect(runs).to.equal(10)
     })
 
-    it('should run all high prio tasks before the low prio ones', async () => {
+    it('should run all critical tasks before high prio tasks before the low prio tasks', async () => {
+      let criticalRuns = 0
       let highPrioRuns = 0
       let lowPrioRuns = 0
       const counter = observable({ num: 0 })
 
+      const criticalReactions = []
       const highPrioReactions = []
       const lowPrioReactions = []
       for (let i = 0; i < 10; i++) {
-        highPrioReactions.push(observe(() => {
-          const duration = heavyCalculation()
-          const dummy = counter.num
-          highPrioRuns++
-        }, priorities.HIGH))
+        criticalReactions.push(
+          observe(() => {
+            const duration = heavyCalculation()
+            const dummy = counter.num
+            criticalRuns++
+          }, priorities.CRITICAL)
+        )
 
-        lowPrioReactions.push(observe(() => {
-          const duration = heavyCalculation()
-          const dummy = counter.num
-          lowPrioRuns++
-        }, priorities.LOW))
+        highPrioReactions.push(
+          observe(() => {
+            const duration = heavyCalculation()
+            const dummy = counter.num
+            highPrioRuns++
+          }, priorities.HIGH)
+        )
+
+        lowPrioReactions.push(
+          observe(() => {
+            const duration = heavyCalculation()
+            const dummy = counter.num
+            lowPrioRuns++
+          }, priorities.LOW)
+        )
       }
 
+      await Promise.all(criticalReactions.map(nextRun))
+      expect(criticalRuns).to.equal(10)
+      expect(highPrioRuns).to.not.equal(10)
+      expect(lowPrioRuns).to.equal(0)
       await Promise.all(highPrioReactions.map(nextRun))
+      expect(criticalRuns).to.equal(10)
       expect(highPrioRuns).to.equal(10)
       expect(lowPrioRuns).to.not.equal(10)
       await Promise.all(lowPrioReactions.map(nextRun))
+      expect(criticalRuns).to.equal(10)
       expect(highPrioRuns).to.equal(10)
       expect(lowPrioRuns).to.equal(10)
     })
@@ -83,11 +112,13 @@ describe('reaction priority', () => {
 
       const reactions = []
       for (let i = 0; i < 10; i++) {
-        reactions.push(observe(() => {
-          const duration = heavyCalculation()
-          const dummy = counter.num
-          runs++
-        }, priorities.LOW))
+        reactions.push(
+          observe(() => {
+            const duration = heavyCalculation()
+            const dummy = counter.num
+            runs++
+          }, priorities.LOW)
+        )
       }
 
       reactions.forEach(reaction => setPriority(reaction, priorities.CRITICAL))

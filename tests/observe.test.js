@@ -1,6 +1,12 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, unobserve, observable, nextRun, priorities } from '@nx-js/observer-util'
+import {
+  observe,
+  unobserve,
+  observable,
+  nextRun,
+  priorities
+} from '@nx-js/observer-util'
 
 for (let key in priorities) {
   const priority = priorities[key]
@@ -278,7 +284,7 @@ for (let key in priorities) {
       expect(reaction1).to.equal(reaction2)
 
       await nextRun(reaction1)
-      const callCount = (priority === priorities.CRITICAL) ? 2 : 1
+      const callCount = priority === priorities.CRITICAL ? 2 : 1
       expect(counterSpy.callCount).to.equal(callCount)
       counter.num++
       await nextRun(reaction1)

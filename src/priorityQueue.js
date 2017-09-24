@@ -119,7 +119,7 @@ function processQueue (priority, interval) {
   const queueWithPriority = queue[priority]
   const iterator = queueWithPriority[Symbol.iterator]()
   let reaction = iterator.next()
-  while ((Date.now() - lastRun) < interval) {
+  while (Date.now() - lastRun < interval) {
     if (reaction.done) {
       return true
     }
