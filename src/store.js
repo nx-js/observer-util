@@ -8,7 +8,7 @@ export function storeObservable (obj) {
 
 export function storeReaction (reaction) {
   // this will be used to save data for cleaning up later
-  reaction[CLEANERS] = new Set()
+  reaction[CLEANERS] = reaction[CLEANERS] || new Set()
 }
 
 export function registerReactionForKey (obj, key, reaction) {

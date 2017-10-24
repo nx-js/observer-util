@@ -22,10 +22,12 @@ const queue = {
 }
 
 export function initReaction (reaction, priority) {
-  reaction[PRIORITY] = priority = priority || DEFAULT_PRIORITY
-  validatePriority(priority)
+  if (!reaction[PRIORITY]) {
+    reaction[PRIORITY] = priority || DEFAULT_PRIORITY
+    validatePriority(reaction[PRIORITY])
+  }
 
-  if (priority === priorities.CRITICAL) {
+  if (reaction[PRIORITY] === priorities.CRITICAL) {
     // critical reactions execute once synchronously on init
     runReaction(reaction)
   } else {

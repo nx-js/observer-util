@@ -1,5 +1,6 @@
 import { storeReaction, releaseReaction } from './store'
 import { initReaction, queueReaction, unqueueReaction } from './priorityQueue'
+import { runReaction } from './reactionRunner'
 
 export function observe (reaction, priority) {
   if (typeof reaction !== 'function') {
