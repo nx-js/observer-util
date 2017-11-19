@@ -57,7 +57,11 @@ export function queueReactionsForKey (obj, key) {
 }
 
 function queueReaction (reaction) {
-  reaction.queue.add(reaction)
+  if (reaction.queue) {
+    reaction.queue.add(reaction)
+  } else {
+    reaction()
+  }
 }
 
 export function hasRunningReaction () {

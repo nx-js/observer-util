@@ -2,14 +2,12 @@ import { storeReaction, releaseReaction } from './store'
 import { Queue, priorities } from './priorityQueue'
 import { runAsReaction } from './reactionRunner'
 
-const defaultQueue = new Queue(priorities.CRITICAL)
-
-export function observe (fn, queue = defaultQueue) {
+export function observe (fn, queue) {
   if (typeof fn !== 'function') {
     throw new TypeError(`The first argument must be a function instead of ${fn}`)
   }
-  if (!(queue instanceof Queue)) {
-    throw new TypeError(`The second argument must be a Queue instance instead of ${queue}`)
+  if (queue !== undefined && !(queue instanceof Queue)) {
+    throw new TypeError(`The second argument must be undefined or a Queue instance instead of ${queue}`)
   }
 
   // bind reaction together with the runner
@@ -26,7 +24,9 @@ export function observe (fn, queue = defaultQueue) {
 
 export function unobserve (reaction) {
   // do not run this reaction anymore, even if it is already queued
-  reaction.queue.remove(reaction)
+  if (reaction.queue) {
+    reaction.queue.remove(reaction)
+  }
   // release every (observable.prop -> reaction) connections
   releaseReaction(reaction)
 }
