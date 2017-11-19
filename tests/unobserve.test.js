@@ -9,7 +9,7 @@ import {
 } from '@nx-js/observer-util'
 
 for (let key in priorities) {
-  const priority = priorities[key]
+  const priority = undefined
 
   describe(`unobserve with ${key} priority`, () => {
     it('should unobserve the observed function', async () => {

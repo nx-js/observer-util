@@ -6,7 +6,7 @@ export function storeObservable (obj) {
   connectionStore.set(obj, Object.create(null))
 }
 
-export function storeReaction (reaction) {
+export function storeReaction (reaction, fn) {
   // this will be used to save data for cleaning up later
   reaction[CLEANERS] = reaction[CLEANERS] || new Set()
 }

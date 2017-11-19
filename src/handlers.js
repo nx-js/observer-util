@@ -43,6 +43,12 @@ function set (obj, key, value, receiver) {
   if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
   }
+  /*// emit a warning and do not queue anything when another reaction is queued
+  // from an already running reaction
+  if (hasRunningReaction()) {
+    console.error(`Mutating observables in reactions is forbidden. You tried to set ${key} to ${value}`)
+    return Reflect.set(obj, key, value, receiver)
+  }*/
   // do not register reactions if it is a symbol keyed property
   // or if the target of the operation is not the raw object (possible because of prototypal inheritance)
   if (typeof key === 'symbol' || obj !== proxyToRaw.get(receiver)) {

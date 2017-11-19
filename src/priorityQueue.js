@@ -1,132 +1,146 @@
 import { nextTick, nextIdlePeriod } from './timers'
-import { runReaction } from './reactionRunner'
 
-export const TARGET_FPS = 60
-const PRIORITY = Symbol('reaction priority')
+const TARGET_FPS = 60
+const TARGET_INTERVAL = 1000 / TARGET_FPS
+const QUEUE = Symbol('task queue')
 let lastRun
 
 export const priorities = {
-  CRITICAL: 'critical',
-  HIGH: 'high',
-  LOW: 'low'
+  CRITICAL: 0,
+  HIGH: 1,
+  LOW: 2
 }
-
+const validPriorities = new Set([0, 1, 2])
 const DEFAULT_PRIORITY = priorities.CRITICAL
 
-const validPriorities = new Set(['critical', 'high', 'low'])
-
-const queue = {
+const queues = {
   [priorities.CRITICAL]: new Set(),
   [priorities.HIGH]: new Set(),
   [priorities.LOW]: new Set()
 }
 
-export function initReaction (reaction, priority) {
-  if (!reaction[PRIORITY]) {
-    reaction[PRIORITY] = priority || DEFAULT_PRIORITY
-    validatePriority(reaction[PRIORITY])
+export class Queue {
+  constructor (priority) {
+    this.priority = validatePriority(priority)
+    this[QUEUE] = new Set()
+    queues[this.priority].add(this[QUEUE])
   }
 
-  if (reaction[PRIORITY] === priorities.CRITICAL) {
-    // critical reactions execute once synchronously on init
-    runReaction(reaction)
-  } else {
-    // otherwise queue it to run later
-    queueReaction(reaction)
+  has (task) {
+    return this[QUEUE].has(task)
   }
-}
 
-export function queueReaction (reaction) {
-  const priority = reaction[PRIORITY]
-  queue[priority].add(reaction)
-  queueReactionProcessing(priority)
-}
+  add (task) {
+    if (typeof task !== 'function') {
+      throw new Error(`${task} can not be added to the queue. Only functions can be added.`)
+    }
+    const queue = this[QUEUE]
+    queue.add(task)
+    queueTaskProcessing(this.priority)
+  }
 
-export function getPriority (reaction) {
-  const priority = reaction[PRIORITY]
-  if (!priority) {
-    throw new TypeError('The first argument must be an active reaction.')
+  remove (task) {
+    this[QUEUE].delete(task)
   }
-  return priority
-}
 
-export function setPriority (reaction, priority) {
-  const prevPriority = reaction[PRIORITY]
-  if (!prevPriority) {
-    throw new TypeError('The first argument must be an active reaction.')
+  start () {
+    queues[this.priority].add(this[QUEUE])
   }
-  if (priority === prevPriority) {
-    return
-  }
-  validatePriority(priority)
 
-  const prevQueue = queue[prevPriority]
-  if (prevQueue.has(reaction)) {
-    const nextQueue = queue[priority]
-    prevQueue.delete(reaction)
-    nextQueue.add(reaction)
+  stop () {
+    queues[this.priority].delete(this[QUEUE])
   }
-  reaction[PRIORITY] = priority
-  queueReactionProcessing(priority)
+
+  clear () {
+    this[QUEUE].clear()
+  }
+
+  process () {
+    const queue = this[QUEUE]
+    queue.forEach(runTask)
+    queue.clear()
+  }
 }
 
 function validatePriority (priority) {
   if (!validPriorities.has(priority)) {
     throw new Error(`Invalid priority: ${priority}`)
   }
+  return priority
 }
 
-export function isReactionQueued (reaction) {
-  const priority = reaction[PRIORITY]
-  return queue[priority].has(reaction)
-}
-
-export function unqueueReaction (reaction) {
-  const priority = reaction[PRIORITY]
-  queue[priority].delete(reaction)
-}
-
-function queueReactionProcessing (priority) {
+function queueTaskProcessing (priority) {
   if (priority === priorities.CRITICAL) {
-    nextTick(runQueuedCriticalReactions)
+    nextTick(runQueuedCriticalTasks)
   } else {
-    nextIdlePeriod(runQueuedIdleReactions)
+    nextIdlePeriod(runQueuedIdleTasks)
   }
 }
 
-function runQueuedCriticalReactions () {
-  // critical reactions must all execute before the next frame
-  const criticalReactions = queue[priorities.CRITICAL]
-  criticalReactions.forEach(runReaction)
-  criticalReactions.clear()
+function runQueuedCriticalTasks () {
+  // critical tasks must all execute before the next frame
+  const criticalQueues = queues[priorities.CRITICAL]
+  criticalQueues.forEach(processCriticalQueue)
 }
 
-function runQueuedIdleReactions () {
-  lastRun = lastRun || Date.now()
-  const interval = 1000 / TARGET_FPS
-  // high-prio reactions can run if there is free time remaining
-  const isHighPrioEmpty = processQueue(priorities.HIGH, interval)
-  // low-prio reactions can run if there is free time and no more high-prio reactions
-  const isLowPrioEmpty = processQueue(priorities.LOW, interval)
+function processCriticalQueue (queue) {
+  queue.forEach(runTask)
+  queue.clear()
+}
 
-  if (isHighPrioEmpty && isLowPrioEmpty) {
+function runTask (task) {
+  task()
+}
+
+function runQueuedIdleTasks () {
+  lastRun = lastRun || Date.now()
+
+  let timeRemaining = processIdleQueues(priorities.HIGH)
+
+  if (timeRemaining) {
+    timeRemaining = processIdleQueues(priorities.LOW)
+  }
+
+  // if there is free time remaining there are no more tasks to run
+  if (timeRemaining) {
     lastRun = undefined
   } else {
-    nextIdlePeriod(runQueuedIdleReactions)
+    nextIdlePeriod(runQueuedIdleTasks)
     lastRun = Date.now()
   }
 }
 
-function processQueue (priority, interval) {
-  const queueWithPriority = queue[priority]
-  const iterator = queueWithPriority[Symbol.iterator]()
-  let reaction = iterator.next()
-  while (Date.now() - lastRun < interval) {
-    if (reaction.done) {
+function processIdleQueues (priority) {
+  const iterator = queues[priority][Symbol.iterator]()
+  const startingQueue = iterator.next()
+  let queue = startingQueue
+  let timeRemaining = true
+
+  do {
+    timeRemaining = timeRemaining && processIdleQueue(queue)
+    moveQueueToEnd(queues, queue)
+    queue = iterator.next()
+  } while (startingQueue !== queue && timeRemaining)
+
+  return timeRemaining
+}
+
+function processIdleQueue (queue) {
+  const iterator = queue[Symbol.iterator]()
+  let task = iterator.next()
+  while ((Date.now() - lastRun) < TARGET_INTERVAL) {
+    if (task.done) {
       return true
     }
-    runReaction(reaction.value)
-    queueWithPriority.delete(reaction.value)
-    reaction = iterator.next()
+    // run the task
+    task.value()
+    queue.delete(task.value)
+    task = iterator.next()
   }
+}
+
+function moveQueueToEnd (queues, queue) {
+  // delete and readd the queue to move it to the end
+  queues.delete(queue)
+  queues.add(queue)
 }

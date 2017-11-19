@@ -3,7 +3,6 @@ import {
   iterateReactionsForKey,
   releaseReaction
 } from './store'
-import { queueReaction, isReactionQueued } from './priorityQueue'
 
 const AFTER = Symbol('after reaction')
 const RESOLVE_AFTER = Symbol('resolve after reaction')
@@ -11,18 +10,18 @@ let runningReaction
 
 // set the reaction as the currently running one
 // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
-export function runReaction (reaction) {
+export function runAsReaction (fn) {
   try {
     // delete all existing (obj.key -> reaction) connections
-    releaseReaction(reaction)
-    runningReaction = reaction
+    releaseReaction(fn.reaction)
     // and reconstruct them in the get trap while the reaction is running
-    reaction()
-    // resolve promises for nextRun
-    afterReaction(reaction)
+    runningReaction = fn.reaction
+    fn()
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined
+    // resolve promises for nextRun
+    afterReaction(fn.reaction)
   }
 }
 
@@ -34,7 +33,7 @@ function afterReaction (reaction) {
 }
 
 export function nextRun (reaction) {
-  if (!isReactionQueued(reaction)) {
+  if (!reaction.queue.has(reaction)) {
     return Promise.resolve()
   }
   if (!reaction[AFTER]) {
@@ -55,6 +54,10 @@ export function registerRunningReactionForKey (obj, key) {
 export function queueReactionsForKey (obj, key) {
   // iterate and queue every reaction, which is triggered by obj.key mutation
   iterateReactionsForKey(obj, key, queueReaction)
+}
+
+function queueReaction (reaction) {
+  reaction.queue.add(reaction)
 }
 
 export function hasRunningReaction () {

@@ -9,7 +9,7 @@ import {
 } from '@nx-js/observer-util'
 
 for (let key in priorities) {
-  const priority = priorities[key]
+  const priority = undefined // priorities[key]
 
   describe(`observe with ${key} priority`, () => {
     it('should throw TypeError on invalid first argument', () => {
@@ -21,7 +21,7 @@ for (let key in priorities) {
     it('should observe basic properties', async () => {
       let dummy
       const counter = observable({ num: 0 })
-      const reaction = observe(() => (dummy = counter.num), priority)
+      const reaction = observe(() => dummy = counter.num, priority)
 
       await nextRun(reaction)
       expect(dummy).to.equal(0)

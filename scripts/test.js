@@ -12,7 +12,7 @@ const bundlePath = bundleType ? `dist/${bundleType}.js` : 'src/index.js'
 const config = {
   frameworks: ['mocha', 'chai', 'source-map-support'],
   reporters: ['progress', 'coverage'],
-  files: ['tests/**/*.test.js'],
+  files: ['tests/observe.test.js'],
   preprocessors: {
     'tests/**/*.test.js': ['rollup']
   },

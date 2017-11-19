@@ -1,4 +1,4 @@
-export { observe, unobserve, queue, unqueue, exec } from './observer'
+export { observe, unobserve } from './observer'
 export { observable, isObservable } from './observable'
-export { getPriority, setPriority, priorities } from './priorityQueue'
+export { Queue, priorities } from './priorityQueue'
 export { nextRun } from './reactionRunner'
