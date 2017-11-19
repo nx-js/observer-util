@@ -1,4 +1,4 @@
-import { storeReaction, releaseReaction } from './store'
+import { releaseReaction } from './store'
 import { Queue, priorities } from './priorityQueue'
 import { runAsReaction } from './reactionRunner'
 
@@ -15,8 +15,6 @@ export function observe (fn, queue) {
   fn.reaction = reaction
   // save the queue on the reaction
   reaction.queue = queue
-  // init basic data structures to save and cleanup (observable.prop -> reaction) connections later
-  storeReaction(reaction)
   // execute reaction once to boot the observation process
   reaction()
   return reaction

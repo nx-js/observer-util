@@ -6,19 +6,20 @@ export function storeObservable (obj) {
   connectionStore.set(obj, Object.create(null))
 }
 
-export function storeReaction (reaction, fn) {
-  // this will be used to save data for cleaning up later
-  reaction[CLEANERS] = reaction[CLEANERS] || new Set()
-}
-
 export function registerReactionForKey (obj, key, reaction) {
   const reactionsForObj = connectionStore.get(obj)
   let reactionsForKey = reactionsForObj[key]
   if (!reactionsForKey) {
     reactionsForObj[key] = reactionsForKey = new Set()
+    addReactionToReactionsForKey(reaction, reactionsForKey)
+  } else if (!reactionsForKey.has(reaction)) {
+    addReactionToReactionsForKey(reaction, reactionsForKey)
   }
+}
+
+function addReactionToReactionsForKey (reaction, reactionsForKey) {
   reactionsForKey.add(reaction)
-  reaction[CLEANERS].add(reactionsForKey)
+  reaction[CLEANERS].push(reactionsForKey)
 }
 
 export function iterateReactionsForKey (obj, key, fn) {
@@ -29,9 +30,10 @@ export function iterateReactionsForKey (obj, key, fn) {
 }
 
 export function releaseReaction (reaction) {
-  const cleaners = reaction[CLEANERS]
-  cleaners.forEach(releaseReactionKeyConnections, reaction)
-  cleaners.clear()
+  if (reaction[CLEANERS]) {
+    reaction[CLEANERS].forEach(releaseReactionKeyConnections, reaction)
+  }
+  reaction[CLEANERS] = []
 }
 
 function releaseReactionKeyConnections (reactionsForKey) {
