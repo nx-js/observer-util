@@ -22,10 +22,12 @@ function addReactionToReactionsForKey (reaction, reactionsForKey) {
   reaction[CLEANERS].push(reactionsForKey)
 }
 
-export function iterateReactionsForKey (obj, key, fn) {
+export function iterateReactionsForKey (obj, key, reactionHandler) {
   const reactionsForKey = connectionStore.get(obj)[key]
   if (reactionsForKey) {
-    reactionsForKey.forEach(fn)
+    // the original reactionsForKey set is mutated by registerReactionForKey during the iteration
+    // it must be cloned before the iteration to avoid infinite loops
+    Array.from(reactionsForKey).forEach(reactionHandler)
   }
 }
 

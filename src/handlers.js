@@ -43,33 +43,38 @@ function set (obj, key, value, receiver) {
   if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
   }
-  /*// emit a warning and do not queue anything when another reaction is queued
+  // save if the value changed because of this set operation
+  // array 'length' is an exception here, because of it's exotic nature
+  const valueChanged = (key === 'length' || value !== obj[key])
+  // execute the set operation before running any reaction
+  const result = Reflect.set(obj, key, value, receiver)
+  // emit a warning and do not queue anything when another reaction is queued
   // from an already running reaction
   if (hasRunningReaction()) {
     console.error(`Mutating observables in reactions is forbidden. You tried to set ${key} to ${value}`)
-    return Reflect.set(obj, key, value, receiver)
-  }*/
-  // do not register reactions if it is a symbol keyed property
-  // or if the target of the operation is not the raw object (possible because of prototypal inheritance)
-  if (typeof key === 'symbol' || obj !== proxyToRaw.get(receiver)) {
-    return Reflect.set(obj, key, value, receiver)
+    return result
   }
-  // only queue reactions if the set operation resulted in a value change
-  // array 'length' property is an exception from this, because of it's exotic nature
-  if (key === 'length' || value !== obj[key]) {
+  // do not queue reactions if it is a symbol keyed property
+  // or the set operation resulted in no value change
+  // or if the target of the operation is not the raw object (possible because of prototypal inheritance)
+  if (typeof key !== 'symbol' && valueChanged && obj === proxyToRaw.get(receiver)) {
     queueReactionsForKey(obj, key)
     queueReactionsForKey(obj, ENUMERATE)
   }
-  return Reflect.set(obj, key, value, receiver)
+  return result
 }
 
 function deleteProperty (obj, key) {
+  // save if the object had the key
+  const hadKey = (key in obj)
+  // execute the delete operation before running any reaction
+  const result = Reflect.deleteProperty(obj, key)
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
-  if (typeof key !== 'symbol' && key in obj) {
+  if (typeof key !== 'symbol' && hadKey) {
     queueReactionsForKey(obj, key)
     queueReactionsForKey(obj, ENUMERATE)
   }
-  return Reflect.deleteProperty(obj, key)
+  return result
 }
 
 export default { get, ownKeys, set, deleteProperty }
