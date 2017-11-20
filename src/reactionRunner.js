@@ -16,7 +16,7 @@ export function runAsReaction (fn) {
     releaseReaction(fn.reaction)
     // and reconstruct them in the get trap while the reaction is running
     runningReaction = fn.reaction
-    fn()
+    return fn()
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined

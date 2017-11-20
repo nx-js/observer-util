@@ -1,8 +1,15 @@
 import { releaseReaction } from './store'
-import { Queue, priorities } from './priorityQueue'
+import { Queue } from './priorityQueue'
 import { runAsReaction } from './reactionRunner'
 
 export function observe (fn, queue) {
+  const reaction = observeLazy(fn, queue)
+  // execute reaction once to boot the observation process
+  reaction()
+  return reaction
+}
+
+export function observeLazy (fn, queue) {
   if (typeof fn !== 'function') {
     throw new TypeError(`The first argument must be a function instead of ${fn}`)
   }
@@ -15,8 +22,6 @@ export function observe (fn, queue) {
   fn.reaction = reaction
   // save the queue on the reaction
   reaction.queue = queue
-  // execute reaction once to boot the observation process
-  reaction()
   return reaction
 }
 
