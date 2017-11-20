@@ -20,28 +20,7 @@ export function runAsReaction (fn) {
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined
-    // resolve promises for nextRun
-    afterReaction(fn.reaction)
   }
-}
-
-function afterReaction (reaction) {
-  if (reaction[RESOLVE_AFTER]) {
-    reaction[RESOLVE_AFTER]()
-    reaction[AFTER] = reaction[RESOLVE_AFTER] = undefined
-  }
-}
-
-export function nextRun (reaction) {
-  if (!reaction.queue.has(reaction)) {
-    return Promise.resolve()
-  }
-  if (!reaction[AFTER]) {
-    reaction[AFTER] = new Promise(
-      resolve => (reaction[RESOLVE_AFTER] = resolve)
-    )
-  }
-  return reaction[AFTER]
 }
 
 // register the currently running reaction to be queued again on obj.key mutations
