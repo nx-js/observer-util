@@ -1,7 +1,4 @@
-import {
-  registerRunningReactionForKey,
-  queueReactionsForKey
-} from '../reactionRunner'
+import { registerRunningReactionForKey, queueReactionsForKey } from '../reactionRunner'
 import { proxyToRaw } from '../internals'
 
 const ITERATE = Symbol('iterate')
@@ -33,11 +30,14 @@ export function add (value) {
   if (!rawContext) {
     return proto.add.apply(this, arguments)
   }
-  if (!proto.has.call(rawContext, value)) {
+  // forward the operation before queueing reactions
+  const valueChanged = !proto.has.call(rawContext, value)
+  const result = proto.add.apply(rawContext, arguments)
+  if (valueChanged) {
     queueReactionsForKey(rawContext, value)
     queueReactionsForKey(rawContext, ITERATE)
   }
-  return proto.add.apply(rawContext, arguments)
+  return result
 }
 
 export function set (key, value) {
@@ -46,11 +46,14 @@ export function set (key, value) {
   if (!rawContext) {
     return proto.set.apply(this, arguments)
   }
-  if (proto.get.call(rawContext, key) !== value) {
+  // forward the operation before queueing reactions
+  const valueChanged = (proto.get.call(rawContext, key) !== value)
+  const result = proto.set.apply(rawContext, arguments)
+  if (valueChanged) {
     queueReactionsForKey(rawContext, key)
     queueReactionsForKey(rawContext, ITERATE)
   }
-  return proto.set.apply(rawContext, arguments)
+  return result
 }
 
 export function deleteFn (value) {
@@ -59,11 +62,14 @@ export function deleteFn (value) {
   if (!rawContext) {
     return proto.delete.apply(this, arguments)
   }
-  if (proto.has.call(rawContext, value)) {
+  // forward the operation before queueing reactions
+  const valueChanged = proto.has.call(rawContext, value)
+  const result = proto.delete.apply(rawContext, arguments)
+  if (valueChanged) {
     queueReactionsForKey(rawContext, value)
     queueReactionsForKey(rawContext, ITERATE)
   }
-  return proto.delete.apply(rawContext, arguments)
+  return result
 }
 
 export function clear () {
@@ -72,10 +78,13 @@ export function clear () {
   if (!rawContext) {
     return proto.clear.apply(this, arguments)
   }
-  if (rawContext.size) {
+  // forward the operation before queueing reactions
+  const valueChanged = (rawContext.size !== 0)
+  const result = proto.clear.apply(rawContext, arguments)
+  if (valueChanged) {
     queueReactionsForKey(rawContext, ITERATE)
   }
-  return proto.clear.apply(rawContext, arguments)
+  return result
 }
 
 export function forEach () {
