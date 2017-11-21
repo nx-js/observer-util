@@ -11,10 +11,14 @@ export function observe (fn, queue) {
 
 export function observeLazy (fn, queue) {
   if (typeof fn !== 'function') {
-    throw new TypeError(`The first argument must be a function instead of ${fn}`)
+    throw new TypeError(
+      `The first argument must be a function instead of ${fn}`
+    )
   }
   if (queue !== undefined && !(queue instanceof Queue)) {
-    throw new TypeError(`The second argument must be undefined or a Queue instance instead of ${queue}`)
+    throw new TypeError(
+      `The second argument must be undefined or a Queue instance instead of ${queue}`
+    )
   }
 
   // bind reaction together with the runner

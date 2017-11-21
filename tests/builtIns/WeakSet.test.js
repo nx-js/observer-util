@@ -13,7 +13,7 @@ describe('WeakSet', () => {
     let dummy
     const value = {}
     const set = observable(new WeakSet())
-    const reaction = observe(() => (dummy = set.has(value)))
+    observe(() => (dummy = set.has(value)))
 
     expect(dummy).to.equal(false)
     set.add(value)
@@ -25,7 +25,7 @@ describe('WeakSet', () => {
   it('should observe custom property mutations', () => {
     let dummy
     const set = observable(new WeakSet())
-    const reaction = observe(() => (dummy = set.customProp))
+    observe(() => (dummy = set.customProp))
 
     expect(dummy).to.equal(undefined)
     set.customProp = 'Hello World'
@@ -39,7 +39,7 @@ describe('WeakSet', () => {
     const value = {}
     const set = observable(new WeakSet())
     const setSpy = spy(() => (dummy = set.has(value)))
-    const reaction = observe(setSpy)
+    observe(setSpy)
 
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(1)
@@ -61,7 +61,7 @@ describe('WeakSet', () => {
     const value = {}
     let dummy
     const set = observable(new WeakSet())
-    const reaction = observe(() => (dummy = set.$raw.has(value)))
+    observe(() => (dummy = set.$raw.has(value)))
 
     expect(dummy).to.equal(false)
     set.add(value)
@@ -72,7 +72,7 @@ describe('WeakSet', () => {
     const value = {}
     let dummy
     const set = observable(new WeakSet())
-    const reaction = observe(() => (dummy = set.has(value)))
+    observe(() => (dummy = set.has(value)))
 
     expect(dummy).to.equal(false)
     set.$raw.add(value)

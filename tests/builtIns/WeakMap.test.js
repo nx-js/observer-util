@@ -13,7 +13,7 @@ describe('WeakMap', () => {
     let dummy
     const key = {}
     const map = observable(new WeakMap())
-    const reaction = observe(() => (dummy = map.get(key)))
+    observe(() => (dummy = map.get(key)))
 
     expect(dummy).to.equal(undefined)
     map.set(key, 'value')
@@ -25,7 +25,7 @@ describe('WeakMap', () => {
   it('should observe custom property mutations', () => {
     let dummy
     const map = observable(new WeakMap())
-    const reaction = observe(() => (dummy = map.customProp))
+    observe(() => (dummy = map.customProp))
 
     expect(dummy).to.equal(undefined)
     map.customProp = 'Hello World'
@@ -39,7 +39,7 @@ describe('WeakMap', () => {
     const key = {}
     const map = observable(new WeakMap())
     const mapSpy = spy(() => (dummy = map.get(key)))
-    const reaction = observe(mapSpy)
+    observe(mapSpy)
 
     expect(dummy).to.equal(undefined)
     expect(mapSpy.callCount).to.equal(1)
@@ -61,7 +61,7 @@ describe('WeakMap', () => {
     const key = {}
     let dummy
     const map = observable(new WeakMap())
-    const reaction = observe(() => (dummy = map.$raw.get(key)))
+    observe(() => (dummy = map.$raw.get(key)))
 
     expect(dummy).to.equal(undefined)
     map.set(key, 'Hello')
@@ -74,7 +74,7 @@ describe('WeakMap', () => {
     const key = {}
     let dummy
     const map = observable(new WeakMap())
-    const reaction = observe(() => (dummy = map.get(key)))
+    observe(() => (dummy = map.get(key)))
 
     expect(dummy).to.equal(undefined)
     map.$raw.set(key, 'Hello')

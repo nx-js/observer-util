@@ -4,8 +4,6 @@ import {
   releaseReaction
 } from './store'
 
-const AFTER = Symbol('after reaction')
-const RESOLVE_AFTER = Symbol('resolve after reaction')
 let runningReaction
 
 // 'this' is bound to a reaction in this function, do not try to call it normally

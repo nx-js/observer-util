@@ -1,4 +1,7 @@
-import { registerRunningReactionForKey, queueReactionsForKey } from '../reactionRunner'
+import {
+  registerRunningReactionForKey,
+  queueReactionsForKey
+} from '../reactionRunner'
 import { proxyToRaw } from '../internals'
 
 const ITERATE = Symbol('iterate')
@@ -47,7 +50,7 @@ export function set (key, value) {
     return proto.set.apply(this, arguments)
   }
   // forward the operation before queueing reactions
-  const valueChanged = (proto.get.call(rawContext, key) !== value)
+  const valueChanged = proto.get.call(rawContext, key) !== value
   const result = proto.set.apply(rawContext, arguments)
   if (valueChanged) {
     queueReactionsForKey(rawContext, key)
@@ -79,7 +82,7 @@ export function clear () {
     return proto.clear.apply(this, arguments)
   }
   // forward the operation before queueing reactions
-  const valueChanged = (rawContext.size !== 0)
+  const valueChanged = rawContext.size !== 0
   const result = proto.clear.apply(rawContext, arguments)
   if (valueChanged) {
     queueReactionsForKey(rawContext, ITERATE)

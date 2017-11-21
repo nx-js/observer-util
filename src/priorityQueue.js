@@ -11,7 +11,6 @@ export const priorities = {
   LOW: 2
 }
 const validPriorities = new Set([0, 1, 2])
-const DEFAULT_PRIORITY = priorities.CRITICAL
 
 const queues = {
   [priorities.CRITICAL]: new Set(),
@@ -32,14 +31,16 @@ export class Queue {
 
   add (task) {
     if (typeof task !== 'function') {
-      throw new Error(`${task} can not be added to the queue. Only functions can be added.`)
+      throw new Error(
+        `${task} can not be added to the queue. Only functions can be added.`
+      )
     }
     const queue = this[QUEUE]
     queue.add(task)
     queueTaskProcessing(this.priority)
   }
 
-  remove (task) {
+  delete (task) {
     this[QUEUE].delete(task)
   }
 
@@ -64,7 +65,7 @@ export class Queue {
 
 function validatePriority (priority) {
   if (!validPriorities.has(priority)) {
-    throw new Error(`Invalid priority: ${priority}`)
+    throw new Error(`Invalid queue priority: ${priority}`)
   }
   return priority
 }
@@ -128,7 +129,7 @@ function processIdleQueues (priority) {
 function processIdleQueue (queue) {
   const iterator = queue[Symbol.iterator]()
   let task = iterator.next()
-  while ((Date.now() - lastRun) < TARGET_INTERVAL) {
+  while (Date.now() - lastRun < TARGET_INTERVAL) {
     if (task.done) {
       return true
     }

@@ -45,19 +45,25 @@ function set (obj, key, value, receiver) {
   }
   // save if the value changed because of this set operation
   // array 'length' is an exception here, because of it's exotic nature
-  const valueChanged = (key === 'length' || value !== obj[key])
+  const valueChanged = key === 'length' || value !== obj[key]
   // execute the set operation before running any reaction
   const result = Reflect.set(obj, key, value, receiver)
   // emit a warning and do not queue anything when another reaction is queued
   // from an already running reaction
   if (hasRunningReaction()) {
-    console.error(`Mutating observables in reactions is forbidden. You set ${key} to ${value}.`)
+    console.error(
+      `Mutating observables in reactions is forbidden. You set ${key} to ${value}.`
+    )
     return result
   }
   // do not queue reactions if it is a symbol keyed property
   // or the set operation resulted in no value change
   // or if the target of the operation is not the raw object (possible because of prototypal inheritance)
-  if (typeof key !== 'symbol' && valueChanged && obj === proxyToRaw.get(receiver)) {
+  if (
+    typeof key !== 'symbol' &&
+    valueChanged &&
+    obj === proxyToRaw.get(receiver)
+  ) {
     queueReactionsForKey(obj, key)
     queueReactionsForKey(obj, ENUMERATE)
   }
@@ -66,7 +72,7 @@ function set (obj, key, value, receiver) {
 
 function deleteProperty (obj, key) {
   // save if the object had the key
-  const hadKey = (key in obj)
+  const hadKey = key in obj
   // execute the delete operation before running any reaction
   const result = Reflect.deleteProperty(obj, key)
   // only queue reactions for non symbol keyed property delete which resulted in an actual change

@@ -12,7 +12,7 @@ describe('Set', () => {
   it('should observe mutations', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => (dummy = set.has('value')))
+    observe(() => (dummy = set.has('value')))
 
     expect(dummy).to.equal(false)
     set.add('value')
@@ -24,7 +24,7 @@ describe('Set', () => {
   it('should observe for of iteration', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => {
+    observe(() => {
       dummy = 0
       for (let num of set) {
         dummy += num
@@ -44,7 +44,7 @@ describe('Set', () => {
   it('should observe forEach iteration', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => {
+    observe(() => {
       dummy = 0
       set.forEach(num => (dummy += num))
     })
@@ -62,7 +62,7 @@ describe('Set', () => {
   it('should observe values iteration', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => {
+    observe(() => {
       dummy = 0
       for (let num of set.values()) {
         dummy += num
@@ -82,7 +82,7 @@ describe('Set', () => {
   it('should observe keys iteration', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => {
+    observe(() => {
       dummy = 0
       for (let num of set.keys()) {
         dummy += num
@@ -102,7 +102,7 @@ describe('Set', () => {
   it('should observe entries iteration', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => {
+    observe(() => {
       dummy = 0
       // eslint-disable-next-line no-unused-vars
       for (let [key, num] of set.entries()) {
@@ -123,7 +123,7 @@ describe('Set', () => {
   it('should observe custom property mutations', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => (dummy = set.customProp))
+    observe(() => (dummy = set.customProp))
 
     expect(dummy).to.equal(undefined)
     set.customProp = 'Hello World'
@@ -135,7 +135,7 @@ describe('Set', () => {
   it('should observe size mutations', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => (dummy = set.size))
+    observe(() => (dummy = set.size))
 
     expect(dummy).to.equal(0)
     set.add('value')
@@ -151,7 +151,7 @@ describe('Set', () => {
     let dummy
     const set = observable(new Set())
     const setSpy = spy(() => (dummy = set.has('value')))
-    const reaction = observe(setSpy)
+    observe(setSpy)
 
     expect(dummy).to.equal(false)
     expect(setSpy.callCount).to.equal(1)
@@ -175,7 +175,7 @@ describe('Set', () => {
   it('should not observe $raw data', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => (dummy = set.$raw.has('value')))
+    observe(() => (dummy = set.$raw.has('value')))
 
     expect(dummy).to.equal(false)
     set.add('value')
@@ -185,7 +185,7 @@ describe('Set', () => {
   it('should not observe $raw iterations', () => {
     let dummy = 0
     const set = observable(new Set())
-    const reaction = observe(() => {
+    observe(() => {
       dummy = 0
       for (let [num] of set.$raw.entries()) {
         dummy += num
@@ -215,7 +215,7 @@ describe('Set', () => {
   it('should not be triggered by $raw mutations', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => (dummy = set.has('value')))
+    observe(() => (dummy = set.has('value')))
 
     expect(dummy).to.equal(false)
     set.$raw.add('value')
@@ -230,7 +230,7 @@ describe('Set', () => {
   it('should not observe $raw size mutations', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => (dummy = set.$raw.size))
+    observe(() => (dummy = set.$raw.size))
 
     expect(dummy).to.equal(0)
     set.add('value')
@@ -240,7 +240,7 @@ describe('Set', () => {
   it('should not be triggered by $raw size mutations', () => {
     let dummy
     const set = observable(new Set())
-    const reaction = observe(() => (dummy = set.size))
+    observe(() => (dummy = set.size))
 
     expect(dummy).to.equal(0)
     set.$raw.add('value')

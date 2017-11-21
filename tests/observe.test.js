@@ -12,7 +12,7 @@ describe('observe', () => {
   it('should observe basic properties', () => {
     let dummy
     const counter = observable({ num: 0 })
-    const reaction = observe(() => dummy = counter.num)
+    observe(() => (dummy = counter.num))
 
     expect(dummy).to.equal(0)
     counter.num = 7
@@ -22,7 +22,7 @@ describe('observe', () => {
   it('should observe multiple properties', () => {
     let dummy
     const counter = observable({ num1: 0, num2: 0, num3: 0 })
-    const reaction = observe(
+    observe(
       () => (dummy = counter.num1 + counter.num2 + counter.num3)
     )
 
@@ -34,8 +34,8 @@ describe('observe', () => {
   it('should handle multiple reactions', () => {
     let dummy1, dummy2
     const counter = observable({ num: 0 })
-    const reaction1 = observe(() => (dummy1 = counter.num))
-    const reaction2 = observe(() => (dummy2 = counter.num))
+    observe(() => (dummy1 = counter.num))
+    observe(() => (dummy2 = counter.num))
 
     expect(dummy1).to.equal(0)
     expect(dummy2).to.equal(0)
@@ -47,8 +47,7 @@ describe('observe', () => {
   it('should observe nested properties', () => {
     let dummy
     const counter = observable({ nested: { num: 0 } })
-    const reaction = observe(() => (dummy = counter.nested.num))
-
+    observe(() => (dummy = counter.nested.num))
 
     expect(dummy).to.equal(0)
     counter.nested.num = 8
@@ -58,8 +57,7 @@ describe('observe', () => {
   it('should observe delete operations', () => {
     let dummy
     const obj = observable({ prop: 'value' })
-    const reaction = observe(() => (dummy = obj.prop))
-
+    observe(() => (dummy = obj.prop))
 
     expect(dummy).to.equal('value')
     delete obj.prop
@@ -71,8 +69,7 @@ describe('observe', () => {
     const counter = observable({ num: 0 })
     const parentCounter = observable({ num: 2 })
     Object.setPrototypeOf(counter, parentCounter)
-    const reaction = observe(() => (dummy = counter.num))
-
+    observe(() => (dummy = counter.num))
 
     expect(dummy).to.equal(0)
     delete counter.num
@@ -86,7 +83,7 @@ describe('observe', () => {
   it('should observe function call chains', () => {
     let dummy
     const counter = observable({ num: 0 })
-    const reaction = observe(() => (dummy = getNum()))
+    observe(() => (dummy = getNum()))
 
     function getNum () {
       return counter.num
@@ -100,8 +97,7 @@ describe('observe', () => {
   it('should observe iteration', () => {
     let dummy
     const list = observable(['Hello'])
-    const reaction = observe(() => (dummy = list.join(' ')))
-
+    observe(() => (dummy = list.join(' ')))
 
     expect(dummy).to.equal('Hello')
     list.push('World!')
@@ -113,7 +109,7 @@ describe('observe', () => {
   it('should observe enumeration', () => {
     let dummy = 0
     const numbers = observable({ num1: 3 })
-    const reaction = observe(() => {
+    observe(() => {
       dummy = 0
       for (let key in numbers) {
         dummy += numbers[key]
@@ -131,7 +127,7 @@ describe('observe', () => {
     const key = Symbol('symbol keyed prop')
     let dummy
     const obj = observable({ [key]: 'value' })
-    const reaction = observe(() => (dummy = obj[key]))
+    observe(() => (dummy = obj[key]))
 
     expect(dummy).to.equal('value')
     obj[key] = 'newValue'
@@ -146,7 +142,7 @@ describe('observe', () => {
 
     let dummy
     const obj = observable({ func: oldFunc })
-    const reaction = observe(() => (dummy = obj.func))
+    observe(() => (dummy = obj.func))
 
     expect(dummy).to.equal(oldFunc)
     obj.func = newFunc
@@ -158,7 +154,7 @@ describe('observe', () => {
     const obj = observable({ prop: 'value' })
 
     const propSpy = spy(() => (dummy = obj.prop))
-    const reaction = observe(propSpy)
+    observe(propSpy)
 
     expect(dummy).to.equal('value')
     obj.prop = 'value'
@@ -169,7 +165,7 @@ describe('observe', () => {
   it('should not observe $raw mutations', () => {
     let dummy
     const obj = observable()
-    const reaction = observe(() => (dummy = obj.$raw.prop))
+    observe(() => (dummy = obj.$raw.prop))
 
     expect(dummy).to.equal(undefined)
     obj.prop = 'value'
@@ -179,7 +175,7 @@ describe('observe', () => {
   it('should not be triggered by $raw mutations', () => {
     let dummy
     const obj = observable()
-    const reaction = observe(() => (dummy = obj.prop))
+    observe(() => (dummy = obj.prop))
 
     expect(dummy).to.equal(undefined)
     obj.$raw.prop = 'value'
@@ -212,7 +208,6 @@ describe('observe', () => {
     let dummy = 0
     const counter = observable({ num: 0 })
     const reaction = observe(() => (dummy = counter.num))
-
 
     expect(dummy).to.equal(0)
     counter.num++
@@ -274,7 +269,7 @@ describe('observe', () => {
     const conditionalSpy = spy(() => {
       dummy = obj.run ? obj.prop : 'other'
     })
-    const reaction = observe(conditionalSpy)
+    observe(conditionalSpy)
 
     expect(dummy).to.equal('value')
     expect(conditionalSpy.callCount).to.equal(1)
