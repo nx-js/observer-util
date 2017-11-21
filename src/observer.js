@@ -41,7 +41,7 @@ export function unobserve (reaction) {
   }
   // do not run this reaction anymore, even if it is already queued
   if (reaction.queue) {
-    reaction.queue.remove(reaction)
+    reaction.queue.delete(reaction)
   }
   // release every (observable.prop -> reaction) connections
   releaseReaction(reaction)

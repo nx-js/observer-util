@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, unobserve, observable, Queue } from '@nx-js/observer-util'
+import { observe, observeLazy, unobserve, observable, Queue, priorities } from '@nx-js/observer-util'
 
 describe('observe', () => {
   it('should throw a TypeError when the first argument is not a function', () => {
@@ -15,10 +15,18 @@ describe('observe', () => {
   })
 
   it('should throw a TypeError when the second argument is not a Queue instance or undefined', () => {
+    const queue = new Queue(priorities.CRITICAL)
     const fn = () => {}
     expect(() => observe(fn, null)).to.throw(TypeError)
     expect(() => observe(fn, {})).to.throw(TypeError)
     expect(() => observe(fn, 'string')).to.throw(TypeError)
+    expect(() => observe(fn, queue)).to.not.throw()
+  })
+
+  it('should run the passed function once (wrapped by a reaction)', () => {
+    const fnSpy = spy(() => {})
+    observe(fnSpy)
+    expect(fnSpy.callCount).to.equal(1)
   })
 
   it('should observe basic properties', () => {
@@ -281,5 +289,13 @@ describe('observe', () => {
     obj.prop = 'value2'
     expect(dummy).to.equal('other')
     expect(conditionalSpy.callCount).to.equal(2)
+  })
+})
+
+describe('observeLazy', () => {
+  it('should not run the passed function', () => {
+    const fnSpy = spy(() => {})
+    observeLazy(fnSpy)
+    expect(fnSpy.callCount).to.equal(0)
   })
 })

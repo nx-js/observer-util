@@ -31,7 +31,7 @@ export class Queue {
 
   add (task) {
     if (typeof task !== 'function') {
-      throw new Error(
+      throw new TypeError(
         `${task} can not be added to the queue. Only functions can be added.`
       )
     }
@@ -61,6 +61,17 @@ export class Queue {
     queue.forEach(runTask)
     queue.clear()
   }
+
+  processing () {
+    const queue = this[QUEUE]
+    return new Promise(resolve => {
+      if (queue.size === 0) {
+        resolve()
+      } else {
+        queue.add(resolve)
+      }
+    })
+  }
 }
 
 function validatePriority (priority) {
@@ -87,10 +98,6 @@ function runQueuedCriticalTasks () {
 function processCriticalQueue (queue) {
   queue.forEach(runTask)
   queue.clear()
-}
-
-function runTask (task) {
-  task()
 }
 
 function runQueuedIdleTasks () {
@@ -134,7 +141,7 @@ function processIdleQueue (queue) {
       return true
     }
     // run the task
-    task.value()
+    runTask(task.value)
     queue.delete(task.value)
     task = iterator.next()
   }
@@ -144,4 +151,8 @@ function moveQueueToEnd (queues, queue) {
   // delete and readd the queue to move it to the end
   queues.delete(queue)
   queues.add(queue)
+}
+
+function runTask (task) {
+  task()
 }
