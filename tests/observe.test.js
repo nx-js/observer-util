@@ -1,12 +1,24 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, unobserve, observable } from '@nx-js/observer-util'
+import { observe, unobserve, observable, Queue } from '@nx-js/observer-util'
 
 describe('observe', () => {
-  it('should throw TypeError on invalid first argument', () => {
+  it('should throw a TypeError when the first argument is not a function', () => {
     expect(() => observe(12)).to.throw(TypeError)
     expect(() => observe({})).to.throw(TypeError)
     expect(() => observe()).to.throw(TypeError)
+  })
+
+  it('should throw a TypeError when the first argument is a reaction', () => {
+    const reaction = observe(() => {})
+    expect(() => observe(reaction)).to.throw(TypeError)
+  })
+
+  it('should throw a TypeError when the second argument is not a Queue instance or undefined', () => {
+    const fn = () => {}
+    expect(() => observe(fn, null)).to.throw(TypeError)
+    expect(() => observe(fn, {})).to.throw(TypeError)
+    expect(() => observe(fn, 'string')).to.throw(TypeError)
   })
 
   it('should observe basic properties', () => {
@@ -194,32 +206,22 @@ describe('observe', () => {
     expect(counterSpy.callCount).to.equal(2)
   })
 
-  it('should return a transparent reactive proxy of the function', () => {
-    function greet (greeting, name) {
-      return `${greeting} ${this.prefix} ${name}`
+  it('should return a new reactive version of the function', () => {
+    function greet () {
+      return 'Hello World'
     }
-    const reaction = observe(greet.bind({ prefix: 'Mr.' }, 'Hello'))
-    expect(reaction).to.be.a('function')
-    const result = reaction('World')
-    expect(result).to.equal('Hello Mr. World')
+    const reaction1 = observe(greet)
+    const reaction2 = observe(greet)
+    expect(reaction1).to.be.a('function')
+    expect(reaction2).to.be.a('function')
+    expect(reaction1).to.not.equal(greet)
+    expect(reaction1).to.not.equal(reaction2)
   })
 
-  it('should be able to re-observe unobserved functions', () => {
-    let dummy = 0
-    const counter = observable({ num: 0 })
-    const reaction = observe(() => (dummy = counter.num))
-
-    expect(dummy).to.equal(0)
-    counter.num++
-    expect(dummy).to.equal(1)
-    unobserve(reaction)
-    counter.num++
-    expect(dummy).to.equal(1)
-    // TODO fix this
-    observe(reaction)
-    expect(dummy).to.equal(2)
-    counter.num++
-    expect(dummy).to.equal(3)
+  it('should keep the return value of the function', () => {
+    const reaction = observe(() => 'Hello World')
+    const result = reaction()
+    expect(result).to.equal('Hello World')
   })
 
   it('should discover new branches while running automatically', () => {

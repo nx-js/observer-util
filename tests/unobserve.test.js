@@ -3,6 +3,14 @@ import { spy } from './utils'
 import { observable, observe, unobserve } from '@nx-js/observer-util'
 
 describe('unobserve', () => {
+  it('should throw a TypeError when the first argument is not a reaction', () => {
+    const fn = () => {}
+    expect(() => unobserve(fn)).to.throw(TypeError)
+    expect(() => unobserve(undefined)).to.throw(TypeError)
+    expect(() => unobserve(null)).to.throw(TypeError)
+    expect(() => unobserve({})).to.throw(TypeError)
+  })
+
   it('should unobserve the observed function', () => {
     let dummy
     const counter = observable({ num: 0 })
@@ -60,12 +68,10 @@ describe('unobserve', () => {
 
     expect(counterSpy.callCount).to.equal(1)
     counter.num = 'Hello'
-
     expect(dummy).to.equal('Hello')
     expect(counterSpy.callCount).to.equal(2)
     counter.num = 'World'
     unobserve(reaction)
-
     expect(dummy).to.equal('Hello')
     expect(counterSpy.callCount).to.equal(2)
   })
