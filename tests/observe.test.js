@@ -41,13 +41,13 @@ describe('observe', () => {
 
   it('should observe multiple properties', () => {
     let dummy
-    const counter = observable({ num1: 0, num2: 0, num3: 0 })
+    const counter = observable({ num1: 0, num2: 0 })
     observe(
-      () => (dummy = counter.num1 + counter.num2 + counter.num3)
+      () => (dummy = counter.num1 + counter.num1 + counter.num2)
     )
 
     expect(dummy).to.equal(0)
-    counter.num1 = counter.num2 = counter.num3 = 7
+    counter.num1 = counter.num2 = 7
     expect(dummy).to.equal(21)
   })
 
