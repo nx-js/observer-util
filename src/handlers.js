@@ -51,7 +51,7 @@ function set (obj, key, value, receiver) {
   // emit a warning and do not queue anything when another reaction is queued
   // from an already running reaction
   if (hasRunningReaction()) {
-    console.error(`Mutating observables in reactions is forbidden. You tried to set ${key} to ${value}`)
+    console.error(`Mutating observables in reactions is forbidden. You set ${key} to ${value}.`)
     return result
   }
   // do not queue reactions if it is a symbol keyed property

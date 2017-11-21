@@ -18,7 +18,7 @@ export function observeLazy (fn, queue) {
   }
 
   // bind reaction together with the runner
-  const reaction = runAsReaction.bind(null, fn)
+  const reaction = runAsReaction.bind(fn)
   fn.reaction = reaction
   // save the queue on the reaction
   reaction.queue = queue

@@ -8,15 +8,16 @@ const AFTER = Symbol('after reaction')
 const RESOLVE_AFTER = Symbol('resolve after reaction')
 let runningReaction
 
-// set the reaction as the currently running one
-// this is required so that we can create (observable.prop -> reaction) pairs in the get trap
-export function runAsReaction (fn) {
+// 'this' is bound to a reaction in this function, do not try to call it normally
+export function runAsReaction () {
   try {
     // delete all existing (obj.key -> reaction) connections
-    releaseReaction(fn.reaction)
     // and reconstruct them in the get trap while the reaction is running
-    runningReaction = fn.reaction
-    return fn()
+    releaseReaction(this.reaction)
+    // set the reaction as the currently running one
+    // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
+    runningReaction = this.reaction
+    return this.apply(null, arguments)
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined

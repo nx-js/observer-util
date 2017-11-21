@@ -18,7 +18,7 @@ describe('observe', () => {
     counter.num = 7
     expect(dummy).to.equal(7)
   })
-  
+
   it('should observe multiple properties', () => {
     let dummy
     const counter = observable({ num1: 0, num2: 0, num3: 0 })
@@ -52,7 +52,6 @@ describe('observe', () => {
 
     expect(dummy).to.equal(0)
     counter.nested.num = 8
-
     expect(dummy).to.equal(8)
   })
 
@@ -64,7 +63,6 @@ describe('observe', () => {
 
     expect(dummy).to.equal('value')
     delete obj.prop
-
     expect(dummy).to.equal(undefined)
   })
 
@@ -78,13 +76,10 @@ describe('observe', () => {
 
     expect(dummy).to.equal(0)
     delete counter.num
-
     expect(dummy).to.equal(2)
     parentCounter.num = 4
-
     expect(dummy).to.equal(4)
     counter.num = 3
-
     expect(dummy).to.equal(3)
   })
 
@@ -97,10 +92,8 @@ describe('observe', () => {
       return counter.num
     }
 
-
     expect(dummy).to.equal(0)
     counter.num = 2
-
     expect(dummy).to.equal(2)
   })
 
@@ -112,10 +105,8 @@ describe('observe', () => {
 
     expect(dummy).to.equal('Hello')
     list.push('World!')
-
     expect(dummy).to.equal('Hello World!')
     list.shift()
-
     expect(dummy).to.equal('World!')
   })
 
@@ -129,13 +120,10 @@ describe('observe', () => {
       }
     })
 
-
     expect(dummy).to.equal(3)
     numbers.num2 = 4
-
     expect(dummy).to.equal(7)
     delete numbers.num1
-
     expect(dummy).to.equal(4)
   })
 
@@ -145,13 +133,10 @@ describe('observe', () => {
     const obj = observable({ [key]: 'value' })
     const reaction = observe(() => (dummy = obj[key]))
 
-
     expect(dummy).to.equal('value')
     obj[key] = 'newValue'
-
     expect(dummy).to.equal('value')
     delete obj[key]
-
     expect(dummy).to.equal('value')
   })
 
@@ -163,10 +148,8 @@ describe('observe', () => {
     const obj = observable({ func: oldFunc })
     const reaction = observe(() => (dummy = obj.func))
 
-
     expect(dummy).to.equal(oldFunc)
     obj.func = newFunc
-
     expect(dummy).to.equal(oldFunc)
   })
 
@@ -177,10 +160,8 @@ describe('observe', () => {
     const propSpy = spy(() => (dummy = obj.prop))
     const reaction = observe(propSpy)
 
-
     expect(dummy).to.equal('value')
     obj.prop = 'value'
-
     expect(propSpy.callCount).to.equal(1)
     expect(dummy).to.equal('value')
   })
@@ -190,10 +171,8 @@ describe('observe', () => {
     const obj = observable()
     const reaction = observe(() => (dummy = obj.$raw.prop))
 
-
     expect(dummy).to.equal(undefined)
     obj.prop = 'value'
-
     expect(dummy).to.equal(undefined)
   })
 
@@ -202,72 +181,31 @@ describe('observe', () => {
     const obj = observable()
     const reaction = observe(() => (dummy = obj.prop))
 
-
     expect(dummy).to.equal(undefined)
     obj.$raw.prop = 'value'
-
     expect(dummy).to.equal(undefined)
   })
 
-  it('should rerun maximum once per stack', () => {
-    let dummy
-    const nums = observable({ num1: 0, num2: 0 })
-
-    const numsSpy = spy(() => (dummy = nums.num1 + nums.num2))
-    const reaction = observe(numsSpy)
-
-
-    expect(numsSpy.callCount).to.equal(1)
-    expect(dummy).to.equal(0)
-    nums.num1 = 1
-    nums.num2 = 3
-    nums.num1 = 2
-
-    expect(numsSpy.callCount).to.equal(2)
-    expect(dummy).to.equal(5)
-  })
-
-  it('should avoid infinite loops', () => {
-    const obj1 = observable({ prop: 'value1' })
-    const obj2 = observable({ prop: 'value2' })
-
-    const spy1 = spy(() => (obj1.prop = obj2.prop))
-    const spy2 = spy(() => (obj2.prop = obj1.prop))
-    const reaction1 = observe(spy1)
-    const reaction2 = observe(spy2)
-
-    expect(obj1.prop).to.equal('value2')
-    expect(obj2.prop).to.equal('value2')
-    expect(spy1.callCount).to.equal(1)
-    expect(spy2.callCount).to.equal(1)
-    obj1.prop = 'Hello'
-    expect(obj2.prop).to.equal('Hello')
-    expect(spy1.callCount).to.equal(2)
-    expect(spy2.callCount).to.equal(2)
-    obj2.prop = 'World!'
-    expect(obj1.prop).to.equal('World!')
-    expect(spy1.callCount).to.equal(3)
-    expect(spy2.callCount).to.equal(3)
-  })
-
-  it('should return the passed function', () => {
-    const fn = () => {}
-    const reaction = observe(fn)
-    expect(reaction).to.equal(fn)
-  })
-
-  it('should simply run the function once on multiple observation of the same function', () => {
-    let dummy
+  it('should not react on observable mutations in reactions', () => {
     const counter = observable({ num: 0 })
-    const counterSpy = spy(() => (dummy = counter.num))
-    const reaction1 = observe(counterSpy)
-    const reaction2 = observe(counterSpy)
-    expect(reaction1).to.equal(reaction2)
 
+    const counterSpy = spy(() => counter.num++)
+    observe(counterSpy)
+    expect(counter.num).to.equal(1)
     expect(counterSpy.callCount).to.equal(1)
-    counter.num++
-    expect(dummy).to.equal(1)
-    expect(counterSpy.callCount).to.equal(callCount + 1)
+    counter.num = 4
+    expect(counter.num).to.equal(5)
+    expect(counterSpy.callCount).to.equal(2)
+  })
+
+  it('should return a transparent reactive proxy of the function', () => {
+    function greet (greeting, name) {
+      return `${greeting} ${this.prefix} ${name}`
+    }
+    const reaction = observe(greet.bind({ prefix: 'Mr.' }, 'Hello'))
+    expect(reaction).to.be.a('function')
+    const result = reaction('World')
+    expect(result).to.equal('Hello Mr. World')
   })
 
   it('should be able to re-observe unobserved functions', () => {
@@ -278,35 +216,55 @@ describe('observe', () => {
 
     expect(dummy).to.equal(0)
     counter.num++
-
     expect(dummy).to.equal(1)
     unobserve(reaction)
     counter.num++
-
     expect(dummy).to.equal(1)
+    // TODO fix this
     observe(reaction)
-
     expect(dummy).to.equal(2)
     counter.num++
-
     expect(dummy).to.equal(3)
   })
 
-  it('should execute in first-tigger order', () => {
-    let dummy = ''
-    const obj = observable({ prop1: 'val1', prop2: 'val2', prop3: 'val3' })
+  it('should discover new branches while running automatically', () => {
+    let dummy
+    const obj = observable({ prop: 'value', run: false })
 
-    const reaction1 = observe(() => (dummy += obj.prop1))
-    const reaction2 = observe(() => (dummy += obj.prop2))
-    const reaction3 = observe(() => (dummy += obj.prop3))
+    const conditionalSpy = spy(() => {
+      dummy = obj.run ? obj.prop : 'other'
+    })
+    observe(conditionalSpy)
 
-    expect(dummy).to.equal('val1val2val3')
-    dummy = ''
-    obj.prop2 = 'p'
-    obj.prop1 = 'p1'
-    obj.prop3 = 'p3'
-    obj.prop2 = 'p2'
-    expect(dummy).to.equal('p2p1p3')
+    expect(dummy).to.equal('other')
+    expect(conditionalSpy.callCount).to.equal(1)
+    obj.prop = 'Hi'
+    expect(dummy).to.equal('other')
+    expect(conditionalSpy.callCount).to.equal(1)
+    obj.run = true
+    expect(dummy).to.equal('Hi')
+    expect(conditionalSpy.callCount).to.equal(2)
+    obj.prop = 'World'
+    expect(dummy).to.equal('World')
+    expect(conditionalSpy.callCount).to.equal(3)
+  })
+
+  it('should discover new branches when running manually', () => {
+    let dummy
+    let run = false
+    const obj = observable({ prop: 'value' })
+    const reaction = observe(() => {
+      dummy = run ? obj.prop : 'other'
+    })
+
+    expect(dummy).to.equal('other')
+    reaction()
+    expect(dummy).to.equal('other')
+    run = true
+    reaction()
+    expect(dummy).to.equal('value')
+    obj.prop = 'World'
+    expect(dummy).to.equal('World')
   })
 
   it('should not be triggered by mutating a property, which is used in an inactive branch', () => {
@@ -318,15 +276,12 @@ describe('observe', () => {
     })
     const reaction = observe(conditionalSpy)
 
-
     expect(dummy).to.equal('value')
     expect(conditionalSpy.callCount).to.equal(1)
     obj.run = false
-
     expect(dummy).to.equal('other')
     expect(conditionalSpy.callCount).to.equal(2)
     obj.prop = 'value2'
-
     expect(dummy).to.equal('other')
     expect(conditionalSpy.callCount).to.equal(2)
   })
