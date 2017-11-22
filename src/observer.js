@@ -1,5 +1,5 @@
+import { Queue } from '@nx-js/queue-util'
 import { releaseReaction } from './store'
-import { Queue } from './priorityQueue'
 import { runAsReaction } from './reactionRunner'
 
 const IS_REACTION = Symbol('is reaction')
