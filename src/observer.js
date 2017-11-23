@@ -1,5 +1,5 @@
 import { Queue } from '@nx-js/queue-util'
-import { storeReaction, releaseReaction } from './store'
+import { releaseReaction } from './store'
 import { runAsReaction } from './reactionRunner'
 
 const IS_REACTION = Symbol('is reaction')
@@ -30,9 +30,12 @@ export function observeLazy (fn, queue) {
   const reaction = () => runAsReaction(fn, reaction)
   // save the queue on the reaction
   reaction.queue = queue
+  // cleaners will store the cleanup wiring on the reaction
+  reaction.cleaners = []
+  // runId will serve as a unique (incremental) id, which identifies the reaction's last run
+  reaction.runId = 0
   // save the fact that this is a reaction
   reaction[IS_REACTION] = true
-  storeReaction(reaction)
   return reaction
 }
 

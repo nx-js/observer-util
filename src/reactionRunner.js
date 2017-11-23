@@ -1,7 +1,6 @@
 import {
   registerReactionForKey,
-  iterateReactionsForKey,
-  pruneReaction
+  iterateReactionsForKey
 } from './store'
 
 let runningReaction
@@ -9,6 +8,8 @@ let runningReaction
 // 'this' is bound to a reaction in this function, do not try to call it normally
 export function runAsReaction (fn, reaction) {
   try {
+    // save a unique (incremental) id on the reaction, which identifies its last run
+    reaction.runId++
     // set the reaction as the currently running one
     // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
     runningReaction = reaction
@@ -16,7 +17,6 @@ export function runAsReaction (fn, reaction) {
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined
-    pruneReaction(reaction)
   }
 }
 
@@ -32,11 +32,15 @@ export function queueReactionsForKey (obj, key) {
   iterateReactionsForKey(obj, key, queueReaction)
 }
 
-function queueReaction (reaction) {
-  if (reaction.queue) {
-    reaction.queue.add(reaction)
-  } else {
-    reaction()
+function queueReaction (runId, reaction) {
+  // only queue the reaction if the triggering key has a matching id with the reaction
+  // (if the triggering key is not currently hidden by conditionals)
+  if (runId === reaction.runId) {
+    if (reaction.queue) {
+      reaction.queue.add(reaction)
+    } else {
+      reaction()
+    }
   }
 }
 
