@@ -1,5 +1,5 @@
 import { Queue } from '@nx-js/queue-util'
-import { releaseReaction } from './store'
+import { storeReaction, releaseReaction } from './store'
 import { runAsReaction } from './reactionRunner'
 
 const IS_REACTION = Symbol('is reaction')
@@ -32,6 +32,7 @@ export function observeLazy (fn, queue) {
   reaction.queue = queue
   // save the fact that this is a reaction
   reaction[IS_REACTION] = true
+  storeReaction(reaction)
   return reaction
 }
 
