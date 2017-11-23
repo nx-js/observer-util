@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, observeLazy, unobserve, observable, Queue, priorities } from '@nx-js/observer-util'
+import { observe, unobserve, observable, Queue, priorities } from '@nx-js/observer-util'
 
 describe('observe', () => {
   it('should throw a TypeError when the first argument is not a function', () => {
@@ -12,15 +12,6 @@ describe('observe', () => {
   it('should throw a TypeError when the first argument is a reaction', () => {
     const reaction = observe(() => {})
     expect(() => observe(reaction)).to.throw(TypeError)
-  })
-
-  it('should throw a TypeError when the second argument is not a Queue instance or undefined', () => {
-    const queue = new Queue(priorities.CRITICAL)
-    const fn = () => {}
-    expect(() => observe(fn, null)).to.throw(TypeError)
-    expect(() => observe(fn, {})).to.throw(TypeError)
-    expect(() => observe(fn, 'string')).to.throw(TypeError)
-    expect(() => observe(fn, queue)).to.not.throw()
   })
 
   it('should run the passed function once (wrapped by a reaction)', () => {
@@ -292,10 +283,39 @@ describe('observe', () => {
   })
 })
 
-describe('observeLazy', () => {
-  it('should not run the passed function', () => {
-    const fnSpy = spy(() => {})
-    observeLazy(fnSpy)
-    expect(fnSpy.callCount).to.equal(0)
+describe('options', () => {
+  it('should throw a TypeError when the second argument is not an options object', () => {
+    const fn = () => {}
+    expect(() => observe(fn, null)).to.throw(TypeError)
+    expect(() => observe(fn, 'string')).to.throw(TypeError)
+    expect(() => observe(fn)).to.not.throw()
+    expect(() => observe(fn, {})).to.not.throw()
+  })
+
+  describe('lazy', () => {
+    it('should not run the passed function', () => {
+      const fnSpy = spy(() => {})
+      observe(fnSpy, { lazy: true })
+      expect(fnSpy.callCount).to.equal(0)
+    })
+  })
+
+  describe('queue', () => {
+    it('should queue the reaction instead of running it sync', async () => {
+      let dummy
+      const queue = new Queue(priorities.CRITICAL)
+      const counter = observable({ num: 0 })
+      const fnSpy = spy(() => dummy = counter.num)
+      const reaction = observe(fnSpy, { queue })
+
+      expect(fnSpy.callCount).to.equal(1)
+      counter.num++
+      expect(fnSpy.callCount).to.equal(1)
+      expect(queue.has(reaction)).to.be.true
+      await queue.processing()
+      expect(fnSpy.callCount).to.equal(2)
+      expect(queue.has(fnSpy)).to.be.false
+      expect(dummy).to.eql(1)
+    })
   })
 })

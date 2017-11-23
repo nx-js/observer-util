@@ -64,7 +64,7 @@ describe('unobserve', () => {
     let dummy
     const counter = observable({ num: 0 })
     const counterSpy = spy(() => (dummy = counter.num))
-    const reaction = observe(counterSpy, queue)
+    const reaction = observe(counterSpy, { queue })
 
     expect(counterSpy.callCount).to.equal(1)
     counter.num = 'Hello'
