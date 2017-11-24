@@ -18,6 +18,17 @@ export function registerReactionForKey (obj, key, reaction) {
 export function iterateReactionsForKey (obj, key, reactionHandler) {
   const reactionsForKey = connectionStore.get(obj)[key]
   if (reactionsForKey) {
-    reactionsForKey.forEach(reactionHandler)
+    reactionsForKey.forEach(handleReaction, reactionHandler)
+  }
+}
+
+function handleReaction (runId, reaction, reactionsForKey) {
+  if (reaction.runId !== runId) {
+    // delete the (key -> reaction) connection if the key was not accessed
+    // during the last run of the reaction, or the reaction is unobserved
+    reactionsForKey.delete(reaction)
+  } else {
+    // otherwise pass the reaction to the reactionHandler (this)
+    this(reaction)
   }
 }

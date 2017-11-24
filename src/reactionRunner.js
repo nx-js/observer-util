@@ -35,12 +35,9 @@ export function queueReactionsForKey (obj, key) {
   iterateReactionsForKey(obj, key, queueReaction)
 }
 
-function queueReaction (runId, reaction, reactions) {
-  // only queue the reaction if the triggering key has a matching id with the reaction
-  // (if the reaction is still active and the triggering key is not currently hidden by conditionals)
-  if (reaction.runId !== runId) {
-    reactions.delete(reaction)
-  } else if (reaction.queue) {
+function queueReaction (reaction) {
+  // queue the reaction for later execution or run it immediately
+  if (reaction.queue) {
     reaction.queue.add(reaction)
   } else {
     reaction()
