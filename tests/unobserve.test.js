@@ -78,4 +78,14 @@ describe('unobserve', () => {
     expect(dummy).to.equal('Hello')
     expect(counterSpy.callCount).to.equal(2)
   })
+
+  it('should throw if an unobserved reaction is called', () => {
+    const fnSpy = spy(() => {})
+    const reaction = observe(fnSpy)
+
+    expect(fnSpy.callCount).to.eql(1)
+    unobserve(reaction)
+    expect(() => reaction()).to.throw()
+    expect(fnSpy.callCount).to.eql(1)
+  })
 })
