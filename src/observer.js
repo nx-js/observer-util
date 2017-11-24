@@ -1,5 +1,4 @@
 import { Queue } from '@nx-js/queue-util'
-import { releaseReaction } from './store'
 import { runAsReaction } from './reactionRunner'
 
 const IS_REACTION = Symbol('is reaction')
@@ -24,8 +23,6 @@ export function observe (fn, options = {}) {
   const reaction = () => runAsReaction(fn, reaction)
   // save the queue on the reaction
   reaction.queue = options.queue
-  // cleaners will store the cleanup wiring on the reaction
-  reaction.cleaners = []
   // runId will serve as a unique (incremental) id, which identifies the reaction's last run
   reaction.runId = 0
   // save the fact that this is a reaction
@@ -54,6 +51,6 @@ export function unobserve (reaction) {
   if (reaction.queue) {
     reaction.queue.delete(reaction)
   }
-  // release every (observable.prop -> reaction) connections
-  releaseReaction(reaction)
+  // indicate that the reaction should not be triggered any more
+  reaction.runId = -1
 }

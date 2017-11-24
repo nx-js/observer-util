@@ -5,8 +5,11 @@ import {
 
 let runningReaction
 
-// 'this' is bound to a reaction in this function, do not try to call it normally
 export function runAsReaction (fn, reaction) {
+  // throw an error if the reaction is unobserved
+  if (reaction.runId === -1) {
+    throw new Error(`Unobserved reactions can not be executed. You tried to run a reaction for ${fn}`)
+  }
   try {
     // save a unique (incremental) id on the reaction, which identifies its last run
     reaction.runId++
@@ -32,15 +35,15 @@ export function queueReactionsForKey (obj, key) {
   iterateReactionsForKey(obj, key, queueReaction)
 }
 
-function queueReaction (runId, reaction) {
+function queueReaction (runId, reaction, reactions) {
   // only queue the reaction if the triggering key has a matching id with the reaction
-  // (if the triggering key is not currently hidden by conditionals)
-  if (runId === reaction.runId) {
-    if (reaction.queue) {
-      reaction.queue.add(reaction)
-    } else {
-      reaction()
-    }
+  // (if the reaction is still active and the triggering key is not currently hidden by conditionals)
+  if (reaction.runId !== runId) {
+    reactions.delete(reaction)
+  } else if (reaction.queue) {
+    reaction.queue.add(reaction)
+  } else {
+    reaction()
   }
 }
 
