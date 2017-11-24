@@ -1,3 +1,4 @@
+import { Queue } from '@nx-js/queue-util'
 import { releaseReaction } from './store'
 import { runAsReaction } from './reactionRunner'
 
@@ -17,6 +18,7 @@ export function observe (fn, options = {}) {
       `The second argument must be an options object instead of ${options}`
     )
   }
+  validateOptions(options)
 
   // crate a reaction from the passed function
   const reaction = () => runAsReaction(fn, reaction)
@@ -33,6 +35,15 @@ export function observe (fn, options = {}) {
     reaction()
   }
   return reaction
+}
+
+function validateOptions ({ lazy = false, queue }) {
+  if (typeof lazy !== 'boolean') {
+    throw new TypeError(`options.lazy must be a boolean or undefined instead of ${lazy}`)
+  }
+  if (!(queue === undefined || queue instanceof Queue)) {
+    throw new TypeError(`options.queue must be a queue instance or undefined instead of ${queue}`)
+  }
 }
 
 export function unobserve (reaction) {

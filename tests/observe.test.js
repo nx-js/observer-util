@@ -293,7 +293,15 @@ describe('options', () => {
   })
 
   describe('lazy', () => {
-    it('should not run the passed function', () => {
+    it('should throw if it is not a boolean or undefined', () => {
+      const fn = () => {}
+      expect(() => observe(fn, { lazy: null })).to.throw(TypeError)
+      expect(() => observe(fn, { lazy: 'true' })).to.throw(TypeError)
+      expect(() => observe(fn, { lazy: undefined })).to.not.throw()
+      expect(() => observe(fn, { lazy: false })).to.not.throw()
+    })
+
+    it('should not run the passed function, if set to true', () => {
       const fnSpy = spy(() => {})
       observe(fnSpy, { lazy: true })
       expect(fnSpy.callCount).to.equal(0)
@@ -301,6 +309,15 @@ describe('options', () => {
   })
 
   describe('queue', () => {
+    it('should throw if it is not a Queue instance or undefined', () => {
+      const fn = () => {}
+      const queue = new Queue(priorities.LOW)
+      expect(() => observe(fn, { queue: null })).to.throw(TypeError)
+      expect(() => observe(fn, { queue: true })).to.throw(TypeError)
+      expect(() => observe(fn, { queue })).to.not.throw()
+      expect(() => observe(fn, { queue: undefined })).to.not.throw()
+    })
+
     it('should queue the reaction instead of running it sync', async () => {
       let dummy
       const queue = new Queue(priorities.CRITICAL)
