@@ -6,7 +6,7 @@ const coverage = require('rollup-plugin-coverage')
 const alias = require('rollup-plugin-alias')
 const TestServer = require('karma').Server
 
-const bundleType = process.env.BUNDLE_TYPE
+const bundleType = process.env.BUNDLE
 const bundlePath = bundleType ? `dist/${bundleType}.js` : 'src/index.js'
 
 const config = {

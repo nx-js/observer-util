@@ -10,6 +10,7 @@
   "scripts": {
     "test": "node ./scripts/test.js",
     "test-builds": "node ./scripts/testBuilds.js",
+    "debug": "node ./scripts/debug.js",
     "lint": "standard",
     "lint-fix": "prettier --ignore-path '.gitignore' --write '**/!(bundle).js' && standard --fix",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
