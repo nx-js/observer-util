@@ -23,6 +23,8 @@ export function observe (fn, options = {}) {
   const reaction = () => runAsReaction(fn, reaction)
   // save the queue on the reaction
   reaction.queue = options.queue
+  //
+  reaction.cleaners = []
   // runId will serve as a unique (incremental) id, which identifies the reaction's last run
   reaction.runId = 0
   // save the fact that this is a reaction
@@ -53,4 +55,11 @@ export function unobserve (reaction) {
   }
   // indicate that the reaction should not be triggered any more
   reaction.runId = -1
+
+  reaction.cleaners.forEach(releaseReactionForKey, reaction)
+  reaction.cleaners = undefined
+}
+
+function releaseReactionForKey (reactionsForKey) {
+  reactionsForKey.delete(this)
 }

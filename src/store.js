@@ -10,6 +10,9 @@ export function registerReactionForKey (obj, key, reaction) {
   let reactionsForKey = reactionsForObj[key]
   if (!reactionsForKey) {
     reactionsForObj[key] = reactionsForKey = new Map()
+    reaction.cleaners.push(reactionsForKey)
+  } else if (!reactionsForKey.has(reaction)) {
+    reaction.cleaners.push(reactionsForKey)
   }
   // save the fact that the key is used by the reaction during its current run
   reactionsForKey.set(reaction, reaction.runId)
