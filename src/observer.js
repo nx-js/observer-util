@@ -55,11 +55,4 @@ export function unobserve (reaction) {
   }
   // indicate that the reaction should not be triggered any more
   reaction.runId = -1
-
-  reaction.cleaners.forEach(releaseReactionForKey, reaction)
-  reaction.cleaners = undefined
-}
-
-function releaseReactionForKey (reactionsForKey) {
-  reactionsForKey.delete(this)
 }
