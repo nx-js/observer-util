@@ -23,8 +23,6 @@ function unobserveMany () {
   reactions = []
   // this makes it not clean up properly!
   clearInterval(interval)
-  // but this fixes it
-  data.array = []
 }
 
 window.observeMany = observeMany

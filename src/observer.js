@@ -1,5 +1,6 @@
 import { Queue } from '@nx-js/queue-util'
 import { runAsReaction } from './reactionRunner'
+import { releaseReaction } from './store'
 
 const IS_REACTION = Symbol('is reaction')
 
@@ -23,8 +24,6 @@ export function observe (fn, options = {}) {
   const reaction = () => runAsReaction(fn, reaction)
   // save the queue on the reaction
   reaction.queue = options.queue
-  //
-  reaction.cleaners = []
   // runId will serve as a unique (incremental) id, which identifies the reaction's last run
   reaction.runId = 0
   // save the fact that this is a reaction
@@ -49,10 +48,15 @@ export function unobserve (reaction) {
   if (typeof reaction !== 'function' || !reaction[IS_REACTION]) {
     throw new TypeError(`The first argument must be a reaction instead of ${reaction}`)
   }
-  // do not run this reaction anymore, even if it is already queued
-  if (reaction.queue) {
-    reaction.queue.delete(reaction)
+  // do nothing, if the reaction is already unobserved
+  if (!reaction.unobserved) {
+    // do not run this reaction anymore, even if it is already queued
+    if (reaction.queue) {
+      reaction.queue.delete(reaction)
+    }
+    // indicate that the reaction should not be triggered any more
+    reaction.unobserved = true
+    // release (obj -> key -> reaction) connections
+    releaseReaction(reaction)
   }
-  // indicate that the reaction should not be triggered any more
-  reaction.runId = -1
 }

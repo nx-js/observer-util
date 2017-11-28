@@ -88,4 +88,22 @@ describe('unobserve', () => {
     expect(() => reaction()).to.throw()
     expect(fnSpy.callCount).to.eql(1)
   })
+
+  it('should have the same effect, when called multiple times', () => {
+    let dummy
+    const counter = observable({ num: 0 })
+    const counterSpy = spy(() => (dummy = counter.num))
+    const reaction = observe(counterSpy)
+
+    expect(counterSpy.callCount).to.equal(1)
+    counter.num = 'Hello'
+    expect(counterSpy.callCount).to.equal(2)
+    expect(dummy).to.equal('Hello')
+    unobserve(reaction)
+    unobserve(reaction)
+    unobserve(reaction)
+    counter.num = 'World'
+    expect(counterSpy.callCount).to.equal(2)
+    expect(dummy).to.equal('Hello')
+  })
 })

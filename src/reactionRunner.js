@@ -1,18 +1,23 @@
 import {
   registerReactionForKey,
-  iterateReactionsForKey
+  iterateReactionsForKey,
+  releaseReaction
 } from './store'
 
 let runningReaction
 
 export function runAsReaction (fn, reaction) {
   // throw an error if the reaction is unobserved
-  if (reaction.runId === -1) {
+  if (reaction.unobserved) {
     throw new Error(`Unobserved reactions can not be executed. You tried to run a reaction for ${fn}`)
   }
+
+  // release the (obj -> key -> reactions) connections
+  // and reset the cleaner connections
+  releaseReaction(reaction)
+  reaction.cleaners = []
+
   try {
-    // save a unique (incremental) id on the reaction, which identifies its last run
-    reaction.runId++
     // set the reaction as the currently running one
     // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
     runningReaction = reaction
