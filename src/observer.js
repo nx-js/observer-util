@@ -1,4 +1,3 @@
-import { Queue } from '@nx-js/queue-util'
 import { runAsReaction } from './reactionRunner'
 import { releaseReaction } from './store'
 
@@ -21,9 +20,11 @@ export function observe (fn, options = {}) {
   validateOptions(options)
 
   // crate a reaction from the passed function
-  const reaction = () => runAsReaction(fn, reaction)
-  // save the queue on the reaction
-  reaction.queue = options.queue
+  function reaction () {
+    return runAsReaction(reaction, fn, this, arguments)
+  }
+  // save the scheduler on the reaction
+  reaction.scheduler = options.scheduler
   // runId will serve as a unique (incremental) id, which identifies the reaction's last run
   reaction.runId = 0
   // save the fact that this is a reaction
@@ -35,12 +36,12 @@ export function observe (fn, options = {}) {
   return reaction
 }
 
-function validateOptions ({ lazy = false, queue }) {
+function validateOptions ({ lazy = false, scheduler }) {
   if (typeof lazy !== 'boolean') {
     throw new TypeError(`options.lazy must be a boolean or undefined instead of ${lazy}`)
   }
-  if (!(queue === undefined || queue instanceof Queue)) {
-    throw new TypeError(`options.queue must be a queue instance or undefined instead of ${queue}`)
+  if (scheduler !== undefined && typeof scheduler !== 'function') {
+    throw new TypeError(`options.scheduler must be a function or undefined instead of ${scheduler}`)
   }
 }
 
@@ -50,10 +51,6 @@ export function unobserve (reaction) {
   }
   // do nothing, if the reaction is already unobserved
   if (!reaction.unobserved) {
-    // do not run this reaction anymore, even if it is already queued
-    if (reaction.queue) {
-      reaction.queue.delete(reaction)
-    }
     // indicate that the reaction should not be triggered any more
     reaction.unobserved = true
     // release (obj -> key -> reaction) connections

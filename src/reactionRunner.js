@@ -6,7 +6,7 @@ import {
 
 let runningReaction
 
-export function runAsReaction (fn, reaction) {
+export function runAsReaction (reaction, fn, context, args) {
   // throw an error if the reaction is unobserved
   if (reaction.unobserved) {
     throw new Error(`Unobserved reactions can not be executed. You tried to run a reaction for ${fn}`)
@@ -21,7 +21,7 @@ export function runAsReaction (fn, reaction) {
     // set the reaction as the currently running one
     // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
     runningReaction = reaction
-    return fn()
+    return fn.apply(context, args)
   } finally {
     // always remove the currently running flag from the reaction when it stops execution
     runningReaction = undefined
@@ -42,8 +42,8 @@ export function queueReactionsForKey (obj, key) {
 
 function queueReaction (reaction) {
   // queue the reaction for later execution or run it immediately
-  if (reaction.queue) {
-    reaction.queue.add(reaction)
+  if (reaction.scheduler) {
+    reaction.scheduler(reaction)
   } else {
     reaction()
   }

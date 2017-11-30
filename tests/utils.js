@@ -1,7 +1,8 @@
 export function spy (fn) {
-  const spyFn = () => {
+   function spyFn () {
     fn()
     spyFn.callCount++
+    spyFn.args = Array.from(arguments)
   }
   spyFn.callCount = 0
   return spyFn

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observable, observe, unobserve, Queue, priorities } from '@nx-js/observer-util'
+import { observable, observe, unobserve } from '@nx-js/observer-util'
 
 describe('unobserve', () => {
   it('should throw a TypeError when the first argument is not a reaction', () => {
@@ -59,27 +59,7 @@ describe('unobserve', () => {
     expect(dummy).to.equal(0)
   })
 
-  it('should unobserve even if the function is already queued', async () => {
-    const queue = new Queue(priorities.CRITICAL)
-    let dummy
-    const counter = observable({ num: 0 })
-    const counterSpy = spy(() => (dummy = counter.num))
-    const reaction = observe(counterSpy, { queue })
-
-    expect(counterSpy.callCount).to.equal(1)
-    counter.num = 'Hello'
-    await queue.processing()
-    expect(dummy).to.equal('Hello')
-    expect(counterSpy.callCount).to.equal(2)
-    counter.num = 'World'
-    unobserve(reaction)
-    expect(queue.has(reaction)).to.be.false
-    await queue.processing()
-    expect(dummy).to.equal('Hello')
-    expect(counterSpy.callCount).to.equal(2)
-  })
-
-  it('should throw if an unobserved reaction is called', () => {
+  it('should warn if an unobserved reaction is called', () => {
     const fnSpy = spy(() => {})
     const reaction = observe(fnSpy)
 

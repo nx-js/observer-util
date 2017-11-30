@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, unobserve, observable, Queue, priorities } from '@nx-js/observer-util'
+import { observe, unobserve, observable } from '@nx-js/observer-util'
 
 describe('observe', () => {
   it('should throw a TypeError when the first argument is not a function', () => {
@@ -293,7 +293,7 @@ describe('options', () => {
   })
 
   describe('lazy', () => {
-    it('should throw if it is not a boolean or undefined', () => {
+    it('should throw if options.lazy is not a boolean or undefined', () => {
       const fn = () => {}
       expect(() => observe(fn, { lazy: null })).to.throw(TypeError)
       expect(() => observe(fn, { lazy: 'true' })).to.throw(TypeError)
@@ -308,31 +308,29 @@ describe('options', () => {
     })
   })
 
-  describe('queue', () => {
-    it('should throw if it is not a Queue instance or undefined', () => {
+  describe('scheduler', () => {
+    it('should throw if options.scheduler is not a function or undefined', () => {
       const fn = () => {}
-      const queue = new Queue(priorities.LOW)
-      expect(() => observe(fn, { queue: null })).to.throw(TypeError)
-      expect(() => observe(fn, { queue: true })).to.throw(TypeError)
-      expect(() => observe(fn, { queue })).to.not.throw()
-      expect(() => observe(fn, { queue: undefined })).to.not.throw()
+      const scheduler = () => {}
+      expect(() => observe(fn, { scheduler: null })).to.throw(TypeError)
+      expect(() => observe(fn, { scheduler: true })).to.throw(TypeError)
+      expect(() => observe(fn, { scheduler })).to.not.throw()
+      expect(() => observe(fn, { scheduler: undefined })).to.not.throw()
     })
 
-    it('should queue the reaction instead of running it sync', async () => {
+    it('should call the scheduler with the reaction instead of running it sync', () => {
       let dummy
-      const queue = new Queue(priorities.CRITICAL)
       const counter = observable({ num: 0 })
-      const fnSpy = spy(() => dummy = counter.num)
-      const reaction = observe(fnSpy, { queue })
+      const fn = spy(() => dummy = counter.num)
+      const scheduler = spy(() => {})
+      const reaction = observe(fn, { scheduler })
 
-      expect(fnSpy.callCount).to.equal(1)
+      expect(fn.callCount).to.equal(1)
+      expect(scheduler.callCount).to.equal(0)
       counter.num++
-      expect(fnSpy.callCount).to.equal(1)
-      expect(queue.has(reaction)).to.be.true
-      await queue.processing()
-      expect(fnSpy.callCount).to.equal(2)
-      expect(queue.has(fnSpy)).to.be.false
-      expect(dummy).to.eql(1)
+      expect(fn.callCount).to.equal(1)
+      expect(scheduler.callCount).to.eql(1)
+      expect(scheduler.args).to.eql([reaction])
     })
   })
 })
