@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, unobserve, observable } from '@nx-js/observer-util'
+import { observe, observable } from '@nx-js/observer-util'
 
 describe('observe', () => {
   it('should throw a TypeError when the first argument is not a function', () => {
@@ -33,9 +33,7 @@ describe('observe', () => {
   it('should observe multiple properties', () => {
     let dummy
     const counter = observable({ num1: 0, num2: 0 })
-    observe(
-      () => (dummy = counter.num1 + counter.num1 + counter.num2)
-    )
+    observe(() => (dummy = counter.num1 + counter.num1 + counter.num2))
 
     expect(dummy).to.equal(0)
     counter.num1 = counter.num2 = 7
@@ -222,7 +220,9 @@ describe('observe', () => {
       return `Hello ${this.prefix} ${name}!`
     }
     const reaction = observe(greet, { lazy: true })
-    expect(reaction.call({ prefix: 'Mr.' }, 'World')).to.eql('Hello Mr. World!')
+    expect(reaction.call({ prefix: 'Mr.' }, 'World')).to.eql(
+      'Hello Mr. World!'
+    )
   })
 
   it('should keep the return value of the function', () => {
@@ -327,9 +327,8 @@ describe('options', () => {
     })
 
     it('should call the scheduler with the reaction instead of running it sync', () => {
-      let dummy
       const counter = observable({ num: 0 })
-      const fn = spy(() => dummy = counter.num)
+      const fn = spy(() => counter.num)
       const scheduler = spy(() => {})
       const reaction = observe(fn, { scheduler })
 

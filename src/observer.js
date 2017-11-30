@@ -10,7 +10,9 @@ export function observe (fn, options = {}) {
     )
   }
   if (fn[IS_REACTION]) {
-    throw new TypeError('The first argument must not be an already observed reaction')
+    throw new TypeError(
+      'The first argument must not be an already observed reaction'
+    )
   }
   if (typeof options !== 'object' || options === null) {
     throw new TypeError(
@@ -38,16 +40,22 @@ export function observe (fn, options = {}) {
 
 function validateOptions ({ lazy = false, scheduler }) {
   if (typeof lazy !== 'boolean') {
-    throw new TypeError(`options.lazy must be a boolean or undefined instead of ${lazy}`)
+    throw new TypeError(
+      `options.lazy must be a boolean or undefined instead of ${lazy}`
+    )
   }
   if (scheduler !== undefined && typeof scheduler !== 'function') {
-    throw new TypeError(`options.scheduler must be a function or undefined instead of ${scheduler}`)
+    throw new TypeError(
+      `options.scheduler must be a function or undefined instead of ${scheduler}`
+    )
   }
 }
 
 export function unobserve (reaction) {
   if (typeof reaction !== 'function' || !reaction[IS_REACTION]) {
-    throw new TypeError(`The first argument must be a reaction instead of ${reaction}`)
+    throw new TypeError(
+      `The first argument must be a reaction instead of ${reaction}`
+    )
   }
   // do nothing, if the reaction is already unobserved
   if (!reaction.unobserved) {

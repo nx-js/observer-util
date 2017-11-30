@@ -9,7 +9,9 @@ let runningReaction
 export function runAsReaction (reaction, fn, context, args) {
   // throw an error if the reaction is unobserved
   if (reaction.unobserved) {
-    throw new Error(`Unobserved reactions can not be executed. You tried to run a reaction for ${fn}`)
+    throw new Error(
+      `Unobserved reactions can not be executed. You tried to run a reaction for ${fn}`
+    )
   }
 
   // release the (obj -> key -> reactions) connections
