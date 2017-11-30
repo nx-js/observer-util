@@ -217,6 +217,14 @@ describe('observe', () => {
     expect(reaction1).to.not.equal(reaction2)
   })
 
+  it('should wrap the passed function seamlessly', () => {
+    function greet (name) {
+      return `Hello ${this.prefix} ${name}!`
+    }
+    const reaction = observe(greet, { lazy: true })
+    expect(reaction.call({ prefix: 'Mr.' }, 'World')).to.eql('Hello Mr. World!')
+  })
+
   it('should keep the return value of the function', () => {
     const reaction = observe(() => 'Hello World')
     const result = reaction()

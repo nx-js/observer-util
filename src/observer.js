@@ -19,7 +19,7 @@ export function observe (fn, options = {}) {
   }
   validateOptions(options)
 
-  // crate a reaction from the passed function
+  // create a reaction from the passed function
   function reaction () {
     return runAsReaction(reaction, fn, this, arguments)
   }
