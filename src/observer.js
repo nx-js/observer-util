@@ -44,9 +44,13 @@ function validateOptions ({ lazy = false, scheduler }) {
       `options.lazy must be a boolean or undefined instead of ${lazy}`
     )
   }
-  if (scheduler !== undefined && typeof scheduler !== 'function') {
+  if (typeof scheduler === 'object' && scheduler !== null) {
+    if (typeof scheduler.add !== 'function' || typeof scheduler.delete !== 'function') {
+      throw new TypeError('options.scheduler object must have an add and delete method')
+    }
+  } else if (scheduler !== undefined && typeof scheduler !== 'function') {
     throw new TypeError(
-      `options.scheduler must be a function or undefined instead of ${scheduler}`
+      `options.scheduler must be a function, an object or undefined instead of ${scheduler}`
     )
   }
 }
@@ -63,5 +67,9 @@ export function unobserve (reaction) {
     reaction.unobserved = true
     // release (obj -> key -> reaction) connections
     releaseReaction(reaction)
+  }
+  // unschedule the reaction, if it is scheduled
+  if (typeof reaction.scheduler === 'object') {
+    reaction.scheduler.delete(reaction)
   }
 }

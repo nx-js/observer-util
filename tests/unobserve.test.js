@@ -59,7 +59,7 @@ describe('unobserve', () => {
     expect(dummy).to.equal(0)
   })
 
-  it('should warn if an unobserved reaction is called', () => {
+  it('should throw if an unobserved reaction is called', () => {
     const fnSpy = spy(() => {})
     const reaction = observe(fnSpy)
 
@@ -85,5 +85,16 @@ describe('unobserve', () => {
     counter.num = 'World'
     expect(counterSpy.callCount).to.equal(2)
     expect(dummy).to.equal('Hello')
+  })
+
+  it('should call scheduler.delete', () => {
+    const counter = observable({ num: 0 })
+    const fn = spy(() => counter.num)
+    const scheduler = { add: () => {}, delete: spy(() => {}) }
+    const reaction = observe(fn, { scheduler })
+
+    counter.num++
+    unobserve(reaction)
+    expect(scheduler.delete.callCount).to.eql(1)
   })
 })

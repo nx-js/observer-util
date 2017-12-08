@@ -44,8 +44,10 @@ export function queueReactionsForKey (obj, key) {
 
 function queueReaction (reaction) {
   // queue the reaction for later execution or run it immediately
-  if (reaction.scheduler) {
+  if (typeof reaction.scheduler === 'function') {
     reaction.scheduler(reaction)
+  } else if (typeof reaction.scheduler === 'object') {
+    reaction.scheduler.add(reaction)
   } else {
     reaction()
   }

@@ -317,7 +317,7 @@ describe('options', () => {
   })
 
   describe('scheduler', () => {
-    it('should throw if options.scheduler is not a function or undefined', () => {
+    it('should throw if options.scheduler is not a function, object or undefined', () => {
       const fn = () => {}
       const scheduler = () => {}
       expect(() => observe(fn, { scheduler: null })).to.throw(TypeError)
@@ -326,7 +326,16 @@ describe('options', () => {
       expect(() => observe(fn, { scheduler: undefined })).to.not.throw()
     })
 
-    it('should call the scheduler with the reaction instead of running it sync', () => {
+    it('should throw if options.scheduler object does not have an add and delete method', () => {
+      const fn = () => {}
+      const add = () => {}
+      const deleteFn = () => {}
+      expect(() => observe(fn, { scheduler: {} })).to.throw(TypeError)
+      expect(() => observe(fn, { scheduler: { add } })).to.throw(TypeError)
+      expect(() => observe(fn, { scheduler: { add, delete: deleteFn } })).to.not.throw()
+    })
+
+    it('should call the scheduler function with the reaction instead of running it sync', () => {
       const counter = observable({ num: 0 })
       const fn = spy(() => counter.num)
       const scheduler = spy(() => {})
@@ -338,6 +347,20 @@ describe('options', () => {
       expect(fn.callCount).to.equal(1)
       expect(scheduler.callCount).to.eql(1)
       expect(scheduler.args).to.eql([reaction])
+    })
+
+    it('should call scheduler.add with the reaction instead of running it sync', () => {
+      const counter = observable({ num: 0 })
+      const fn = spy(() => counter.num)
+      const scheduler = { add: spy(() => {}), delete: () => {} }
+      const reaction = observe(fn, { scheduler })
+
+      expect(fn.callCount).to.equal(1)
+      expect(scheduler.add.callCount).to.equal(0)
+      counter.num++
+      expect(fn.callCount).to.equal(1)
+      expect(scheduler.add.callCount).to.eql(1)
+      expect(scheduler.add.args).to.eql([reaction])
     })
   })
 })
