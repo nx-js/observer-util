@@ -65,10 +65,14 @@ export function observable (obj) {
   )
 }
 
+function isDomNode (obj) {
+  return Node && obj instanceof Node
+}
+
 function instrumentObservable (obj) {
   const instrument = instrumentations.get(Object.getPrototypeOf(obj))
   // these objects break, when they are wrapped with proxies
-  if (instrument === false) {
+  if (instrument === false || isDomNode(obj)) {
     return obj
   }
   // these objects can be wrapped by Proxies, but require special instrumentation beforehand

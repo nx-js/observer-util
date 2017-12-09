@@ -328,4 +328,16 @@ describe('observe', () => {
     await nextTick()
     expect(dummy).to.equal('p2p1p3')
   })
+
+  it('should not error when a DOM element is added', async () => {
+    let dummy = null
+    const observed = observable({ obj: null })
+    observe(() => (dummy = observed.obj && observed.obj.nodeType))
+
+    await nextTick()
+    expect(dummy).to.equal(null)
+    observed.obj = document
+    await nextTick()
+    expect(dummy).to.equal(9)
+  })
 })
