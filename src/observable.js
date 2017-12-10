@@ -10,10 +10,9 @@ export function isObservable (obj) {
   return proxyToRaw.has(obj)
 }
 
-export function observable (obj) {
-  obj = obj || {}
+export function observable (obj = {}) {
   if (typeof obj !== 'object') {
-    throw new TypeError('First argument must be an object or undefined')
+    throw new TypeError('Observable first argument must be an object or undefined')
   }
   // if it is already an observable, return it
   if (proxyToRaw.has(obj)) {
