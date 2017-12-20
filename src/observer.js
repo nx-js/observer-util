@@ -66,7 +66,7 @@ export function observable (obj) {
 }
 
 function isDomNode (obj) {
-  return Node && obj instanceof Node
+  return typeof Node === 'function' && obj instanceof Node
 }
 
 function instrumentObservable (obj) {
