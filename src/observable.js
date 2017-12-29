@@ -3,13 +3,6 @@ import { storeObservable } from './store'
 import builtInHandlers from './builtInHandlers'
 import baseHandlers from './handlers'
 
-export function isObservable (obj) {
-  if (typeof obj !== 'object') {
-    throw new TypeError('First argument must be an object')
-  }
-  return proxyToRaw.has(obj)
-}
-
 export function observable (obj = {}) {
   if (typeof obj !== 'object') {
     throw new TypeError('Observable first argument must be an object or undefined')
@@ -26,11 +19,11 @@ export function observable (obj = {}) {
 
   // if it is a special built-in object, instrument it
   // otherwise simply wrap the object with an observable Proxy
-  const instrumentHandlers = builtInHandlers.get(Object.getPrototypeOf(obj))
-  if (instrumentHandlers === false) {
+  let handlers = builtInHandlers.get(Object.getPrototypeOf(obj))
+  if (handlers === false) {
     return obj
   }
-  observable = new Proxy(obj, instrumentHandlers || baseHandlers)
+  observable = new Proxy(obj, handlers || baseHandlers)
   // save these to switch between the raw object and the wrapped object with ease later
   rawToProxy.set(obj, observable)
   proxyToRaw.set(observable, obj)
@@ -38,6 +31,11 @@ export function observable (obj = {}) {
   storeObservable(obj)
   return observable
 }
+
+export function isObservable (obj) {
+  return proxyToRaw.has(obj)
+}
+
 
 export function raw (obj) {
   return proxyToRaw.get(obj) || obj
