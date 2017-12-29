@@ -12,18 +12,18 @@ export function observable (obj = {}) {
     return obj
   }
   // if it already has a cached observable wrapper, return it
-  let observable = rawToProxy.get(obj)
-  if (observable) {
-    return observable
-  }
+  // otherwise create a new observable
+  return rawToProxy.get(obj) || createObservable(obj)
+}
 
-  // if it is a special built-in object, instrument it
-  // otherwise simply wrap the object with an observable Proxy
-  let handlers = builtInHandlers.get(Object.getPrototypeOf(obj))
-  if (handlers === false) {
+function createObservable (obj) {
+  const handlers = builtInHandlers.get(Object.getPrototypeOf(obj)) || baseHandlers
+  // if it is a simple built-in object, do not wrap it
+  if (handlers === true) {
     return obj
   }
-  observable = new Proxy(obj, handlers || baseHandlers)
+  // if it is a complex built-in object or a normal object, wrap it
+  const observable = new Proxy(obj, handlers)
   // save these to switch between the raw object and the wrapped object with ease later
   rawToProxy.set(obj, observable)
   proxyToRaw.set(observable, obj)

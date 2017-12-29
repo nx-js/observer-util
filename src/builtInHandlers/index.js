@@ -10,6 +10,6 @@ export default new Map([
   [WeakMap.prototype, collectionHandlers],
   [WeakSet.prototype, collectionHandlers],
   // simple objects are not wrapped by Proxies, neither instrumented
-  [Date.prototype, false],
-  [RegExp.prototype, false]
+  [Date.prototype, true],
+  [RegExp.prototype, true]
 ])
