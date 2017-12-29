@@ -18,6 +18,9 @@ const handlers = new Map([
 ])
 
 export function shouldInstrument (obj) {
+  if (typeof Node === 'function' && obj instanceof Node) {
+    return false
+  }
   return !dontInstrument.has(obj.constructor)
 }
 

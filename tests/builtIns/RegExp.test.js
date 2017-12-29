@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { observable, isObservable } from '@nx-js/observer-util'
 
-describe('Date', () => {
+describe('RegExp', () => {
   it('should not be converted to observable', () => {
     const regex = new RegExp()
     const obsRegex = observable(regex)
