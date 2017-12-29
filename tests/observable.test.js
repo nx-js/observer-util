@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, isObservable } from '@nx-js/observer-util'
+import { observable, isObservable, raw } from '@nx-js/observer-util'
 
 describe('observable', () => {
   it('should throw TypeError on invalid arguments', () => {
@@ -43,5 +43,42 @@ describe('observable', () => {
     expect(isObservable(obj.nested2)).to.equal(false)
     expect(isObservable(obs.nested1)).to.equal(false)
     expect(isObservable(obs.nested2)).to.equal(true)
+  })
+})
+
+describe('isObservable', () => {
+  it('should throw a TypeError on invalid arguments', () => {
+    expect(() => isObservable(12)).to.throw(TypeError)
+    expect(() => isObservable('string')).to.throw(TypeError)
+    expect(() => isObservable()).to.throw(TypeError)
+    expect(() => isObservable({})).to.not.throw(TypeError)
+  })
+
+  it('should return true if an observable is passed as argument', () => {
+    const obs = observable()
+    const isObs = isObservable(obs)
+    expect(isObs).to.equal(true)
+  })
+
+  it('should return false if a non observable is passed as argument', () => {
+    const obj1 = { prop: 'value' }
+    const obj2 = new Proxy({}, {})
+    const isObs1 = isObservable(obj1)
+    const isObs2 = isObservable(obj2)
+    expect(isObs1).to.equal(false)
+    expect(isObs2).to.equal(false)
+  })
+})
+
+describe('raw', () => {
+  it('should return the raw non-reactive object', () => {
+    const obj = {}
+    const obs = observable(obj)
+    expect(raw(obs)).to.eql(obj)
+    expect(raw(obj)).to.eql(obj)
+  })
+
+  it('should work with plain primitives', () => {
+    expect(raw(12)).to.eql(12)
   })
 })

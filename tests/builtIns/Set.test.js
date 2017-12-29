@@ -1,12 +1,12 @@
 import { expect } from 'chai'
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe, raw } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('Set', () => {
   it('should be a proper JS Set', () => {
     const set = observable(new Set())
     expect(set).to.be.instanceOf(Set)
-    expect(set.$raw).to.be.instanceOf(Set)
+    expect(raw(set)).to.be.instanceOf(Set)
   })
 
   it('should observe mutations', () => {
@@ -120,15 +120,13 @@ describe('Set', () => {
     expect(dummy).to.equal(0)
   })
 
-  it('should observe custom property mutations', () => {
+  it('should not observe custom property mutations', () => {
     let dummy
     const set = observable(new Set())
     observe(() => (dummy = set.customProp))
 
     expect(dummy).to.equal(undefined)
     set.customProp = 'Hello World'
-    expect(dummy).to.equal('Hello World')
-    delete set.customProp
     expect(dummy).to.equal(undefined)
   })
 
@@ -172,34 +170,34 @@ describe('Set', () => {
     expect(setSpy.callCount).to.equal(3)
   })
 
-  it('should not observe $raw data', () => {
+  it('should not observe raw data', () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.$raw.has('value')))
+    observe(() => (dummy = raw(set).has('value')))
 
     expect(dummy).to.equal(false)
     set.add('value')
     expect(dummy).to.equal(false)
   })
 
-  it('should not observe $raw iterations', () => {
+  it('should not observe raw iterations', () => {
     let dummy = 0
     const set = observable(new Set())
     observe(() => {
       dummy = 0
-      for (let [num] of set.$raw.entries()) {
+      for (let [num] of raw(set).entries()) {
         dummy += num
       }
-      for (let num of set.$raw.keys()) {
+      for (let num of raw(set).keys()) {
         dummy += num
       }
-      for (let num of set.$raw.values()) {
+      for (let num of raw(set).values()) {
         dummy += num
       }
-      set.$raw.forEach(num => {
+      raw(set).forEach(num => {
         dummy += num
       })
-      for (let num of set.$raw) {
+      for (let num of raw(set)) {
         dummy += num
       }
     })
@@ -212,38 +210,38 @@ describe('Set', () => {
     expect(dummy).to.equal(0)
   })
 
-  it('should not be triggered by $raw mutations', () => {
+  it('should not be triggered by raw mutations', () => {
     let dummy
     const set = observable(new Set())
     observe(() => (dummy = set.has('value')))
 
     expect(dummy).to.equal(false)
-    set.$raw.add('value')
+    raw(set).add('value')
     expect(dummy).to.equal(false)
     dummy = true
-    set.$raw.delete('value')
+    raw(set).delete('value')
     expect(dummy).to.equal(true)
-    set.$raw.clear()
+    raw(set).clear()
     expect(dummy).to.equal(true)
   })
 
-  it('should not observe $raw size mutations', () => {
+  it('should not observe raw size mutations', () => {
     let dummy
     const set = observable(new Set())
-    observe(() => (dummy = set.$raw.size))
+    observe(() => (dummy = raw(set).size))
 
     expect(dummy).to.equal(0)
     set.add('value')
     expect(dummy).to.equal(0)
   })
 
-  it('should not be triggered by $raw size mutations', () => {
+  it('should not be triggered by raw size mutations', () => {
     let dummy
     const set = observable(new Set())
     observe(() => (dummy = set.size))
 
     expect(dummy).to.equal(0)
-    set.$raw.add('value')
+    raw(set).add('value')
     expect(dummy).to.equal(0)
   })
 })

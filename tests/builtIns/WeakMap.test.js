@@ -1,12 +1,12 @@
 import { expect } from 'chai'
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe, raw } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('WeakMap', () => {
   it('should be a proper JS WeakMap', () => {
     const map = observable(new WeakMap())
     expect(map).to.be.instanceOf(WeakMap)
-    expect(map.$raw).to.be.instanceOf(WeakMap)
+    expect(raw(map)).to.be.instanceOf(WeakMap)
   })
 
   it('should observe mutations', () => {
@@ -22,15 +22,13 @@ describe('WeakMap', () => {
     expect(dummy).to.equal(undefined)
   })
 
-  it('should observe custom property mutations', () => {
+  it('should not observe custom property mutations', () => {
     let dummy
     const map = observable(new WeakMap())
     observe(() => (dummy = map.customProp))
 
     expect(dummy).to.equal(undefined)
     map.customProp = 'Hello World'
-    expect(dummy).to.equal('Hello World')
-    delete map.customProp
     expect(dummy).to.equal(undefined)
   })
 
@@ -57,11 +55,11 @@ describe('WeakMap', () => {
     expect(mapSpy.callCount).to.equal(3)
   })
 
-  it('should not observe $raw data', () => {
+  it('should not observe raw data', () => {
     const key = {}
     let dummy
     const map = observable(new WeakMap())
-    observe(() => (dummy = map.$raw.get(key)))
+    observe(() => (dummy = raw(map).get(key)))
 
     expect(dummy).to.equal(undefined)
     map.set(key, 'Hello')
@@ -70,16 +68,16 @@ describe('WeakMap', () => {
     expect(dummy).to.equal(undefined)
   })
 
-  it('should not be triggered by $raw mutations', () => {
+  it('should not be triggered by raw mutations', () => {
     const key = {}
     let dummy
     const map = observable(new WeakMap())
     observe(() => (dummy = map.get(key)))
 
     expect(dummy).to.equal(undefined)
-    map.$raw.set(key, 'Hello')
+    raw(map).set(key, 'Hello')
     expect(dummy).to.equal(undefined)
-    map.$raw.delete(key)
+    raw(map).delete(key)
     expect(dummy).to.equal(undefined)
   })
 })

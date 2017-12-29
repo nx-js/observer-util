@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, observable } from '@nx-js/observer-util'
+import { observe, observable, raw } from '@nx-js/observer-util'
 
 describe('observe', () => {
   it('should throw a TypeError when the first argument is not a function', () => {
@@ -171,23 +171,23 @@ describe('observe', () => {
     expect(dummy).to.equal('value')
   })
 
-  it('should not observe $raw mutations', () => {
+  it('should not observe raw mutations', () => {
     let dummy
     const obj = observable()
-    observe(() => (dummy = obj.$raw.prop))
+    observe(() => (dummy = raw(obj).prop))
 
     expect(dummy).to.equal(undefined)
     obj.prop = 'value'
     expect(dummy).to.equal(undefined)
   })
 
-  it('should not be triggered by $raw mutations', () => {
+  it('should not be triggered by raw mutations', () => {
     let dummy
     const obj = observable()
     observe(() => (dummy = obj.prop))
 
     expect(dummy).to.equal(undefined)
-    obj.$raw.prop = 'value'
+    raw(obj).prop = 'value'
     expect(dummy).to.equal(undefined)
   })
 

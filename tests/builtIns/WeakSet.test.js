@@ -1,12 +1,12 @@
 import { expect } from 'chai'
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe, raw } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('WeakSet', () => {
   it('should be a proper JS WeakSet', () => {
     const set = observable(new WeakSet())
     expect(set).to.be.instanceOf(WeakSet)
-    expect(set.$raw).to.be.instanceOf(WeakSet)
+    expect(raw(set)).to.be.instanceOf(WeakSet)
   })
 
   it('should observe mutations', () => {
@@ -22,15 +22,13 @@ describe('WeakSet', () => {
     expect(dummy).to.equal(false)
   })
 
-  it('should observe custom property mutations', () => {
+  it('should not observe custom property mutations', () => {
     let dummy
     const set = observable(new WeakSet())
     observe(() => (dummy = set.customProp))
 
     expect(dummy).to.equal(undefined)
     set.customProp = 'Hello World'
-    expect(dummy).to.equal('Hello World')
-    delete set.customProp
     expect(dummy).to.equal(undefined)
   })
 
@@ -57,25 +55,25 @@ describe('WeakSet', () => {
     expect(setSpy.callCount).to.equal(3)
   })
 
-  it('should not observe $raw data', () => {
+  it('should not observe raw data', () => {
     const value = {}
     let dummy
     const set = observable(new WeakSet())
-    observe(() => (dummy = set.$raw.has(value)))
+    observe(() => (dummy = raw(set).has(value)))
 
     expect(dummy).to.equal(false)
     set.add(value)
     expect(dummy).to.equal(false)
   })
 
-  it('should not be triggered by $raw mutations', () => {
+  it('should not be triggered by raw mutations', () => {
     const value = {}
     let dummy
     const set = observable(new WeakSet())
     observe(() => (dummy = set.has(value)))
 
     expect(dummy).to.equal(false)
-    set.$raw.add(value)
+    raw(set).add(value)
     expect(dummy).to.equal(false)
   })
 })

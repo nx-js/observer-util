@@ -1,12 +1,12 @@
 import { expect } from 'chai'
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe, raw } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('Map', () => {
   it('should be a proper JS Map', () => {
     const map = observable(new Map())
     expect(map).to.be.instanceOf(Map)
-    expect(map.$raw).to.be.instanceOf(Map)
+    expect(raw(map)).to.be.instanceOf(Map)
   })
 
   it('should observe mutations', () => {
@@ -141,15 +141,13 @@ describe('Map', () => {
     expect(dummy).to.equal(0)
   })
 
-  it('should observe custom property mutations', () => {
+  it('should not observe custom property mutations', () => {
     let dummy
     const map = observable(new Map())
     observe(() => (dummy = map.customProp))
 
     expect(dummy).to.equal(undefined)
     map.customProp = 'Hello World'
-    expect(dummy).to.equal('Hello World')
-    delete map.customProp
     expect(dummy).to.equal(undefined)
   })
 
@@ -178,10 +176,10 @@ describe('Map', () => {
     expect(mapSpy.callCount).to.equal(3)
   })
 
-  it('should not observe $raw data', () => {
+  it('should not observe raw data', () => {
     let dummy
     const map = observable(new Map())
-    observe(() => (dummy = map.$raw.get('key')))
+    observe(() => (dummy = raw(map).get('key')))
 
     expect(dummy).to.equal(undefined)
     map.set('key', 'Hello')
@@ -190,26 +188,26 @@ describe('Map', () => {
     expect(dummy).to.equal(undefined)
   })
 
-  it('should not observe $raw iterations', () => {
+  it('should not observe raw iterations', () => {
     let dummy = 0
     const map = observable(new Map())
     observe(() => {
       dummy = 0
       // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of map.$raw.entries()) {
+      for (let [key, num] of raw(map).entries()) {
         dummy += num
       }
-      for (let key of map.$raw.keys()) {
-        dummy += map.$raw.get(key)
+      for (let key of raw(map).keys()) {
+        dummy += raw(map).get(key)
       }
-      for (let num of map.$raw.values()) {
+      for (let num of raw(map).values()) {
         dummy += num
       }
-      map.$raw.forEach((num, key) => {
+      raw(map).forEach((num, key) => {
         dummy += num
       })
       // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of map.$raw) {
+      for (let [key, num] of raw(map)) {
         dummy += num
       }
     })
@@ -222,38 +220,38 @@ describe('Map', () => {
     expect(dummy).to.equal(0)
   })
 
-  it('should not be triggered by $raw mutations', () => {
+  it('should not be triggered by raw mutations', () => {
     let dummy
     const map = observable(new Map())
     observe(() => (dummy = map.get('key')))
 
     expect(dummy).to.equal(undefined)
-    map.$raw.set('key', 'Hello')
+    raw(map).set('key', 'Hello')
     expect(dummy).to.equal(undefined)
     dummy = 'Thing'
-    map.$raw.delete('key')
+    raw(map).delete('key')
     expect(dummy).to.equal('Thing')
-    map.$raw.clear()
+    raw(map).clear()
     expect(dummy).to.equal('Thing')
   })
 
-  it('should not observe $raw size mutations', () => {
+  it('should not observe raw size mutations', () => {
     let dummy
     const map = observable(new Map())
-    observe(() => (dummy = map.$raw.size))
+    observe(() => (dummy = raw(map).size))
 
     expect(dummy).to.equal(0)
     map.set('key', 'value')
     expect(dummy).to.equal(0)
   })
 
-  it('should not be triggered by $raw size mutations', () => {
+  it('should not be triggered by raw size mutations', () => {
     let dummy
     const map = observable(new Map())
     observe(() => (dummy = map.size))
 
     expect(dummy).to.equal(0)
-    map.$raw.set('key', 'value')
+    raw(map).set('key', 'value')
     expect(dummy).to.equal(0)
   })
 })

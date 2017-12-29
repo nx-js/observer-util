@@ -10,19 +10,15 @@ const ENUMERATE = Symbol('enumerate')
 
 // intercept get operations on observables to know which reaction uses their properties
 function get (obj, key, receiver) {
-  // make sure to use the raw object here
-  const rawObj = proxyToRaw.get(obj) || obj
-  // expose the raw object on observable.$raw
-  if (key === '$raw') {
-    return rawObj
-  }
   const result = Reflect.get(obj, key, receiver)
   // do not register (observable.prop -> reaction) pairs for these cases
   if (typeof key === 'symbol' || typeof result === 'function') {
     return result
   }
+  // make sure to use the raw object here, obj might be a Proxy because of inheritance
+  obj = proxyToRaw.get(obj) || obj
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForKey(rawObj, key)
+  registerRunningReactionForKey(obj, key)
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
   // this is needed to intercept property access on that object too (dynamic observable tree)
   if (hasRunningReaction() && typeof result === 'object' && result !== null) {

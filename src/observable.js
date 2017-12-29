@@ -1,7 +1,7 @@
 import { proxyToRaw, rawToProxy } from './internals'
-import instrumentations from './builtIns'
 import { storeObservable } from './store'
-import handlers from './handlers'
+import builtInHandlers from './builtInHandlers'
+import baseHandlers from './handlers'
 
 export function isObservable (obj) {
   if (typeof obj !== 'object') {
@@ -18,33 +18,27 @@ export function observable (obj = {}) {
   if (proxyToRaw.has(obj)) {
     return obj
   }
-  return (
-    // if it already has a cached observable wrapper, return it
-    // if it is a special built-in object, instrument it then wrap it with an observable
-    // otherwise simply wrap the object with an observable
-    rawToProxy.get(obj) || instrumentObservable(obj) || createObservable(obj)
-  )
-}
+  // if it already has a cached observable wrapper, return it
+  let observable = rawToProxy.get(obj)
+  if (observable) {
+    return observable
+  }
 
-function instrumentObservable (obj) {
-  const instrument = instrumentations.get(Object.getPrototypeOf(obj))
-  // these objects break, when they are wrapped with proxies
-  if (instrument === false) {
+  // if it is a special built-in object, instrument it
+  // otherwise simply wrap the object with an observable Proxy
+  const instrumentHandlers = builtInHandlers.get(Object.getPrototypeOf(obj))
+  if (instrumentHandlers === false) {
     return obj
   }
-  // these objects can be wrapped by Proxies, but require special instrumentation beforehand
-  if (typeof instrument === 'function') {
-    instrument(obj)
-  }
-}
-
-// wrap the object in a Proxy and save the obj-proxy, proxy-obj pairs
-function createObservable (obj) {
-  const observable = new Proxy(obj, handlers)
+  observable = new Proxy(obj, instrumentHandlers || baseHandlers)
+  // save these to switch between the raw object and the wrapped object with ease later
+  rawToProxy.set(obj, observable)
+  proxyToRaw.set(observable, obj)
   // init basic data structures to save and cleanup later (observable.prop -> reaction) connections
   storeObservable(obj)
-  // save these to switch between the raw object and the wrapped object with ease later
-  proxyToRaw.set(observable, obj)
-  rawToProxy.set(obj, observable)
   return observable
+}
+
+export function raw (obj) {
+  return proxyToRaw.get(obj) || obj
 }
