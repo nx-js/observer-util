@@ -1,4 +1,4 @@
-# The observer utility
+# The Observer Utility
 
 Simple transparent reactivity with 100% language coverage. Built with :heart: and ES6 Proxies.
 
@@ -35,16 +35,15 @@ Simple transparent reactivity with 100% language coverage. Built with :heart: an
 
 Popular frontend frameworks - like Angular, React and Vue - use a reactivity system to automatically update the view when the state changes. This is necessary for creating modern web apps and staying sane at the same time.
 
-The observer util is a similar reactivity system, with a modern twist. It uses [Proxies](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to achieve transparency and a 100% language coverage. Ideally you would like to manage your state with plain JS code and expect the view to update where needed. In practice some reactivity systems require extra syntax - like React's `setState`. Others have limits on the language features, which they can react on - like dynamic properties or the `delete` keyword. These are small nuisances, but they lead to long hours lost among special docs and related issues.
+The Observer Utililty is a similar reactivity system, with a modern twist. It uses [ES6 Proxies](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to achieve true transparency and a 100% language coverage. Ideally you would like to manage your state with plain JS code and expect the view to update where needed. In practice some reactivity systems require extra syntax - like React's `setState`. Others have limits on the language features, which they can react on - like dynamic properties or the `delete` keyword. These are small nuisances, but they lead to long hours lost among special docs and related issues.
 
-The observer util aims to minimize the edge cases of transparent reactivity. It comes with a tiny learning curve and with a promise that you won't have to dig up hidden docs and issues later. Give it a try, things will just work.
+The Observer Utility aims to eradicate these edge cases. It comes with a tiny learning curve and with a promise that you won't have to dig up hidden docs and issues later. Give it a try, things will just work.
 
 ## Bindings
 
-This a simple, but low-level library. It is meant to be used by other libraries.
-List of libraries.
+This is a framework independent library, which powers the reactivity system behind other state management solutions. These are the currently available bindings.
 
-- React Easy State
+- [React Easy State](https://github.com/solkimicreb/react-easy-state) is a state management solution for React with a minimal learning curve.
 
 ## Installation
 
@@ -54,11 +53,11 @@ $ npm install @nx-js/observer-util
 
 ## Usage
 
-The two building blocks of reactivity are **observables** and **reactions**. Observable objects represent the state and reactions are functions, which react to state changes. In case of transparent reactivity, these reactions are called automatically on relevant state changes.
+The two building blocks of reactivity are **observables** and **reactions**. Observable objects represent the state and reactions are functions, that react to state changes. In case of transparent reactivity, these reactions are called automatically on relevant state changes.
 
 ### Observables
 
-Observables are Proxies, which can be created with the `observable` function. From the outside they behave exactly like plain JS objects.
+Observables are transparent Proxies, which can be created with the `observable` function. From the outside they behave exactly like plain JS objects.
 
 ```js
 import { observable } from '@nx-js/observer-util'
@@ -88,19 +87,18 @@ counter.num++
 #### React Component
 
 ```js
-import { observable, observe } from 'react-easy-state'
+import { store, view } from 'react-easy-state'
 
-const counter = observable({
+// this is an observable store
+const counter = store({
   num: 0,
-  increase () {
+  up () {
     this.num++
   }
 })
 
 // this is a reactive component, which re-renders whenever counter.num changes
-const UserComp = observe(() => {
-  return <div onClick={counter.increase}>{counter.num}</div>  
-})
+const UserComp = view(() => <div onClick={counter.up}>{counter.num}</div>)
 ```
 
 #### More examples
@@ -245,7 +243,7 @@ delete user.name
 
 ### Reaction scheduling
 
-Reactions are scheduled to run whenever the relevant observable state changes. The default scheduler runs the reactions synchronously, but custom schedulers can be passed to change this behavior. Schedulers are usually functions which receive the scheduled reaction as argument. For example the React Easy State scheduler delegates the render scheduling to React Fiber.
+Reactions are scheduled to run whenever the relevant observable state changes. The default scheduler runs the reactions synchronously, but custom schedulers can be passed to change this behavior. Schedulers are usually functions which receive the scheduled reaction as argument.
 
 ```js
 import { observable, observe } from '@nx-js/observer-util'
@@ -260,21 +258,22 @@ observe(() => console.log(person.name), { scheduler })
 person.name = 'Barbie'
 ```
 
+Alternatively schedulers can be objects with an `add` and `delete` method. Check out the below examples for more.
+
 #### More examples
 
 <details>
 <summary>React Scheduler</summary>
 
-The React scheduler simply calls `setState` on relevant observable changes. This delegates the render scheduling to React Fiber.
+The React scheduler simply calls `setState` on relevant observable changes. This delegates the render scheduling to React Fiber. It works roughly like this.
 
 ```js
 import { observe } from '@nx-js/observer-util'
 
-class ReactiveComp extends BaseComponent {
+class ReactiveComp extends BaseComp {
   constructor () {
     // ...
     this.render = observe(this.render, {
-      lazy: true,
       scheduler: () => this.setState()
     })
   }
@@ -307,7 +306,7 @@ person.age = 87
 <details>
 <summary>Batched updates with queues</summary>
 
-Queues from the [queue util]() can be used to implement complex scheduling patterns by combining automatic priority based and manual execution.
+Queues from the [Queue Util](https://github.com/nx-js/queue-util) can be used to implement complex scheduling patterns by combining automatic priority based and manual execution.
 
 ```js
 import { observable, observe } from '@nx-js/observer-util'
@@ -332,9 +331,9 @@ Queues are automatically scheduling reactions - based on their priority - but th
 
 Creates and returns a proxied observable object, which behaves just like the originally passed object. The original object is **not modified**.
 
-- If no argument is provided, it returns an empty observable.
+- If no argument is provided, it returns an empty observable object.
 - If an object is passed as argument, it wraps the passed object in an observable.
-- If an observable object is passed, it simply returns the passed observable object.
+- If an observable object is passed, it returns the passed observable object.
 
 ### boolean = isObservable(object)
 
@@ -342,13 +341,13 @@ Returns true if the passed object is an observable, returns false otherwise.
 
 ### reaction = observe(function, config)
 
-Wraps the passed function with reaction, which behaves just like the original function. The original function is **not modified**.
+Wraps the passed function with a reaction, which behaves just like the original function. The reaction is automatically scheduled to run whenever an observable - used by it - changes. The original function is **not modified**.
 
-It also accepts an optional config object with the following options.
+`observe` also accepts an optional config object with the following options.
 
-- lazy: A boolean, which controls if the reaction should run once after it is created or not. If it is true, the reaction has to be called once manually to trigger the reactivity process. Defaults to false.
+- `lazy`: A boolean, which controls if the reaction is executed when it is created or not. If it is true, the reaction has to be called once manually to trigger the reactivity process. Defaults to false.
 
-- scheduler: A function, which is called with the reaction when it is scheduled to run because of observable changes. The default scheduler runs the reaction right away. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions.
+- `scheduler`: A function, which is called with the reaction when it is scheduled to run. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions. The default scheduler runs the reaction synchronously on related observable mutations.
 
 ### unobserve(reaction)
 
@@ -366,7 +365,7 @@ unobserve(logger)
 
 ### obj = raw(observable)
 
-Original objects are never modified, but transparently wrapped by observables. `raw` can be used  to access the original non-reactive object. Modifying and accessing properties on the raw object doesn't trigger reactions.
+Original objects are never modified, but transparently wrapped by observable proxies. `raw` can access the original non-reactive object. Modifying and accessing properties on the raw object doesn't trigger reactions.
 
 #### Using `raw` at property access
 
