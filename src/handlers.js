@@ -40,10 +40,13 @@ function set (obj, key, value, receiver) {
     value = proxyToRaw.get(value) || value
   }
   // save if the value changed because of this set operation
-  // array 'length' is an exception here, because of it's exotic nature
-  const valueChanged = key === 'length' || value !== obj[key]
+  const valueChanged = value !== obj[key]
+  // length is lazy, it can change without an explicit length set operation
+  const prevLength = Array.isArray(obj) && obj.length
   // execute the set operation before running any reaction
   const result = Reflect.set(obj, key, value, receiver)
+  // check if the length changed implicitly, because of out of bound set operations
+  const lengthChanged = prevLength !== false && prevLength !== obj.length
   // emit a warning and do not queue anything when another reaction is queued
   // from an already running reaction
   if (hasRunningReaction()) {
@@ -52,16 +55,20 @@ function set (obj, key, value, receiver) {
     )
     return result
   }
+  // if the target of the operation is not the raw receiver return
+  // (possible because of prototypal inheritance)
+  if (obj !== proxyToRaw.get(receiver)) {
+    return result
+  }
   // do not queue reactions if it is a symbol keyed property
   // or the set operation resulted in no value change
-  // or if the target of the operation is not the raw object (possible because of prototypal inheritance)
-  if (
-    typeof key !== 'symbol' &&
-    valueChanged &&
-    obj === proxyToRaw.get(receiver)
-  ) {
+  if (typeof key !== 'symbol' && valueChanged) {
     queueReactionsForKey(obj, key)
     queueReactionsForKey(obj, ENUMERATE)
+  }
+  // queue length reactions in case the length changed
+  if (lengthChanged) {
+    queueReactionsForKey(obj, 'length')
   }
   return result
 }

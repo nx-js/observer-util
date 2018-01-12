@@ -115,6 +115,18 @@ describe('observe', () => {
     expect(dummy).to.equal('World!')
   })
 
+  it('should observe implicit array length changes', () => {
+    let dummy
+    const list = observable(['Hello'])
+    observe(() => (dummy = list.join(' ')))
+
+    expect(dummy).to.equal('Hello')
+    list[1] = 'World!'
+    expect(dummy).to.equal('Hello World!')
+    list[3] = 'Hello!'
+    expect(dummy).to.equal('Hello World!  Hello!')
+  })
+
   it('should observe enumeration', () => {
     let dummy = 0
     const numbers = observable({ num1: 3 })

@@ -1,8 +1,8 @@
 # The observer utility
 
-[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
-
 Simple transparent reactivity with 100% language coverage. Built with :heart: and ES6 Proxies.
+
+[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
 
 <details>
 <summary><strong>Table of Contents</strong></summary>
@@ -10,28 +10,26 @@ Simple transparent reactivity with 100% language coverage. Built with :heart: an
 
 <!-- toc -->
 
+* [Motivation](#motivation)
+* [Bindings](#bindings)
 * [Installation](#installation)
 * [Usage](#usage)
-* [Key features](#key-features)
-* [Platform support](#platform-support)
+  + [Observables](#observables)
+  + [Reactions](#reactions)
+  + [Reaction scheduling](#reaction-scheduling)
 * [API](#api)
-  + [const object = observable(object)](#const-object--observableobject)
-  + [const boolean = isObservable(object)](#const-boolean--isobservableobject)
-  + [const function = observe(function)](#const-function--observefunction)
-  + [unobserve(function)](#unobservefunction)
-  + [unqueue(function)](#unqueuefunction)
-  + [exec(function)](#execfunction)
-  + [const promise = nextTick(function)](#const-promise--nexttickfunction)
-  + [observable.$raw](#observableraw)
-* [Examples](#examples)
+  + [Proxy = observable(object)](#proxy--observableobject)
+  + [boolean = isObservable(object)](#boolean--isobservableobject)
+  + [reaction = observe(function, config)](#reaction--observefunction-config)
+  + [unobserve(reaction)](#unobservereaction)
+  + [obj = raw(observable)](#obj--rawobservable)
+* [Platform support](#platform-support)
 * [Alternative builds](#alternative-builds)
 * [Contributing](#contributing)
 
 <!-- tocstop -->
 
 </details>
-
-[React Easy State](https://github.com/solkimicreb/react-easy-state) is a React state management solution - based on this library. This library is part of the [NX framework](https://nx-framework.com).
 
 ## Motivation
 
