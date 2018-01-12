@@ -14,7 +14,7 @@ const handlers = new Map([
   [Map, collectionHandlers],
   [Set, collectionHandlers],
   [WeakMap, collectionHandlers],
-  [WeakSet, collectionHandlers],
+  [WeakSet, collectionHandlers]
 ])
 
 export function shouldInstrument (obj) {

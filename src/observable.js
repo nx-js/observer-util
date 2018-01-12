@@ -32,7 +32,6 @@ export function isObservable (obj) {
   return proxyToRaw.has(obj)
 }
 
-
 export function raw (obj) {
   return proxyToRaw.get(obj) || obj
 }
