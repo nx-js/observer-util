@@ -74,7 +74,9 @@ async function build () {
       `${config.output.format}.es6.min.js`
     )
     const { code: es6MinCode } = babel.transform(es6Code, {
-      presets: ['minify']
+      // dead code elimination breaks the delete trap
+      // by moving the hadKey part after the deletion, which always results in false
+      presets: [['minify', { deadcode: false }]]
     })
     fs.writeFileSync(es6MinPath, es6MinCode, 'utf-8')
 
@@ -92,7 +94,7 @@ async function build () {
       `${config.output.format}.es5.min.js`
     )
     const { code: es5MinCode } = babel.transform(es5Code, {
-      presets: ['minify']
+      presets: [['minify', { deadcode: false }]]
     })
     fs.writeFileSync(es5MinPath, es5MinCode, 'utf-8')
   }
