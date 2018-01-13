@@ -381,10 +381,8 @@ describe('options', () => {
     const observed = observable({ obj: null })
     observe(() => (dummy = observed.obj && observed.obj.nodeType))
 
-    await nextTick()
     expect(dummy).to.equal(null)
     observed.obj = document
-    await nextTick()
     expect(dummy).to.equal(9)
   })
 })
