@@ -1,6 +1,6 @@
 # The Observer Utility
 
-Simple transparent reactivity with 100% language coverage. Built with :heart: and ES6 Proxies.
+Simple transparent reactivity with 100% language coverage. Made with :heart: and ES6 Proxies.
 
 [![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
 
