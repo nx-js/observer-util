@@ -1,6 +1,6 @@
 # The Observer Utility
 
-Simple transparent reactivity with 100% language coverage. Made with :heart: and ES6 Proxies.
+Transparent reactivity with 100% language coverage. Made with :heart: and ES6 Proxies.
 
 [![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
 
@@ -105,6 +105,7 @@ const UserComp = view(() => <div onClick={counter.up}>{counter.num}</div>)
 
 <details>
 <summary>Dynamic properties</summary>
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
@@ -114,9 +115,11 @@ observe(() => console.log(profile.name))
 // logs 'Bob'
 profile.name = 'Bob'
 ```
+
 </details>
 <details>
 <summary>Nested properties</summary>
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
@@ -133,9 +136,11 @@ observe(() => console.log(`${person.name.first} ${person.name.last}`))
 // logs 'Bob Smith'
 person.name.first = 'Bob'
 ```
+
 </details>
 <details>
 <summary>Computed properties</summary>
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
@@ -152,9 +157,11 @@ observe(() => console.log(person.name))
 // logs 'Ann Smith'
 observable.firstName = 'Ann'
 ```
+
 </details>
 <details>
 <summary>Conditionals</summary>
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
@@ -174,9 +181,11 @@ observe(() => {
 // logs 'Ms. Potato'
 person.gender = 'female'
 ```
+
 </details>
 <details>
 <summary>Arrays</summary>
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
@@ -193,9 +202,11 @@ users.push('John')
 // logs 'Bob'
 users.pop()
 ```
+
 </details>
 <details>
 <summary>ES6 collections</summary>
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
@@ -213,9 +224,11 @@ people.set('Bob', 22)
 // logs 'Bob, 22' and 'John, 35'
 people.set('John', 35)
 ```
+
 </details>
 <details>
 <summary>Inherited properties</summary>
+
 ```js
 import { observable, observe } from '@nx-js/observer-util'
 
@@ -237,6 +250,7 @@ user.job = 'stylist'
 // logs 'Unknown is a stylist'
 delete user.name
 ```
+
 </details>
 
 **This is all you need to know to get started!** The following sections are about advanced topics - like custom reaction scheduling and cleanup.
@@ -278,8 +292,8 @@ class ReactiveComp extends BaseComp {
     })
   }
 }
-
 ```
+
 </details>
 <details>
 <summary>Batched updates with ES6 Sets</summary>
@@ -302,6 +316,7 @@ setInterval(() => {
 person.name = 'Barbie'
 person.age = 87
 ```
+
 </details>
 <details>
 <summary>Batched updates with queues</summary>
