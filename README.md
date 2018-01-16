@@ -253,8 +253,6 @@ delete user.name
 
 </details>
 
-**This is all you need to know to get started!** The following sections are about advanced topics - like custom reaction scheduling and cleanup.
-
 ### Reaction scheduling
 
 Reactions are scheduled to run whenever the relevant observable state changes. The default scheduler runs the reactions synchronously, but custom schedulers can be passed to change this behavior. Schedulers are usually functions which receive the scheduled reaction as argument.
