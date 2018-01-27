@@ -6,6 +6,7 @@ import { proxyToRaw } from '../internals'
 
 const ITERATE = Symbol('iterate')
 const getPrototypeOf = Object.getPrototypeOf
+const hasOwnProperty = Object.prototype.hasOwnProperty
 
 const instrumentations = {
   has (value) {
@@ -111,7 +112,7 @@ const instrumentations = {
 export default {
   get (target, key, receiver) {
     // instrument methods and property accessors to be reactive
-    target = (key in getPrototypeOf(target)) ? instrumentations : target
+    target = hasOwnProperty.call(instrumentations, key) ? instrumentations : target
     return Reflect.get(target, key, receiver)
   }
 }
