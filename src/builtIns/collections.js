@@ -23,8 +23,8 @@ const instrumentations = {
   add (value) {
     const rawContext = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    // forward the operation before queueing reactions
     const valueChanged = !proto.has.call(rawContext, value)
+    // forward the operation before queueing reactions
     const result = proto.add.apply(rawContext, arguments)
     if (valueChanged) {
       queueReactionsForKey(rawContext, value)
@@ -35,11 +35,14 @@ const instrumentations = {
   set (key, value) {
     const rawContext = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    // forward the operation before queueing reactions
+    const hadKey = proto.has.call(rawContext, key)
     const valueChanged = proto.get.call(rawContext, key) !== value
+    // forward the operation before queueing reactions
     const result = proto.set.apply(rawContext, arguments)
     if (valueChanged) {
       queueReactionsForKey(rawContext, key)
+    }
+    if (!hadKey) {
       queueReactionsForKey(rawContext, ITERATE)
     }
     return result
@@ -47,8 +50,8 @@ const instrumentations = {
   delete (value) {
     const rawContext = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    // forward the operation before queueing reactions
     const valueChanged = proto.has.call(rawContext, value)
+    // forward the operation before queueing reactions
     const result = proto.delete.apply(rawContext, arguments)
     if (valueChanged) {
       queueReactionsForKey(rawContext, value)
@@ -59,8 +62,8 @@ const instrumentations = {
   clear () {
     const rawContext = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    // forward the operation before queueing reactions
     const valueChanged = rawContext.size !== 0
+    // forward the operation before queueing reactions
     const result = proto.clear.apply(rawContext, arguments)
     if (valueChanged) {
       queueReactionsForKey(rawContext, ITERATE)

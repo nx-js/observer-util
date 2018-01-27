@@ -39,6 +39,8 @@ function set (obj, key, value, receiver) {
   if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
   }
+  // save if the object had a descriptor for this key
+  const hadKey = key in obj
   // save if the value changed because of this set operation
   const valueChanged = value !== obj[key]
   // length is lazy, it can change without an explicit length set operation
@@ -62,13 +64,16 @@ function set (obj, key, value, receiver) {
   }
   // do not queue reactions if it is a symbol keyed property
   // or the set operation resulted in no value change
-  if (typeof key !== 'symbol' && valueChanged) {
-    queueReactionsForKey(obj, key)
-    queueReactionsForKey(obj, ENUMERATE)
-  }
-  // queue length reactions in case the length changed
-  if (lengthChanged) {
-    queueReactionsForKey(obj, 'length')
+  if (typeof key !== 'symbol') {
+    if (valueChanged) {
+      queueReactionsForKey(obj, key)
+    }
+    if (!hadKey) {
+      queueReactionsForKey(obj, ENUMERATE)  
+    }
+    if (lengthChanged) {
+      queueReactionsForKey(obj, 'length')
+    }
   }
   return result
 }
