@@ -6,6 +6,7 @@ import {
   hasRunningReaction
 } from './reactionRunner'
 
+const hasOwnProperty = Object.prototype.hasOwnProperty
 const ENUMERATE = Symbol('enumerate')
 
 // intercept get operations on observables to know which reaction uses their properties
@@ -40,7 +41,7 @@ function set (obj, key, value, receiver) {
     value = proxyToRaw.get(value) || value
   }
   // save if the object had a descriptor for this key
-  const hadKey = key in obj
+  const hadKey = hasOwnProperty.call(obj, key)
   // save if the value changed because of this set operation
   const valueChanged = value !== obj[key]
   // length is lazy, it can change without an explicit length set operation
@@ -69,7 +70,7 @@ function set (obj, key, value, receiver) {
       queueReactionsForKey(obj, key)
     }
     if (!hadKey) {
-      queueReactionsForKey(obj, ENUMERATE)  
+      queueReactionsForKey(obj, ENUMERATE)
     }
     if (lengthChanged) {
       queueReactionsForKey(obj, 'length')
@@ -80,7 +81,7 @@ function set (obj, key, value, receiver) {
 
 function deleteProperty (obj, key) {
   // save if the object had the key
-  const hadKey = key in obj
+  const hadKey = hasOwnProperty.call(obj, key)
   // execute the delete operation before running any reaction
   const result = Reflect.deleteProperty(obj, key)
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
