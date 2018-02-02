@@ -44,12 +44,8 @@ function set (obj, key, value, receiver) {
   const hadKey = hasOwnProperty.call(obj, key)
   // save if the value changed because of this set operation
   const valueChanged = value !== obj[key]
-  // length is lazy, it can change without an explicit length set operation
-  const prevLength = Array.isArray(obj) && obj.length
   // execute the set operation before running any reaction
   const result = Reflect.set(obj, key, value, receiver)
-  // check if the length changed implicitly, because of out of bound set operations
-  const lengthChanged = prevLength !== false && prevLength !== obj.length
   // emit a warning and do not queue anything when another reaction is queued
   // from an already running reaction
   if (hasRunningReaction()) {
@@ -58,23 +54,20 @@ function set (obj, key, value, receiver) {
     )
     return result
   }
-  // if the target of the operation is not the raw receiver return
+  // do not queue reactions if it is a symbol keyed property
+  // or the target of the operation is not the raw receiver
   // (possible because of prototypal inheritance)
-  if (obj !== proxyToRaw.get(receiver)) {
+  if (typeof key === 'symbol' || obj !== proxyToRaw.get(receiver)) {
     return result
   }
-  // do not queue reactions if it is a symbol keyed property
-  // or the set operation resulted in no value change
-  if (typeof key !== 'symbol') {
-    if (valueChanged) {
-      queueReactionsForKey(obj, key)
-    }
-    if (!hadKey) {
-      queueReactionsForKey(obj, ENUMERATE)
-    }
-    if (lengthChanged) {
-      queueReactionsForKey(obj, 'length')
-    }
+  // queue if the set operation resulted in value change
+  if (valueChanged) {
+    queueReactionsForKey(obj, key)
+  }
+  // or if it added a new key
+  if (!hadKey) {
+    const iterationKey = Array.isArray(obj) ? 'length' : ENUMERATE
+    queueReactionsForKey(obj, iterationKey)
   }
   return result
 }
@@ -87,7 +80,8 @@ function deleteProperty (obj, key) {
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
   if (typeof key !== 'symbol' && hadKey) {
     queueReactionsForKey(obj, key)
-    queueReactionsForKey(obj, ENUMERATE)
+    const iterationKey = Array.isArray(obj) ? 'length' : ENUMERATE
+    queueReactionsForKey(obj, iterationKey)
   }
   return result
 }

@@ -127,6 +127,19 @@ describe('observe', () => {
     expect(dummy).to.equal('Hello World!  Hello!')
   })
 
+  it('should observe sparse array mutations', () => {
+    let dummy
+    const list = observable([])
+    list[1] = 'World!'
+    observe(() => (dummy = list.join(' ')))
+
+    expect(dummy).to.equal(' World!')
+    list[0] = 'Hello'
+    expect(dummy).to.equal('Hello World!')
+    list.pop()
+    expect(dummy).to.equal('Hello')
+  })
+
   it('should observe enumeration', () => {
     let dummy = 0
     const numbers = observable({ num1: 3 })
