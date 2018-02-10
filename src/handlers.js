@@ -16,8 +16,6 @@ function get (obj, key, receiver) {
   if (typeof key === 'symbol' || typeof result === 'function') {
     return result
   }
-  // make sure to use the raw object here, obj might be a Proxy because of inheritance
-  // obj = proxyToRaw.get(obj) || obj
   // register and save (observable.prop -> runningReaction)
   registerRunningReactionForKey(obj, key)
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
