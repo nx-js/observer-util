@@ -10,11 +10,9 @@ export function registerReactionForKey (obj, key, reaction) {
   let reactionsForKey = reactionsForObj[key]
   if (!reactionsForKey) {
     reactionsForObj[key] = reactionsForKey = new Set()
-    // save the fact that the key is used by the reaction during its current run
-    reactionsForKey.add(reaction)
-    reaction.cleaners.push(reactionsForKey)
-  } else if (!reactionsForKey.has(reaction)) {
-    // save the fact that the key is used by the reaction during its current run
+  }
+  // save the fact that the key is used by the reaction during its current run
+  if (!reactionsForKey.has(reaction)) {
     reactionsForKey.add(reaction)
     reaction.cleaners.push(reactionsForKey)
   }
@@ -33,7 +31,7 @@ export function releaseReaction (reaction) {
   if (reaction.cleaners) {
     reaction.cleaners.forEach(releaseReactionKeyConnection, reaction)
   }
-  reaction.cleaners = undefined
+  reaction.cleaners = []
 }
 
 function releaseReactionKeyConnection (reactionsForKey) {

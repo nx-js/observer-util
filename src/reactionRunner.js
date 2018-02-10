@@ -17,7 +17,6 @@ export function runAsReaction (reaction, fn, context, args) {
   // release the (obj -> key -> reactions) connections
   // and reset the cleaner connections
   releaseReaction(reaction)
-  reaction.cleaners = []
 
   try {
     // set the reaction as the currently running one
