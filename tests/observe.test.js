@@ -73,6 +73,18 @@ describe('observe', () => {
     expect(dummy).to.equal(undefined)
   })
 
+  it('should observe has operations', () => {
+    let dummy
+    const obj = observable({ prop: 'value' })
+    observe(() => (dummy = 'prop' in obj))
+
+    expect(dummy).to.equal(true)
+    delete obj.prop
+    expect(dummy).to.equal(false)
+    obj.prop = 12
+    expect(dummy).to.equal(true)
+  })
+
   it('should observe properties on the prototype chain', () => {
     let dummy
     const counter = observable({ num: 0 })
@@ -87,6 +99,22 @@ describe('observe', () => {
     expect(dummy).to.equal(4)
     counter.num = 3
     expect(dummy).to.equal(3)
+  })
+
+  it('should observe has operations on the prototype chain', () => {
+    let dummy
+    const counter = observable({ num: 0 })
+    const parentCounter = observable({ num: 2 })
+    Object.setPrototypeOf(counter, parentCounter)
+    observe(() => (dummy = 'num' in counter))
+
+    expect(dummy).to.equal(true)
+    delete counter.num
+    expect(dummy).to.equal(true)
+    delete parentCounter.num
+    expect(dummy).to.equal(false)
+    counter.num = 3
+    expect(dummy).to.equal(true)
   })
 
   it('should observe function call chains', () => {
@@ -159,15 +187,18 @@ describe('observe', () => {
 
   it('should not observe symbol keyed properties', () => {
     const key = Symbol('symbol keyed prop')
-    let dummy
+    let dummy, hasDummy
     const obj = observable({ [key]: 'value' })
     observe(() => (dummy = obj[key]))
+    observe(() => (hasDummy = key in obj))
 
     expect(dummy).to.equal('value')
+    expect(hasDummy).to.equal(true)
     obj[key] = 'newValue'
     expect(dummy).to.equal('value')
     delete obj[key]
     expect(dummy).to.equal('value')
+    expect(hasDummy).to.equal(true)
   })
 
   it('should not observe function valued properties', () => {

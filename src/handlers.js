@@ -17,7 +17,7 @@ function get (obj, key, receiver) {
     return result
   }
   // make sure to use the raw object here, obj might be a Proxy because of inheritance
-  obj = proxyToRaw.get(obj) || obj
+  // obj = proxyToRaw.get(obj) || obj
   // register and save (observable.prop -> runningReaction)
   registerRunningReactionForKey(obj, key)
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
@@ -27,6 +27,17 @@ function get (obj, key, receiver) {
   }
   // otherwise return the observable wrapper if it is already created and cached or the raw object
   return rawToProxy.get(result) || result
+}
+
+function has (obj, key) {
+  const result = Reflect.has(obj, key)
+  // do not register (observable.prop -> reaction) pairs for these cases
+  if (typeof key === 'symbol') {
+    return result
+  }
+  // register and save (observable.prop -> runningReaction)
+  registerRunningReactionForKey(obj, key)
+  return result
 }
 
 function ownKeys (obj) {
@@ -86,4 +97,4 @@ function deleteProperty (obj, key) {
   return result
 }
 
-export default { get, ownKeys, set, deleteProperty }
+export default { get, has, ownKeys, set, deleteProperty }
