@@ -117,6 +117,32 @@ describe('observe', () => {
     expect(dummy).to.equal(true)
   })
 
+  it('should observe inherited property accessors', () => {
+    let dummy, parentDummy, hiddenValue
+    const obj = observable({})
+    const parent = observable({
+      set prop (value) {
+        hiddenValue = value
+      },
+      get prop () {
+        return hiddenValue
+      }
+    })
+    Object.setPrototypeOf(obj, parent)
+    observe(() => (dummy = obj.prop))
+    observe(() => (parentDummy = parent.prop))
+
+    expect(dummy).to.equal(undefined)
+    expect(parentDummy).to.equal(undefined)
+    obj.prop = 4
+    expect(dummy).to.equal(4)
+    // this doesn't work, should it?
+    // expect(parentDummy).to.equal(4)
+    parent.prop = 2
+    expect(dummy).to.equal(2)
+    expect(parentDummy).to.equal(2)
+  })
+
   it('should observe function call chains', () => {
     let dummy
     const counter = observable({ num: 0 })
@@ -245,6 +271,28 @@ describe('observe', () => {
     expect(dummy).to.equal(undefined)
     raw(obj).prop = 'value'
     expect(dummy).to.equal(undefined)
+  })
+
+  it('should not be triggered by inherited raw setters', () => {
+    let dummy, parentDummy, hiddenValue
+    const obj = observable({})
+    const parent = observable({
+      set prop (value) {
+        hiddenValue = value
+      },
+      get prop () {
+        return hiddenValue
+      }
+    })
+    Object.setPrototypeOf(obj, parent)
+    observe(() => (dummy = obj.prop))
+    observe(() => (parentDummy = parent.prop))
+
+    expect(dummy).to.equal(undefined)
+    expect(parentDummy).to.equal(undefined)
+    raw(obj).prop = 4
+    expect(dummy).to.equal(undefined)
+    expect(parentDummy).to.equal(undefined)
   })
 
   it('should not react on observable mutations in reactions', () => {
