@@ -59,14 +59,16 @@ describe('unobserve', () => {
     expect(dummy).to.equal(0)
   })
 
-  it('should throw if an unobserved reaction is called', () => {
-    const fnSpy = spy(() => {})
-    const reaction = observe(fnSpy)
+  it('should not reobserve unobserved reactions on manual execution', () => {
+    let dummy
+    const obj = observable()
+    const reaction = observe(() => dummy = obj.prop)
 
-    expect(fnSpy.callCount).to.eql(1)
+    expect(dummy).to.equal(undefined)
     unobserve(reaction)
-    expect(() => reaction()).to.throw()
-    expect(fnSpy.callCount).to.eql(1)
+    reaction()
+    obj.prop = 12
+    expect(dummy).to.equal(undefined)
   })
 
   it('should have the same effect, when called multiple times', () => {
