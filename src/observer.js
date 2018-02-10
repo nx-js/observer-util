@@ -27,8 +27,6 @@ export function observe (fn, options = {}) {
   }
   // save the scheduler on the reaction
   reaction.scheduler = options.scheduler
-  // runId will serve as a unique (incremental) id, which identifies the reaction's last run
-  reaction.runId = 0
   // save the fact that this is a reaction
   reaction[IS_REACTION] = true
   // run the reaction once if it is not a lazy one
