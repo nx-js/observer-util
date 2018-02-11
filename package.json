@@ -4,8 +4,10 @@
   "description": "Simple transparent reactivity with 100% language coverage. Made with ES6 Proxies.",
   "main": "dist/cjs.es5.js",
   "module": "dist/es.es5.js",
+  "types": "types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "types"
   ],
   "scripts": {
     "test": "node ./scripts/test.js",
