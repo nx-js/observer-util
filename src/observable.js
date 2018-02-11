@@ -4,9 +4,6 @@ import * as builtIns from './builtIns'
 import baseHandlers from './handlers'
 
 export function observable (obj = {}) {
-  if (typeof obj !== 'object') {
-    throw new TypeError('Observable first argument must be an object or undefined')
-  }
   // if it is already an observable or it should not be wrapped, return it
   if (proxyToRaw.has(obj) || !builtIns.shouldInstrument(obj)) {
     return obj

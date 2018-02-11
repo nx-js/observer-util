@@ -3,17 +3,6 @@ import { spy } from './utils'
 import { observe, observable, raw } from '@nx-js/observer-util'
 
 describe('observe', () => {
-  it('should throw a TypeError when the first argument is not a function', () => {
-    expect(() => observe(12)).to.throw(TypeError)
-    expect(() => observe({})).to.throw(TypeError)
-    expect(() => observe()).to.throw(TypeError)
-  })
-
-  it('should throw a TypeError when the first argument is a reaction', () => {
-    const reaction = observe(() => {})
-    expect(() => observe(reaction)).to.throw(TypeError)
-  })
-
   it('should run the passed function once (wrapped by a reaction)', () => {
     const fnSpy = spy(() => {})
     observe(fnSpy)
@@ -393,52 +382,30 @@ describe('observe', () => {
     expect(dummy).to.equal('other')
     expect(conditionalSpy.callCount).to.equal(2)
   })
+
+  it('should not double wrap if the passed function is a reaction', () => {
+    const reaction = observe(() => {})
+    const otherReaction = observe(reaction)
+    expect(reaction).to.equal(otherReaction)
+  })
 })
 
 describe('options', () => {
-  it('should throw a TypeError when the second argument is not an options object', () => {
-    const fn = () => {}
-    expect(() => observe(fn, null)).to.throw(TypeError)
-    expect(() => observe(fn, 'string')).to.throw(TypeError)
-    expect(() => observe(fn)).to.not.throw()
-    expect(() => observe(fn, {})).to.not.throw()
-  })
-
   describe('lazy', () => {
-    it('should throw if options.lazy is not a boolean or undefined', () => {
-      const fn = () => {}
-      expect(() => observe(fn, { lazy: null })).to.throw(TypeError)
-      expect(() => observe(fn, { lazy: 'true' })).to.throw(TypeError)
-      expect(() => observe(fn, { lazy: undefined })).to.not.throw()
-      expect(() => observe(fn, { lazy: false })).to.not.throw()
-    })
-
     it('should not run the passed function, if set to true', () => {
       const fnSpy = spy(() => {})
       observe(fnSpy, { lazy: true })
       expect(fnSpy.callCount).to.equal(0)
     })
+
+    it('should default to false', () => {
+      const fnSpy = spy(() => {})
+      observe(fnSpy)
+      expect(fnSpy.callCount).to.equal(1)
+    })
   })
 
   describe('scheduler', () => {
-    it('should throw if options.scheduler is not a function, object or undefined', () => {
-      const fn = () => {}
-      const scheduler = () => {}
-      expect(() => observe(fn, { scheduler: null })).to.throw(TypeError)
-      expect(() => observe(fn, { scheduler: true })).to.throw(TypeError)
-      expect(() => observe(fn, { scheduler })).to.not.throw()
-      expect(() => observe(fn, { scheduler: undefined })).to.not.throw()
-    })
-
-    it('should throw if options.scheduler object does not have an add and delete method', () => {
-      const fn = () => {}
-      const add = () => {}
-      const deleteFn = () => {}
-      expect(() => observe(fn, { scheduler: {} })).to.throw(TypeError)
-      expect(() => observe(fn, { scheduler: { add } })).to.throw(TypeError)
-      expect(() => observe(fn, { scheduler: { add, delete: deleteFn } })).to.not.throw()
-    })
-
     it('should call the scheduler function with the reaction instead of running it sync', () => {
       const counter = observable({ num: 0 })
       const fn = spy(() => counter.num)
