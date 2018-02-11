@@ -10,14 +10,14 @@ const hasOwnProperty = Object.prototype.hasOwnProperty
 const ENUMERATE = Symbol('enumerate')
 
 // intercept get operations on observables to know which reaction uses their properties
-function get (obj, key, receiver) {
-  const result = Reflect.get(obj, key, receiver)
+function get (object, key, receiver) {
+  const result = Reflect.get(object, key, receiver)
   // do not register (observable.prop -> reaction) pairs for these cases
   if (typeof key === 'symbol' || typeof result === 'function') {
     return result
   }
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForKey(obj, key)
+  registerRunningReactionForKey({ object, key })
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
   // this is needed to intercept property access on that object too (dynamic observable tree)
   if (hasRunningReaction() && typeof result === 'object' && result !== null) {
@@ -27,34 +27,34 @@ function get (obj, key, receiver) {
   return rawToProxy.get(result) || result
 }
 
-function has (obj, key) {
-  const result = Reflect.has(obj, key)
+function has (object, key) {
+  const result = Reflect.has(object, key)
   // do not register (observable.prop -> reaction) pairs for these cases
   if (typeof key === 'symbol') {
     return result
   }
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForKey(obj, key)
+  registerRunningReactionForKey({ object, key })
   return result
 }
 
-function ownKeys (obj) {
-  registerRunningReactionForKey(obj, ENUMERATE)
-  return Reflect.ownKeys(obj)
+function ownKeys (object) {
+  registerRunningReactionForKey({ object, key: ENUMERATE })
+  return Reflect.ownKeys(object)
 }
 
 // intercept set operations on observables to know when to trigger reactions
-function set (obj, key, value, receiver) {
+function set (object, key, value, receiver) {
   // make sure to do not pollute the raw object with observables
   if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
   }
   // save if the object had a descriptor for this key
-  const hadKey = hasOwnProperty.call(obj, key)
+  const hadKey = hasOwnProperty.call(object, key)
   // save if the value changed because of this set operation
-  const valueChanged = value !== obj[key]
+  const valueChanged = value !== object[key]
   // execute the set operation before running any reaction
-  const result = Reflect.set(obj, key, value, receiver)
+  const result = Reflect.set(object, key, value, receiver)
   // emit a warning and do not queue anything when another reaction is queued
   // from an already running reaction
   if (hasRunningReaction()) {
@@ -66,31 +66,31 @@ function set (obj, key, value, receiver) {
   // do not queue reactions if it is a symbol keyed property
   // or the target of the operation is not the raw receiver
   // (possible because of prototypal inheritance)
-  if (typeof key === 'symbol' || obj !== proxyToRaw.get(receiver)) {
+  if (typeof key === 'symbol' || object !== proxyToRaw.get(receiver)) {
     return result
   }
   // queue if the set operation resulted in value change
   if (valueChanged) {
-    queueReactionsForKey(obj, key)
+    queueReactionsForKey({ object, key })
   }
   // or if it added a new key
   if (!hadKey) {
-    const iterationKey = Array.isArray(obj) ? 'length' : ENUMERATE
-    queueReactionsForKey(obj, iterationKey)
+    const iterationKey = Array.isArray(object) ? 'length' : ENUMERATE
+    queueReactionsForKey({ object, key: iterationKey })
   }
   return result
 }
 
-function deleteProperty (obj, key) {
+function deleteProperty (object, key) {
   // save if the object had the key
-  const hadKey = hasOwnProperty.call(obj, key)
+  const hadKey = hasOwnProperty.call(object, key)
   // execute the delete operation before running any reaction
-  const result = Reflect.deleteProperty(obj, key)
+  const result = Reflect.deleteProperty(object, key)
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
   if (typeof key !== 'symbol' && hadKey) {
-    queueReactionsForKey(obj, key)
-    const iterationKey = Array.isArray(obj) ? 'length' : ENUMERATE
-    queueReactionsForKey(obj, iterationKey)
+    queueReactionsForKey({ object, key })
+    const iterationKey = Array.isArray(object) ? 'length' : ENUMERATE
+    queueReactionsForKey({ object, key: iterationKey })
   }
   return result
 }

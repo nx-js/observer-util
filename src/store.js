@@ -5,8 +5,8 @@ export function storeObservable (obj) {
   connectionStore.set(obj, Object.create(null))
 }
 
-export function registerReactionForKey (obj, key, reaction) {
-  const reactionsForObj = connectionStore.get(obj)
+export function registerReactionForKey (reaction, { object, key }) {
+  const reactionsForObj = connectionStore.get(object)
   let reactionsForKey = reactionsForObj[key]
   if (!reactionsForKey) {
     reactionsForObj[key] = reactionsForKey = new Set()
@@ -18,8 +18,8 @@ export function registerReactionForKey (obj, key, reaction) {
   }
 }
 
-export function iterateReactionsForKey (obj, key, reactionHandler) {
-  const reactionsForKey = connectionStore.get(obj)[key]
+export function iterateReactionsForKey (reactionHandler, { object, key }) {
+  const reactionsForKey = connectionStore.get(object)[key]
   if (reactionsForKey) {
     // create a static copy of the reactions, before iterating them
     // to avoid infinite (iterate items: remove -> readd) loops

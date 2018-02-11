@@ -28,15 +28,15 @@ export function runAsReaction (reaction, fn, context, args) {
 }
 
 // register the currently running reaction to be queued again on obj.key mutations
-export function registerRunningReactionForKey (obj, key) {
+export function registerRunningReactionForKey (operation) {
   if (runningReaction) {
-    registerReactionForKey(obj, key, runningReaction)
+    registerReactionForKey(runningReaction, operation)
   }
 }
 
-export function queueReactionsForKey (obj, key) {
+export function queueReactionsForKey (operation) {
   // iterate and queue every reaction, which is triggered by obj.key mutation
-  iterateReactionsForKey(obj, key, queueReaction)
+  iterateReactionsForKey(queueReaction, operation)
 }
 
 function queueReaction (reaction) {
