@@ -8,8 +8,9 @@ export function observe (fn, options = {}) {
   const reaction = fn[IS_REACTION] ? fn : function reaction () {
     return runAsReaction(reaction, fn, this, arguments)
   }
-  // save the scheduler on the reaction
+  // save the scheduler and debugger on the reaction
   reaction.scheduler = options.scheduler
+  reaction.debugger = options.debugger
   // save the fact that this is a reaction
   reaction[IS_REACTION] = true
   // run the reaction once if it is not a lazy one

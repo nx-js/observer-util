@@ -1,6 +1,6 @@
 import {
   registerReactionForKey,
-  iterateReactionsForKey,
+  getReactionsForKey,
   releaseReaction
 } from './store'
 
@@ -30,16 +30,22 @@ export function runAsReaction (reaction, fn, context, args) {
 // register the currently running reaction to be queued again on obj.key mutations
 export function registerRunningReactionForKey (operation) {
   if (runningReaction) {
+    if (runningReaction.debugger) {
+      runningReaction.debugger(operation)
+    }
     registerReactionForKey(runningReaction, operation)
   }
 }
 
 export function queueReactionsForKey (operation) {
   // iterate and queue every reaction, which is triggered by obj.key mutation
-  iterateReactionsForKey(queueReaction, operation)
+  getReactionsForKey(operation).forEach(queueReaction, operation)
 }
 
 function queueReaction (reaction) {
+  if (reaction.debugger) {
+    reaction.debugger(this)
+  }
   // queue the reaction for later execution or run it immediately
   if (typeof reaction.scheduler === 'function') {
     reaction.scheduler(reaction)

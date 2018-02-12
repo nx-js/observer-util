@@ -6,12 +6,12 @@ export function storeObservable (obj) {
   connectionStore.set(obj, Object.create(null))
 }
 
-export function registerReactionForKey (reaction, { object, key, type }) {
+export function registerReactionForKey (reaction, { target, key, type }) {
   if (type === 'iterate') {
     key = ITERATION_KEY
   }
 
-  const reactionsForObj = connectionStore.get(object)
+  const reactionsForObj = connectionStore.get(target)
   let reactionsForKey = reactionsForObj[key]
   if (!reactionsForKey) {
     reactionsForObj[key] = reactionsForKey = new Set()
@@ -23,21 +23,21 @@ export function registerReactionForKey (reaction, { object, key, type }) {
   }
 }
 
-export function iterateReactionsForKey (reactionHandler, { object, key, type }) {
+export function getReactionsForKey ({ target, key, type }) {
   const reactionsForKey = new Set()
 
   if (type !== 'clear') {
-    const setTypeReactions = connectionStore.get(object)[key]
+    const setTypeReactions = connectionStore.get(target)[key]
     setTypeReactions && setTypeReactions.forEach(reactionsForKey.add, reactionsForKey)
   }
 
   if (type === 'add' || type === 'delete' || type === 'clear') {
-    const iterationKey = Array.isArray(object) ? 'length' : ITERATION_KEY
-    const addTypeReactions = connectionStore.get(object)[iterationKey]
+    const iterationKey = Array.isArray(target) ? 'length' : ITERATION_KEY
+    const addTypeReactions = connectionStore.get(target)[iterationKey]
     addTypeReactions && addTypeReactions.forEach(reactionsForKey.add, reactionsForKey)
   }
 
-  reactionsForKey.forEach(reactionHandler)
+  return reactionsForKey
 }
 
 export function releaseReaction (reaction) {

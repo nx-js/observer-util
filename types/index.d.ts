@@ -10,6 +10,7 @@ declare module '@nx-js/observer-util' {
 
   interface ObserveOptions {
     scheduler?: Scheduler | Function
+    debugger?: Function
     lazy?: boolean
   }
 

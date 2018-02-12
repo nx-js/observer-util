@@ -8,100 +8,100 @@ const getPrototypeOf = Object.getPrototypeOf
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
 const instrumentations = {
-  has (value) {
-    const rawContext = proxyToRaw.get(this)
+  has (key) {
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, key: value, type: 'has' })
-    return proto.has.apply(rawContext, arguments)
+    registerRunningReactionForKey({ target, key, type: 'has' })
+    return proto.has.apply(target, arguments)
   },
   get (key) {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, key, type: 'get' })
-    return proto.get.apply(rawContext, arguments)
+    registerRunningReactionForKey({ target, key, type: 'get' })
+    return proto.get.apply(target, arguments)
   },
-  add (value) {
-    const rawContext = proxyToRaw.get(this)
+  add (key) {
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    const hadKey = proto.has.call(rawContext, value)
+    const hadKey = proto.has.call(target, key)
     // forward the operation before queueing reactions
-    const result = proto.add.apply(rawContext, arguments)
+    const result = proto.add.apply(target, arguments)
     if (!hadKey) {
-      queueReactionsForKey({ object: rawContext, key: value, type: 'add' })
+      queueReactionsForKey({ target, key, type: 'add' })
     }
     return result
   },
   set (key, value) {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    const hadKey = proto.has.call(rawContext, key)
-    const valueChanged = proto.get.call(rawContext, key) !== value
+    const hadKey = proto.has.call(target, key)
+    const valueChanged = proto.get.call(target, key) !== value
     // forward the operation before queueing reactions
-    const result = proto.set.apply(rawContext, arguments)
+    const result = proto.set.apply(target, arguments)
     if (!hadKey) {
-      queueReactionsForKey({ object: rawContext, key, type: 'add' })
+      queueReactionsForKey({ target, key, type: 'add' })
     } else if (valueChanged) {
-      queueReactionsForKey({ object: rawContext, key, type: 'set' })
+      queueReactionsForKey({ target, key, type: 'set' })
     }
     return result
   },
-  delete (value) {
-    const rawContext = proxyToRaw.get(this)
+  delete (key) {
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    const hadKey = proto.has.call(rawContext, value)
+    const hadKey = proto.has.call(target, key)
     // forward the operation before queueing reactions
-    const result = proto.delete.apply(rawContext, arguments)
+    const result = proto.delete.apply(target, arguments)
     if (hadKey) {
-      queueReactionsForKey({ object: rawContext, key: value, type: 'delete' })
+      queueReactionsForKey({ target, key, type: 'delete' })
     }
     return result
   },
   clear () {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    const hadItems = rawContext.size !== 0
+    const hadItems = target.size !== 0
     // forward the operation before queueing reactions
-    const result = proto.clear.apply(rawContext, arguments)
+    const result = proto.clear.apply(target, arguments)
     if (hadItems) {
-      queueReactionsForKey({ object: rawContext, type: 'clear' })
+      queueReactionsForKey({ target, type: 'clear' })
     }
     return result
   },
   forEach () {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, type: 'iterate' })
-    return proto.forEach.apply(rawContext, arguments)
+    registerRunningReactionForKey({ target, type: 'iterate' })
+    return proto.forEach.apply(target, arguments)
   },
   keys () {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, type: 'iterate' })
-    return proto.keys.apply(rawContext, arguments)
+    registerRunningReactionForKey({ target, type: 'iterate' })
+    return proto.keys.apply(target, arguments)
   },
   values () {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, type: 'iterate' })
-    return proto.values.apply(rawContext, arguments)
+    registerRunningReactionForKey({ target, type: 'iterate' })
+    return proto.values.apply(target, arguments)
   },
   entries () {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, type: 'iterate' })
-    return proto.entries.apply(rawContext, arguments)
+    registerRunningReactionForKey({ target, type: 'iterate' })
+    return proto.entries.apply(target, arguments)
   },
   [Symbol.iterator] () {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, type: 'iterate' })
-    return proto[Symbol.iterator].apply(rawContext, arguments)
+    registerRunningReactionForKey({ target, type: 'iterate' })
+    return proto[Symbol.iterator].apply(target, arguments)
   },
   get size () {
-    const rawContext = proxyToRaw.get(this)
+    const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
-    registerRunningReactionForKey({ object: rawContext, type: 'iterate' })
-    return Reflect.get(proto, 'size', rawContext)
+    registerRunningReactionForKey({ target, type: 'iterate' })
+    return Reflect.get(proto, 'size', target)
   }
 }
 
