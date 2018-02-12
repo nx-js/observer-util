@@ -434,7 +434,7 @@ describe('options', () => {
       counter.num++
       expect(fn.callCount).to.equal(1)
       expect(scheduler.callCount).to.eql(1)
-      expect(scheduler.args).to.eql([reaction])
+      expect(scheduler.lastArgs).to.eql([reaction])
     })
 
     it('should call scheduler.add with the reaction instead of running it sync', () => {
@@ -448,7 +448,7 @@ describe('options', () => {
       counter.num++
       expect(fn.callCount).to.equal(1)
       expect(scheduler.add.callCount).to.eql(1)
-      expect(scheduler.add.args).to.eql([reaction])
+      expect(scheduler.add.lastArgs).to.eql([reaction])
     })
   })
 

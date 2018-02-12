@@ -143,6 +143,18 @@ describe('Map', () => {
     expect(dummy).to.equal(0)
   })
 
+  it('should be triggered by clearing', () => {
+    let dummy
+    const map = observable(new Map())
+    observe(() => (dummy = map.get('key')))
+
+    expect(dummy).to.equal(undefined)
+    map.set('key', 3)
+    expect(dummy).to.equal(3)
+    map.clear()
+    expect(dummy).to.equal(undefined)
+  })
+
   it('should not observe custom property mutations', () => {
     let dummy
     const map = observable(new Map())

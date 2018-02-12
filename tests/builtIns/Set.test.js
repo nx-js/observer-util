@@ -120,6 +120,18 @@ describe('Set', () => {
     expect(dummy).to.equal(0)
   })
 
+  it('should be triggered by clearing', () => {
+    let dummy
+    const set = observable(new Set())
+    observe(() => (dummy = set.has('key')))
+
+    expect(dummy).to.equal(false)
+    set.add('key')
+    expect(dummy).to.equal(true)
+    set.clear()
+    expect(dummy).to.equal(false)
+  })
+
   it('should not observe custom property mutations', () => {
     let dummy
     const set = observable(new Set())
