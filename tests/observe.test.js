@@ -388,6 +388,23 @@ describe('observe', () => {
     const otherReaction = observe(reaction)
     expect(reaction).to.equal(otherReaction)
   })
+
+  it('should not run multiple times for a single mutation', () => {
+    let dummy
+    const obj = observable()
+    const fnSpy = spy(() => {
+      for (const key in obj) {
+        dummy = obj[key]
+      }
+      dummy = obj.prop
+    })
+    observe(fnSpy)
+
+    expect(fnSpy.callCount).to.equal(1)
+    obj.prop = 16
+    expect(dummy).to.equal(16)
+    expect(fnSpy.callCount).to.equal(2)
+  })
 })
 
 describe('options', () => {

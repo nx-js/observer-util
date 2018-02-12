@@ -18,6 +18,8 @@ describe('WeakMap', () => {
     expect(dummy).to.equal(undefined)
     map.set(key, 'value')
     expect(dummy).to.equal('value')
+    map.set(key, 'value2')
+    expect(dummy).to.equal('value2')
     map.delete(key)
     expect(dummy).to.equal(undefined)
   })

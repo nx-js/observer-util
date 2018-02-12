@@ -7,7 +7,6 @@ import {
 } from './reactionRunner'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
-const ENUMERATE = Symbol('enumerate')
 
 // intercept get operations on observables to know which reaction uses their properties
 function get (object, key, receiver) {
@@ -17,7 +16,7 @@ function get (object, key, receiver) {
     return result
   }
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForKey({ object, key })
+  registerRunningReactionForKey({ object, key, type: 'get' })
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
   // this is needed to intercept property access on that object too (dynamic observable tree)
   if (hasRunningReaction() && typeof result === 'object' && result !== null) {
@@ -34,12 +33,12 @@ function has (object, key) {
     return result
   }
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForKey({ object, key })
+  registerRunningReactionForKey({ object, key, type: 'has' })
   return result
 }
 
 function ownKeys (object) {
-  registerRunningReactionForKey({ object, key: ENUMERATE })
+  registerRunningReactionForKey({ object, type: 'iterate' })
   return Reflect.ownKeys(object)
 }
 
@@ -69,14 +68,12 @@ function set (object, key, value, receiver) {
   if (typeof key === 'symbol' || object !== proxyToRaw.get(receiver)) {
     return result
   }
-  // queue if the set operation resulted in value change
-  if (valueChanged) {
-    queueReactionsForKey({ object, key })
-  }
-  // or if it added a new key
+
+  // queue a reaction if it's a new property or its value changed
   if (!hadKey) {
-    const iterationKey = Array.isArray(object) ? 'length' : ENUMERATE
-    queueReactionsForKey({ object, key: iterationKey })
+    queueReactionsForKey({ object, key, type: 'add' })
+  } else if (valueChanged) {
+    queueReactionsForKey({ object, key, type: 'set' })
   }
   return result
 }
@@ -88,9 +85,7 @@ function deleteProperty (object, key) {
   const result = Reflect.deleteProperty(object, key)
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
   if (typeof key !== 'symbol' && hadKey) {
-    queueReactionsForKey({ object, key })
-    const iterationKey = Array.isArray(object) ? 'length' : ENUMERATE
-    queueReactionsForKey({ object, key: iterationKey })
+    queueReactionsForKey({ object, key, type: 'delete' })
   }
   return result
 }

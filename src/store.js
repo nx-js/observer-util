@@ -1,11 +1,16 @@
 const connectionStore = new WeakMap()
+const ITERATION_KEY = Symbol('iteration key')
 
 export function storeObservable (obj) {
   // this will be used to save (obj.key -> reaction) connections later
   connectionStore.set(obj, Object.create(null))
 }
 
-export function registerReactionForKey (reaction, { object, key }) {
+export function registerReactionForKey (reaction, { object, key, type }) {
+  if (type === 'iterate') {
+    key = ITERATION_KEY
+  }
+
   const reactionsForObj = connectionStore.get(object)
   let reactionsForKey = reactionsForObj[key]
   if (!reactionsForKey) {
@@ -18,13 +23,21 @@ export function registerReactionForKey (reaction, { object, key }) {
   }
 }
 
-export function iterateReactionsForKey (reactionHandler, { object, key }) {
-  const reactionsForKey = connectionStore.get(object)[key]
-  if (reactionsForKey) {
-    // create a static copy of the reactions, before iterating them
-    // to avoid infinite (iterate items: remove -> readd) loops
-    Array.from(reactionsForKey).forEach(reactionHandler)
+export function iterateReactionsForKey (reactionHandler, { object, key, type }) {
+  const reactionsForKey = new Set()
+
+  if (type !== 'clear') {
+    const setTypeReactions = connectionStore.get(object)[key]
+    setTypeReactions && setTypeReactions.forEach(reactionsForKey.add, reactionsForKey)
   }
+
+  if (type === 'add' || type === 'delete' || type === 'clear') {
+    const iterationKey = Array.isArray(object) ? 'length' : ITERATION_KEY
+    const addTypeReactions = connectionStore.get(object)[iterationKey]
+    addTypeReactions && addTypeReactions.forEach(reactionsForKey.add, reactionsForKey)
+  }
+
+  reactionsForKey.forEach(reactionHandler)
 }
 
 export function releaseReaction (reaction) {
