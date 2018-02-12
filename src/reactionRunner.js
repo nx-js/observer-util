@@ -1,6 +1,6 @@
 import {
-  registerReactionForKey,
-  getReactionsForKey,
+  registerReactionForOperation,
+  getReactionsForOperation,
   releaseReaction
 } from './store'
 
@@ -28,18 +28,18 @@ export function runAsReaction (reaction, fn, context, args) {
 }
 
 // register the currently running reaction to be queued again on obj.key mutations
-export function registerRunningReactionForKey (operation) {
+export function registerRunningReactionForOperation (operation) {
   if (runningReaction) {
     if (runningReaction.debugger) {
       runningReaction.debugger(operation)
     }
-    registerReactionForKey(runningReaction, operation)
+    registerReactionForOperation(runningReaction, operation)
   }
 }
 
-export function queueReactionsForKey (operation) {
+export function queueReactionsForOperation (operation) {
   // iterate and queue every reaction, which is triggered by obj.key mutation
-  getReactionsForKey(operation).forEach(queueReaction, operation)
+  getReactionsForOperation(operation).forEach(queueReaction, operation)
 }
 
 function queueReaction (reaction) {

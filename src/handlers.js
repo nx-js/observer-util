@@ -1,8 +1,8 @@
 import { observable } from './observable'
 import { proxyToRaw, rawToProxy } from './internals'
 import {
-  registerRunningReactionForKey,
-  queueReactionsForKey,
+  registerRunningReactionForOperation,
+  queueReactionsForOperation,
   hasRunningReaction
 } from './reactionRunner'
 
@@ -16,7 +16,7 @@ function get (target, key, receiver) {
     return result
   }
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForKey({ target, key, type: 'get' })
+  registerRunningReactionForOperation({ target, key, type: 'get' })
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
   // this is needed to intercept property access on that object too (dynamic observable tree)
   if (hasRunningReaction() && typeof result === 'object' && result !== null) {
@@ -33,12 +33,12 @@ function has (target, key) {
     return result
   }
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForKey({ target, key, type: 'has' })
+  registerRunningReactionForOperation({ target, key, type: 'has' })
   return result
 }
 
 function ownKeys (target) {
-  registerRunningReactionForKey({ target, type: 'iterate' })
+  registerRunningReactionForOperation({ target, type: 'iterate' })
   return Reflect.ownKeys(target)
 }
 
@@ -71,9 +71,9 @@ function set (target, key, value, receiver) {
 
   // queue a reaction if it's a new property or its value changed
   if (!hadKey) {
-    queueReactionsForKey({ target, key, type: 'add' })
+    queueReactionsForOperation({ target, key, type: 'add' })
   } else if (valueChanged) {
-    queueReactionsForKey({ target, key, type: 'set' })
+    queueReactionsForOperation({ target, key, type: 'set' })
   }
   return result
 }
@@ -85,7 +85,7 @@ function deleteProperty (target, key) {
   const result = Reflect.deleteProperty(target, key)
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
   if (typeof key !== 'symbol' && hadKey) {
-    queueReactionsForKey({ target, key, type: 'delete' })
+    queueReactionsForOperation({ target, key, type: 'delete' })
   }
   return result
 }
