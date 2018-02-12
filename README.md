@@ -360,7 +360,9 @@ Wraps the passed function with a reaction, which behaves just like the original 
 
 - `lazy`: A boolean, which controls if the reaction is executed when it is created or not. If it is true, the reaction has to be called once manually to trigger the reactivity process. Defaults to false.
 
-- `scheduler`: A function, which is called with the reaction when it is scheduled to run. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions. The default scheduler runs the reaction synchronously on related observable mutations.
+- `scheduler`: A function, which is called with the reaction when it is scheduled to run. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions. The default scheduler runs the reaction synchronously on observable mutations. You can learn more about reaction scheduling in the [related docs section](#reaction-scheduling).
+
+- `debugger`: An optional function. It is called with contextual metadata object on basic operations - like set, get, delete, etc. The metadata object can be used to determine why the operation wired or scheduled the reaction and it always has enough data to reverse the operation. The debugger is always called before the scheduler.
 
 ### unobserve(reaction)
 
