@@ -142,12 +142,14 @@ describe('debugger', () => {
 
     expect(dummy).to.equal('value')
     expect(debugSpy.callCount).to.equal(1)
+    const oldMap = new Map(rawMap)
     map.clear()
     expect(dummy).to.equal(undefined)
     expect(debugSpy.callCount).to.equal(3)
     expect(debugSpy.args[1]).to.eql([{
       type: 'clear',
-      target: rawMap
+      target: rawMap,
+      oldTarget: oldMap
     }])
   })
 })

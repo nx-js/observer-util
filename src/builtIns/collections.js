@@ -61,10 +61,11 @@ const instrumentations = {
     const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
     const hadItems = target.size !== 0
+    const oldTarget = target instanceof Map ? new Map(target) : new Set(target)
     // forward the operation before queueing reactions
     const result = proto.clear.apply(target, arguments)
     if (hadItems) {
-      queueReactionsForOperation({ target, type: 'clear' })
+      queueReactionsForOperation({ target, oldTarget, type: 'clear' })
     }
     return result
   },
