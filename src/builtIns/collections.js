@@ -27,7 +27,7 @@ const instrumentations = {
     // forward the operation before queueing reactions
     const result = proto.add.apply(target, arguments)
     if (!hadKey) {
-      queueReactionsForOperation({ target, key, type: 'add' })
+      queueReactionsForOperation({ target, key, value: key, type: 'add' })
     }
     return result
   },
@@ -35,13 +35,13 @@ const instrumentations = {
     const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
-    const valueChanged = proto.get.call(target, key) !== value
+    const oldValue = proto.get.call(target, key)
     // forward the operation before queueing reactions
     const result = proto.set.apply(target, arguments)
     if (!hadKey) {
-      queueReactionsForOperation({ target, key, type: 'add' })
-    } else if (valueChanged) {
-      queueReactionsForOperation({ target, key, type: 'set' })
+      queueReactionsForOperation({ target, key, value, type: 'add' })
+    } else if (value !== oldValue) {
+      queueReactionsForOperation({ target, key, value, oldValue, type: 'set' })
     }
     return result
   },
@@ -49,10 +49,11 @@ const instrumentations = {
     const target = proxyToRaw.get(this)
     const proto = getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
+    const oldValue = proto.get ? proto.get.call(target, key) : undefined
     // forward the operation before queueing reactions
     const result = proto.delete.apply(target, arguments)
     if (hadKey) {
-      queueReactionsForOperation({ target, key, type: 'delete' })
+      queueReactionsForOperation({ target, key, oldValue, type: 'delete' })
     }
     return result
   },

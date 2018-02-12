@@ -16,7 +16,7 @@ function get (target, key, receiver) {
     return result
   }
   // register and save (observable.prop -> runningReaction)
-  registerRunningReactionForOperation({ target, key, type: 'get' })
+  registerRunningReactionForOperation({ target, key, receiver, type: 'get' })
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
   // this is needed to intercept property access on that object too (dynamic observable tree)
   if (hasRunningReaction() && typeof result === 'object' && result !== null) {
@@ -51,7 +51,7 @@ function set (target, key, value, receiver) {
   // save if the object had a descriptor for this key
   const hadKey = hasOwnProperty.call(target, key)
   // save if the value changed because of this set operation
-  const valueChanged = value !== target[key]
+  const oldValue = target[key]
   // execute the set operation before running any reaction
   const result = Reflect.set(target, key, value, receiver)
   // emit a warning and do not queue anything when another reaction is queued
@@ -71,9 +71,9 @@ function set (target, key, value, receiver) {
 
   // queue a reaction if it's a new property or its value changed
   if (!hadKey) {
-    queueReactionsForOperation({ target, key, type: 'add' })
-  } else if (valueChanged) {
-    queueReactionsForOperation({ target, key, type: 'set' })
+    queueReactionsForOperation({ target, key, value, receiver, type: 'add' })
+  } else if (value !== oldValue) {
+    queueReactionsForOperation({ target, key, value, oldValue, receiver, type: 'set' })
   }
   return result
 }
@@ -81,11 +81,12 @@ function set (target, key, value, receiver) {
 function deleteProperty (target, key) {
   // save if the object had the key
   const hadKey = hasOwnProperty.call(target, key)
+  const oldValue = target[key]
   // execute the delete operation before running any reaction
   const result = Reflect.deleteProperty(target, key)
   // only queue reactions for non symbol keyed property delete which resulted in an actual change
   if (typeof key !== 'symbol' && hadKey) {
-    queueReactionsForOperation({ target, key, type: 'delete' })
+    queueReactionsForOperation({ target, key, oldValue, type: 'delete' })
   }
   return result
 }

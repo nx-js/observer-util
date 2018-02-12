@@ -17,7 +17,8 @@ describe('debugger', () => {
     expect(debugSpy.lastArgs).to.eql([{
       type: 'get',
       target: rawCounter,
-      key: 'num'
+      key: 'num',
+      receiver: counter
     }])
   })
 
@@ -77,7 +78,9 @@ describe('debugger', () => {
     expect(debugSpy.args[1]).to.eql([{
       type: 'add',
       target: rawCounter,
-      key: 'num'
+      key: 'num',
+      value: 12,
+      receiver: counter
     }])
   })
 
@@ -98,7 +101,10 @@ describe('debugger', () => {
     expect(debugSpy.args[1]).to.eql([{
       type: 'set',
       target: rawCounter,
-      key: 'num'
+      key: 'num',
+      value: 12,
+      oldValue: 0,
+      receiver: counter
     }])
   })
 
@@ -119,7 +125,8 @@ describe('debugger', () => {
     expect(debugSpy.args[1]).to.eql([{
       type: 'delete',
       target: rawCounter,
-      key: 'num'
+      key: 'num',
+      oldValue: 0
     }])
   })
 
