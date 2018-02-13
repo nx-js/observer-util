@@ -5,9 +5,11 @@ const IS_REACTION = Symbol('is reaction')
 
 export function observe (fn, options = {}) {
   // wrap the passed function in a reaction, if it is not already one
-  const reaction = fn[IS_REACTION] ? fn : function reaction () {
-    return runAsReaction(reaction, fn, this, arguments)
-  }
+  const reaction = fn[IS_REACTION]
+    ? fn
+    : function reaction () {
+      return runAsReaction(reaction, fn, this, arguments)
+    }
   // save the scheduler and debugger on the reaction
   reaction.scheduler = options.scheduler
   reaction.debugger = options.debugger

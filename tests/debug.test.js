@@ -14,12 +14,14 @@ describe('debugger', () => {
 
     expect(dummy).to.equal(0)
     expect(debugSpy.callCount).to.equal(1)
-    expect(debugSpy.lastArgs).to.eql([{
-      type: 'get',
-      target: rawCounter,
-      key: 'num',
-      receiver: counter
-    }])
+    expect(debugSpy.lastArgs).to.eql([
+      {
+        type: 'get',
+        target: rawCounter,
+        key: 'num',
+        receiver: counter
+      }
+    ])
   })
 
   it('should debug has operations', () => {
@@ -33,11 +35,13 @@ describe('debugger', () => {
 
     expect(dummy).to.equal(false)
     expect(debugSpy.callCount).to.equal(1)
-    expect(debugSpy.lastArgs).to.eql([{
-      type: 'has',
-      target: rawCounter,
-      key: 'num'
-    }])
+    expect(debugSpy.lastArgs).to.eql([
+      {
+        type: 'has',
+        target: rawCounter,
+        key: 'num'
+      }
+    ])
   })
 
   it('should debug iteration operations', () => {
@@ -45,20 +49,25 @@ describe('debugger', () => {
     const rawCounter = { num: 0 }
     const counter = observable(rawCounter)
     const debugSpy = spy(() => {})
-    observe(() => {
-      for (const key in counter) {
-        dummy = key
+    observe(
+      () => {
+        for (const key in counter) {
+          dummy = key
+        }
+      },
+      {
+        debugger: debugSpy
       }
-    }, {
-      debugger: debugSpy
-    })
+    )
 
     expect(dummy).to.equal('num')
     expect(debugSpy.callCount).to.equal(1)
-    expect(debugSpy.lastArgs).to.eql([{
-      type: 'iterate',
-      target: rawCounter
-    }])
+    expect(debugSpy.lastArgs).to.eql([
+      {
+        type: 'iterate',
+        target: rawCounter
+      }
+    ])
   })
 
   it('should debug add operations', () => {
@@ -75,13 +84,15 @@ describe('debugger', () => {
     counter.num = 12
     expect(dummy).to.equal(12)
     expect(debugSpy.callCount).to.equal(3)
-    expect(debugSpy.args[1]).to.eql([{
-      type: 'add',
-      target: rawCounter,
-      key: 'num',
-      value: 12,
-      receiver: counter
-    }])
+    expect(debugSpy.args[1]).to.eql([
+      {
+        type: 'add',
+        target: rawCounter,
+        key: 'num',
+        value: 12,
+        receiver: counter
+      }
+    ])
   })
 
   it('should debug set operations', () => {
@@ -98,14 +109,16 @@ describe('debugger', () => {
     counter.num = 12
     expect(dummy).to.equal(12)
     expect(debugSpy.callCount).to.equal(3)
-    expect(debugSpy.args[1]).to.eql([{
-      type: 'set',
-      target: rawCounter,
-      key: 'num',
-      value: 12,
-      oldValue: 0,
-      receiver: counter
-    }])
+    expect(debugSpy.args[1]).to.eql([
+      {
+        type: 'set',
+        target: rawCounter,
+        key: 'num',
+        value: 12,
+        oldValue: 0,
+        receiver: counter
+      }
+    ])
   })
 
   it('should debug delete operations', () => {
@@ -122,12 +135,14 @@ describe('debugger', () => {
     delete counter.num
     expect(dummy).to.equal(undefined)
     expect(debugSpy.callCount).to.equal(3)
-    expect(debugSpy.args[1]).to.eql([{
-      type: 'delete',
-      target: rawCounter,
-      key: 'num',
-      oldValue: 0
-    }])
+    expect(debugSpy.args[1]).to.eql([
+      {
+        type: 'delete',
+        target: rawCounter,
+        key: 'num',
+        oldValue: 0
+      }
+    ])
   })
 
   it('should debug clear operations', () => {
@@ -146,10 +161,12 @@ describe('debugger', () => {
     map.clear()
     expect(dummy).to.equal(undefined)
     expect(debugSpy.callCount).to.equal(3)
-    expect(debugSpy.args[1]).to.eql([{
-      type: 'clear',
-      target: rawMap,
-      oldTarget: oldMap
-    }])
+    expect(debugSpy.args[1]).to.eql([
+      {
+        type: 'clear',
+        target: rawMap,
+        oldTarget: oldMap
+      }
+    ])
   })
 })

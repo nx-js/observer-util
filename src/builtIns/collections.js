@@ -110,7 +110,9 @@ const instrumentations = {
 export default {
   get (target, key, receiver) {
     // instrument methods and property accessors to be reactive
-    target = hasOwnProperty.call(instrumentations, key) ? instrumentations : target
+    target = hasOwnProperty.call(instrumentations, key)
+      ? instrumentations
+      : target
     return Reflect.get(target, key, receiver)
   }
 }

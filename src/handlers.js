@@ -73,7 +73,14 @@ function set (target, key, value, receiver) {
   if (!hadKey) {
     queueReactionsForOperation({ target, key, value, receiver, type: 'add' })
   } else if (value !== oldValue) {
-    queueReactionsForOperation({ target, key, value, oldValue, receiver, type: 'set' })
+    queueReactionsForOperation({
+      target,
+      key,
+      value,
+      oldValue,
+      receiver,
+      type: 'set'
+    })
   }
   return result
 }

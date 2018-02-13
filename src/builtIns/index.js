@@ -1,10 +1,7 @@
 import collectionHandlers from './collections'
 
 // simple objects are not wrapped by Proxies, neither instrumented
-const dontInstrument = new Set([
-  Date,
-  RegExp
-])
+const dontInstrument = new Set([Date, RegExp])
 
 // built-in object can not be wrapped by Proxies
 // their methods expect the object instance as the 'this' instead of the Proxy wrapper
