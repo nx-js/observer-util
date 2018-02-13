@@ -54,7 +54,7 @@ describe('unobserve', () => {
   it('should not reobserve unobserved reactions on manual execution', () => {
     let dummy
     const obj = observable()
-    const reaction = observe(() => dummy = obj.prop)
+    const reaction = observe(() => (dummy = obj.prop))
 
     expect(dummy).to.equal(undefined)
     unobserve(reaction)
