@@ -169,4 +169,17 @@ describe('debugger', () => {
       }
     ])
   })
+
+  it('should not cause infinite loops', () => {
+    let receiverDummy
+    const rawCounter = { num: 0 }
+    const counter = observable(rawCounter)
+    const debugSpy = spy(({ receiver }) => (receiverDummy = receiver.num))
+    observe(() => counter.num, {
+      debugger: debugSpy
+    })
+
+    expect(receiverDummy).to.equal(0)
+    expect(debugSpy.callCount).to.equal(1)
+  })
 })

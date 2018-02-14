@@ -1,6 +1,6 @@
 export function spy (fn) {
   function spyFn () {
-    fn()
+    fn.apply(this, arguments)
     spyFn.callCount++
     spyFn.lastArgs = Array.from(arguments)
     spyFn.args.push(spyFn.lastArgs)

@@ -5,6 +5,7 @@ import {
 } from './store'
 
 let runningReaction
+let isDebugging = false
 
 export function runAsReaction (reaction, fn, context, args) {
   // do not build reactive relations, if the reaction is unobserved
@@ -30,9 +31,7 @@ export function runAsReaction (reaction, fn, context, args) {
 // register the currently running reaction to be queued again on obj.key mutations
 export function registerRunningReactionForOperation (operation) {
   if (runningReaction) {
-    if (runningReaction.debugger) {
-      runningReaction.debugger(operation)
-    }
+    debugOperation(runningReaction, operation)
     registerReactionForOperation(runningReaction, operation)
   }
 }
@@ -43,9 +42,7 @@ export function queueReactionsForOperation (operation) {
 }
 
 function queueReaction (reaction) {
-  if (reaction.debugger) {
-    reaction.debugger(this)
-  }
+  debugOperation(reaction, this)
   // queue the reaction for later execution or run it immediately
   if (typeof reaction.scheduler === 'function') {
     reaction.scheduler(reaction)
@@ -53,6 +50,17 @@ function queueReaction (reaction) {
     reaction.scheduler.add(reaction)
   } else {
     reaction()
+  }
+}
+
+function debugOperation (reaction, operation) {
+  if (reaction.debugger && !isDebugging) {
+    try {
+      isDebugging = true
+      reaction.debugger(operation)
+    } finally {
+      isDebugging = false
+    }
   }
 }
 
