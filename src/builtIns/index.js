@@ -1,7 +1,6 @@
 import collectionHandlers from './collections'
 
-// simple objects are not wrapped by Proxies, neither instrumented
-const dontInstrument = new Set([Date, RegExp])
+const globalObj = Function('return this')()
 
 // built-in object can not be wrapped by Proxies
 // their methods expect the object instance as the 'this' instead of the Proxy wrapper
@@ -11,14 +10,17 @@ const handlers = new Map([
   [Map, collectionHandlers],
   [Set, collectionHandlers],
   [WeakMap, collectionHandlers],
-  [WeakSet, collectionHandlers]
+  [WeakSet, collectionHandlers],
+  [Object, false],
+  [Array, false]
 ])
 
-export function shouldInstrument (obj) {
-  if (typeof Node === 'function' && obj instanceof Node) {
-    return false
-  }
-  return !dontInstrument.has(obj.constructor)
+export function shouldInstrument ({ constructor }) {
+  const isBuiltIn =
+    typeof constructor === 'function' &&
+    constructor.name in globalObj &&
+    globalObj[constructor.name] === constructor
+  return !isBuiltIn || handlers.has(constructor)
 }
 
 export function getHandlers (obj) {

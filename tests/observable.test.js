@@ -2,13 +2,6 @@ import { expect } from 'chai'
 import { observable, isObservable, raw } from '@nx-js/observer-util'
 
 describe('observable', () => {
-  it('should throw TypeError on invalid arguments', () => {
-    expect(() => observable(12)).to.throw(TypeError)
-    expect(() => observable('string')).to.throw(TypeError)
-    expect(() => observable({})).to.not.throw(TypeError)
-    expect(() => observable()).to.not.throw(TypeError)
-  })
-
   it('should return a new observable when no argument is provided', () => {
     const obs = observable()
     expect(isObservable(obs)).to.equal(true)
