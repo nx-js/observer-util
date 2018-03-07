@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, isObservable, raw } from '@nx-js/observer-util'
+import { observable, observe, isObservable, raw } from '@nx-js/observer-util'
 
 describe('observable', () => {
   it('should return a new observable when no argument is provided', () => {
@@ -25,6 +25,21 @@ describe('observable', () => {
     const obs1 = observable(obj)
     const obs2 = observable(obj)
     expect(obs1).to.equal(obs2)
+  })
+
+  it('should not throw on none writable nested objects, should simply not observe them instead', () => {
+    let dummy
+    const obj = {}
+    Object.defineProperty(obj, 'prop', {
+      value: { num: 12 },
+      writable: false,
+      configurable: false
+    })
+    const obs = observable(obj)
+    expect(() => observe(() => (dummy = obs.prop.num))).to.not.throw()
+    expect(dummy).to.eql(12)
+    obj.prop.num = 13
+    expect(dummy).to.eql(12)
   })
 
   it('should never let observables leak into the underlying raw object', () => {

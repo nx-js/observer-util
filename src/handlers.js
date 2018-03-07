@@ -19,11 +19,20 @@ function get (target, key, receiver) {
   registerRunningReactionForOperation({ target, key, receiver, type: 'get' })
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
   // this is needed to intercept property access on that object too (dynamic observable tree)
+  const observableResult = rawToProxy.get(result)
   if (hasRunningReaction() && typeof result === 'object' && result !== null) {
-    return observable(result)
+    if (observableResult) {
+      return observableResult
+    }
+    // do not violate the none-configurable none-writable prop get handler invariant
+    // fall back to none reactive mode in this case, instead of letting the Proxy throw a TypeError
+    const descriptor = Reflect.getOwnPropertyDescriptor(target, key)
+    if (!descriptor || !(descriptor.writable === false && descriptor.configurable === false)) {
+      return observable(result)
+    }
   }
   // otherwise return the observable wrapper if it is already created and cached or the raw object
-  return rawToProxy.get(result) || result
+  return observableResult || result
 }
 
 function has (target, key) {
