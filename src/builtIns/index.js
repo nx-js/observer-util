@@ -1,7 +1,7 @@
 import collectionHandlers from './collections'
 
 // eslint-disable-next-line
-const globalObj = Function('return this')()
+const globalObj = Function("return this")();
 
 // built-in object can not be wrapped by Proxies
 // their methods expect the object instance as the 'this' instead of the Proxy wrapper
@@ -13,7 +13,16 @@ const handlers = new Map([
   [WeakMap, collectionHandlers],
   [WeakSet, collectionHandlers],
   [Object, false],
-  [Array, false]
+  [Array, false],
+  [Int8Array, false],
+  [Uint8Array, false],
+  [Uint8ClampedArray, false],
+  [Int16Array, false],
+  [Uint16Array, false],
+  [Int32Array, false],
+  [Uint32Array, false],
+  [Float32Array, false],
+  [Float64Array, false]
 ])
 
 export function shouldInstrument ({ constructor }) {
