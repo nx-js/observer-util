@@ -1,5 +1,6 @@
 import collectionHandlers from './collections'
 
+// eslint-disable-next-line
 const globalObj = Function('return this')()
 
 // built-in object can not be wrapped by Proxies

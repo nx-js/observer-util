@@ -27,7 +27,10 @@ function get (target, key, receiver) {
     // do not violate the none-configurable none-writable prop get handler invariant
     // fall back to none reactive mode in this case, instead of letting the Proxy throw a TypeError
     const descriptor = Reflect.getOwnPropertyDescriptor(target, key)
-    if (!descriptor || !(descriptor.writable === false && descriptor.configurable === false)) {
+    if (
+      !descriptor ||
+      !(descriptor.writable === false && descriptor.configurable === false)
+    ) {
       return observable(result)
     }
   }
