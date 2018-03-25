@@ -155,7 +155,7 @@ const person = observable({
 observe(() => console.log(person.name))
 
 // logs 'Ann Smith'
-observable.firstName = 'Ann'
+person.firstName = 'Ann'
 ```
 
 </details>
