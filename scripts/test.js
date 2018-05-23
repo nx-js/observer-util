@@ -18,6 +18,9 @@ const config = {
   },
   rollupPreprocessor: {
     plugins: [
+      alias({
+        '@nx-js/observer-util': path.resolve(bundlePath)
+      }),
       babel({
         exclude: 'node_modules/**'
       }),
@@ -26,9 +29,6 @@ const config = {
         namedExports: {
           'node_modules/chai/index.js': ['expect']
         }
-      }),
-      alias({
-        '@nx-js/observer-util': path.resolve(bundlePath)
       }),
       coverage({
         include: ['src/**/*.js']
