@@ -256,4 +256,23 @@ describe('Set', () => {
     raw(set).add('value')
     expect(dummy).to.equal(0)
   })
+
+  it('should support objects as key', () => {
+    let dummy
+    const key = {}
+    const set = observable(new Set())
+    const setSpy = spy(() => (dummy = set.has(key)))
+    observe(setSpy)
+
+    expect(dummy).to.equal(false)
+    expect(setSpy.callCount).to.equal(1)
+
+    set.add({})
+    expect(dummy).to.equal(false)
+    expect(setSpy.callCount).to.equal(1)
+
+    set.add(key)
+    expect(dummy).to.equal(true)
+    expect(setSpy.callCount).to.equal(2)
+  })
 })
