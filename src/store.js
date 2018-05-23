@@ -3,7 +3,7 @@ const ITERATION_KEY = Symbol('iteration key')
 
 export function storeObservable (obj) {
   // this will be used to save (obj.key -> reaction) connections later
-  connectionStore.set(obj, Object.create(null))
+  connectionStore.set(obj, new Map())
 }
 
 export function registerReactionForOperation (reaction, { target, key, type }) {
@@ -12,9 +12,10 @@ export function registerReactionForOperation (reaction, { target, key, type }) {
   }
 
   const reactionsForObj = connectionStore.get(target)
-  let reactionsForKey = reactionsForObj[key]
+  let reactionsForKey = reactionsForObj.get(key)
   if (!reactionsForKey) {
-    reactionsForObj[key] = reactionsForKey = new Set()
+    reactionsForKey = new Set()
+    reactionsForObj.set(key, reactionsForKey)
   }
   // save the fact that the key is used by the reaction during its current run
   if (!reactionsForKey.has(reaction)) {
@@ -28,9 +29,9 @@ export function getReactionsForOperation ({ target, key, type }) {
   const reactionsForKey = new Set()
 
   if (type === 'clear') {
-    for (let key in reactionsForTarget) {
+    reactionsForTarget.forEach((_, key) => {
       addReactionsForKey(reactionsForKey, reactionsForTarget, key)
-    }
+    })
   } else {
     addReactionsForKey(reactionsForKey, reactionsForTarget, key)
   }
@@ -44,7 +45,7 @@ export function getReactionsForOperation ({ target, key, type }) {
 }
 
 function addReactionsForKey (reactionsForKey, reactionsForTarget, key) {
-  const reactions = reactionsForTarget[key]
+  const reactions = reactionsForTarget.get(key)
   reactions && reactions.forEach(reactionsForKey.add, reactionsForKey)
 }
 

@@ -268,4 +268,23 @@ describe('Map', () => {
     raw(map).set('key', 'value')
     expect(dummy).to.equal(0)
   })
+
+  it('should support objects as key', () => {
+    let dummy
+    const key = {}
+    const map = observable(new Map())
+    const mapSpy = spy(() => (dummy = map.get(key)))
+    observe(mapSpy)
+
+    expect(dummy).to.equal(undefined)
+    expect(mapSpy.callCount).to.equal(1)
+
+    map.set(key, 1)
+    expect(dummy).to.equal(1)
+    expect(mapSpy.callCount).to.equal(2)
+
+    map.set({}, 2)
+    expect(dummy).to.equal(1)
+    expect(mapSpy.callCount).to.equal(2)
+  })
 })
