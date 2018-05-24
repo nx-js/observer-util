@@ -2,7 +2,7 @@
 
 Transparent reactivity with 100% language coverage. Made with :heart: and ES6 Proxies.
 
-[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](http://img.badgesize.io/https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js?compression=gzip&label=minzip_size)](https://unpkg.com/@nx-js/observer-util/dist/umd.es6.min.js)  [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
+[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](https://img.shields.io/bundlephobia/minzip/@nx-js/observer-util.svg)](https://bundlephobia.com/result?p=@nx-js/observer-util) [![Version](https://img.shields.io/npm/v/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@nx-js/observer-util.svg)](https://www.npmjs.com/package/@nx-js/observer-util)
 
 <details>
 <summary><strong>Table of Contents</strong></summary>
@@ -14,15 +14,15 @@ Transparent reactivity with 100% language coverage. Made with :heart: and ES6 Pr
 * [Bindings](#bindings)
 * [Installation](#installation)
 * [Usage](#usage)
-  + [Observables](#observables)
-  + [Reactions](#reactions)
-  + [Reaction scheduling](#reaction-scheduling)
+  * [Observables](#observables)
+  * [Reactions](#reactions)
+  * [Reaction scheduling](#reaction-scheduling)
 * [API](#api)
-  + [Proxy = observable(object)](#proxy--observableobject)
-  + [boolean = isObservable(object)](#boolean--isobservableobject)
-  + [reaction = observe(function, config)](#reaction--observefunction-config)
-  + [unobserve(reaction)](#unobservereaction)
-  + [obj = raw(observable)](#obj--rawobservable)
+  * [Proxy = observable(object)](#proxy--observableobject)
+  * [boolean = isObservable(object)](#boolean--isobservableobject)
+  * [reaction = observe(function, config)](#reaction--observefunction-config)
+  * [unobserve(reaction)](#unobservereaction)
+  * [obj = raw(observable)](#obj--rawobservable)
 * [Platform support](#platform-support)
 * [Alternative builds](#alternative-builds)
 * [Contributing](#contributing)
@@ -43,7 +43,7 @@ The Observer Utility aims to eradicate these edge cases. It comes with a tiny le
 
 This is a framework independent library, which powers the reactivity system behind other state management solutions. These are the currently available bindings.
 
-- [React Easy State](https://github.com/solkimicreb/react-easy-state) is a state management solution for React with a minimal learning curve.
+* [React Easy State](https://github.com/solkimicreb/react-easy-state) is a state management solution for React with a minimal learning curve.
 
 ## Installation
 
@@ -60,12 +60,12 @@ The two building blocks of reactivity are **observables** and **reactions**. Obs
 Observables are transparent Proxies, which can be created with the `observable` function. From the outside they behave exactly like plain JS objects.
 
 ```js
-import { observable } from '@nx-js/observer-util'
+import { observable } from '@nx-js/observer-util';
 
-const counter = observable({ num: 0 })
+const counter = observable({ num: 0 });
 
 // observables behave like plain JS objects
-counter.num = 12
+counter.num = 12;
 ```
 
 ### Reactions
@@ -75,30 +75,30 @@ Reactions are functions, which use observables. They can be created with the `ob
 #### Vanilla JavaScript
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
-const counter = observable({ num: 0 })
-const countLogger = observe(() => console.log(counter.num))
+const counter = observable({ num: 0 });
+const countLogger = observe(() => console.log(counter.num));
 
 // this calls countLogger and logs 1
-counter.num++
+counter.num++;
 ```
 
 #### React Component
 
 ```js
-import { store, view } from 'react-easy-state'
+import { store, view } from 'react-easy-state';
 
 // this is an observable store
 const counter = store({
   num: 0,
-  up () {
-    this.num++
+  up() {
+    this.num++;
   }
-})
+});
 
 // this is a reactive component, which re-renders whenever counter.num changes
-const UserComp = view(() => <div onClick={counter.up}>{counter.num}</div>)
+const UserComp = view(() => <div onClick={counter.up}>{counter.num}</div>);
 ```
 
 #### More examples
@@ -107,13 +107,13 @@ const UserComp = view(() => <div onClick={counter.up}>{counter.num}</div>)
 <summary>Dynamic properties</summary>
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
-const profile = observable()
-observe(() => console.log(profile.name))
+const profile = observable();
+observe(() => console.log(profile.name));
 
 // logs 'Bob'
-profile.name = 'Bob'
+profile.name = 'Bob';
 ```
 
 </details>
@@ -121,7 +121,7 @@ profile.name = 'Bob'
 <summary>Nested properties</summary>
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
 const person = observable({
   name: {
@@ -129,12 +129,12 @@ const person = observable({
     last: 'Smith'
   },
   age: 22
-})
+});
 
-observe(() => console.log(`${person.name.first} ${person.name.last}`))
+observe(() => console.log(`${person.name.first} ${person.name.last}`));
 
 // logs 'Bob Smith'
-person.name.first = 'Bob'
+person.name.first = 'Bob';
 ```
 
 </details>
@@ -142,20 +142,20 @@ person.name.first = 'Bob'
 <summary>Computed properties</summary>
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
 const person = observable({
   firstName: 'Bob',
   lastName: 'Smith',
-  get name () {
-    return `${firstName} ${lastName}`
+  get name() {
+    return `${firstName} ${lastName}`;
   }
-})
+});
 
-observe(() => console.log(person.name))
+observe(() => console.log(person.name));
 
 // logs 'Ann Smith'
-person.firstName = 'Ann'
+person.firstName = 'Ann';
 ```
 
 </details>
@@ -163,23 +163,23 @@ person.firstName = 'Ann'
 <summary>Conditionals</summary>
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
 const person = observable({
   gender: 'male',
   name: 'Potato'
-})
+});
 
 observe(() => {
   if (person.gender === 'male') {
-    console.log(`Mr. ${person.name}`)
+    console.log(`Mr. ${person.name}`);
   } else {
-    console.log(`Ms. ${person.name}`)
+    console.log(`Ms. ${person.name}`);
   }
-})
+});
 
 // logs 'Ms. Potato'
-person.gender = 'female'
+person.gender = 'female';
 ```
 
 </details>
@@ -187,20 +187,20 @@ person.gender = 'female'
 <summary>Arrays</summary>
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
-const users = observable([])
+const users = observable([]);
 
-observe(() => console.log(users.join(', ')))
+observe(() => console.log(users.join(', ')));
 
 // logs 'Bob'
-users.push('Bob')
+users.push('Bob');
 
 // logs 'Bob, John'
-users.push('John')
+users.push('John');
 
 // logs 'Bob'
-users.pop()
+users.pop();
 ```
 
 </details>
@@ -208,21 +208,21 @@ users.pop()
 <summary>ES6 collections</summary>
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
-const people = observable(new Map())
+const people = observable(new Map());
 
 observe(() => {
   for (let [name, age] of people) {
-    console.log(`${name}, ${age}`)
+    console.log(`${name}, ${age}`);
   }
-})
+});
 
 // logs 'Bob, 22'
-people.set('Bob', 22)
+people.set('Bob', 22);
 
 // logs 'Bob, 22' and 'John, 35'
-people.set('John', 35)
+people.set('John', 35);
 ```
 
 </details>
@@ -230,25 +230,25 @@ people.set('John', 35)
 <summary>Inherited properties</summary>
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
 const defaultUser = observable({
   name: 'Unknown',
   job: 'developer'
-})
-const user = observable(Object.create(defaultUser))
+});
+const user = observable(Object.create(defaultUser));
 
 // logs 'Unknown is a developer'
-observe(() => console.log(`${user.name} is a ${user.job}`))
+observe(() => console.log(`${user.name} is a ${user.job}`));
 
 // logs 'Bob is a developer'
-user.name = 'Bob'
+user.name = 'Bob';
 
 // logs 'Bob is a stylist'
-user.job = 'stylist'
+user.job = 'stylist';
 
 // logs 'Unknown is a stylist'
-delete user.name
+delete user.name;
 ```
 
 </details>
@@ -258,16 +258,16 @@ delete user.name
 Reactions are scheduled to run whenever the relevant observable state changes. The default scheduler runs the reactions synchronously, but custom schedulers can be passed to change this behavior. Schedulers are usually functions which receive the scheduled reaction as argument.
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
 // this scheduler delays reactions by 1 second
-const scheduler = reaction => setTimeout(reaction, 1000)
+const scheduler = reaction => setTimeout(reaction, 1000);
 
-const person = observable({ name: 'Josh' })
-observe(() => console.log(person.name), { scheduler })
+const person = observable({ name: 'Josh' });
+observe(() => console.log(person.name), { scheduler });
 
 // this logs 'Barbie' after a one second delay
-person.name = 'Barbie'
+person.name = 'Barbie';
 ```
 
 Alternatively schedulers can be objects with an `add` and `delete` method. Check out the below examples for more.
@@ -280,14 +280,14 @@ Alternatively schedulers can be objects with an `add` and `delete` method. Check
 The React scheduler simply calls `setState` on relevant observable changes. This delegates the render scheduling to React Fiber. It works roughly like this.
 
 ```js
-import { observe } from '@nx-js/observer-util'
+import { observe } from '@nx-js/observer-util';
 
 class ReactiveComp extends BaseComp {
-  constructor () {
+  constructor() {
     // ...
     this.render = observe(this.render, {
       scheduler: () => this.setState()
-    })
+    });
   }
 }
 ```
@@ -299,20 +299,20 @@ class ReactiveComp extends BaseComp {
 Schedulers can be objects with an `add` and `delete` method, which schedule and unschedule reactions. ES6 Sets can be used as a scheduler, that automatically removes duplicate reactions.
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
+import { observable, observe } from '@nx-js/observer-util';
 
-const reactions = new Set()
-const person = observable({ name: 'Josh' })
-observe(() => console.log(person), { scheduler: reactions })
+const reactions = new Set();
+const person = observable({ name: 'Josh' });
+observe(() => console.log(person), { scheduler: reactions });
 
 // this throttles reactions to run with a minimal 1 second interval
 setInterval(() => {
-  reactions.forEach(reaction => reaction())
-}, 1000)
+  reactions.forEach(reaction => reaction());
+}, 1000);
 
 // these will cause { name: 'Barbie', age: 30 } to be logged once
-person.name = 'Barbie'
-person.age = 87
+person.name = 'Barbie';
+person.age = 87;
 ```
 
 </details>
@@ -322,20 +322,21 @@ person.age = 87
 Queues from the [Queue Util](https://github.com/nx-js/queue-util) can be used to implement complex scheduling patterns by combining automatic priority based and manual execution.
 
 ```js
-import { observable, observe } from '@nx-js/observer-util'
-import { Queue, priorities } from '@nx-js/queue-util'
+import { observable, observe } from '@nx-js/observer-util';
+import { Queue, priorities } from '@nx-js/queue-util';
 
-const scheduler = new Queue(priorities.LOW)
-const person = observable({ name: 'Josh' })
-observe(() => console.log(person), { scheduler })
+const scheduler = new Queue(priorities.LOW);
+const person = observable({ name: 'Josh' });
+observe(() => console.log(person), { scheduler });
 
 // these will cause { name: 'Barbie', age: 30 } to be logged once
 // when everything is idle and there is free time to do it
-person.name = 'Barbie'
-person.age = 87
+person.name = 'Barbie';
+person.age = 87;
 ```
 
 Queues are automatically scheduling reactions - based on their priority - but they can also be stopped, started and cleared manually at any time. Learn more about them [here]().
+
 </details>
 
 ## API
@@ -344,9 +345,9 @@ Queues are automatically scheduling reactions - based on their priority - but th
 
 Creates and returns a proxied observable object, which behaves just like the originally passed object. The original object is **not modified**.
 
-- If no argument is provided, it returns an empty observable object.
-- If an object is passed as argument, it wraps the passed object in an observable.
-- If an observable object is passed, it returns the passed observable object.
+* If no argument is provided, it returns an empty observable object.
+* If an object is passed as argument, it wraps the passed object in an observable.
+* If an observable object is passed, it returns the passed observable object.
 
 ### boolean = isObservable(object)
 
@@ -358,24 +359,24 @@ Wraps the passed function with a reaction, which behaves just like the original 
 
 `observe` also accepts an optional config object with the following options.
 
-- `lazy`: A boolean, which controls if the reaction is executed when it is created or not. If it is true, the reaction has to be called once manually to trigger the reactivity process. Defaults to false.
+* `lazy`: A boolean, which controls if the reaction is executed when it is created or not. If it is true, the reaction has to be called once manually to trigger the reactivity process. Defaults to false.
 
-- `scheduler`: A function, which is called with the reaction when it is scheduled to run. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions. The default scheduler runs the reaction synchronously on observable mutations. You can learn more about reaction scheduling in the [related docs section](#reaction-scheduling).
+* `scheduler`: A function, which is called with the reaction when it is scheduled to run. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions. The default scheduler runs the reaction synchronously on observable mutations. You can learn more about reaction scheduling in the [related docs section](#reaction-scheduling).
 
-- `debugger`: An optional function. It is called with contextual metadata object on basic operations - like set, get, delete, etc. The metadata object can be used to determine why the operation wired or scheduled the reaction and it always has enough data to reverse the operation. The debugger is always called before the scheduler.
+* `debugger`: An optional function. It is called with contextual metadata object on basic operations - like set, get, delete, etc. The metadata object can be used to determine why the operation wired or scheduled the reaction and it always has enough data to reverse the operation. The debugger is always called before the scheduler.
 
 ### unobserve(reaction)
 
 Unobserves the passed reaction. Unobserved reactions won't be automatically run anymore.
 
 ```js
-import { observable, observe, unobserve } from '@nx-js/observer-util'
+import { observable, observe, unobserve } from '@nx-js/observer-util';
 
-const counter = observable({ num: 0 })
-const logger = observe(() => console.log(counter.num))
+const counter = observable({ num: 0 });
+const logger = observe(() => console.log(counter.num));
 
 // after this the logger won't be automatically called on counter.num changes
-unobserve(logger)
+unobserve(logger);
 ```
 
 ### obj = raw(observable)
@@ -385,51 +386,51 @@ Original objects are never modified, but transparently wrapped by observable pro
 #### Using `raw` at property access
 
 ```js
-import { observable, observe, raw } from '@nx-js/observer-util'
+import { observable, observe, raw } from '@nx-js/observer-util';
 
-const person = observable()
-const logger = observe(() => console.log(person.name))
+const person = observable();
+const logger = observe(() => console.log(person.name));
 
 // this logs 'Bob'
-person.name = 'Bob'
+person.name = 'Bob';
 
 // `name` is used from the raw non-reactive object, this won't log anything
-raw(person).name = 'John'
+raw(person).name = 'John';
 ```
 
 #### Using `raw` at property mutation
 
 ```js
-import { observable, observe, raw } from '@nx-js/observer-util'
+import { observable, observe, raw } from '@nx-js/observer-util';
 
-const person = observable({ age: 20 })
-observe(() => console.log(`${person.name}: ${raw(person).age}`))
+const person = observable({ age: 20 });
+observe(() => console.log(`${person.name}: ${raw(person).age}`));
 
 // this logs 'Bob: 20'
-person.name = 'Bob'
+person.name = 'Bob';
 
 // `age` is used from the raw non-reactive object, this won't log anything
-person.age = 33
+person.age = 33;
 ```
 
 ## Platform support
 
-- Node: 6.5 and above
-- Chrome: 49 and above
-- Firefox: 38 and above
-- Safari: 10 and above
-- Edge: 12 and above
-- Opera: 36 and above
-- IE is not supported
+* Node: 6.5 and above
+* Chrome: 49 and above
+* Firefox: 38 and above
+* Safari: 10 and above
+* Edge: 12 and above
+* Opera: 36 and above
+* IE is not supported
 
 ## Alternative builds
 
 This library detects if you use ES6 or commonJS modules and serve the right format to you. The exposed bundles are transpiled to ES5 to support common tools - like UglifyJS minifying. If you would like a finer control over the provided build, you can specify them in your imports.
 
-- `@nx-js/observer-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
-- `@nx-js/observer-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
-- `@nx-js/observer-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
-- `@nx-js/observer-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
+* `@nx-js/observer-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
+* `@nx-js/observer-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
+* `@nx-js/observer-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
+* `@nx-js/observer-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
 
 If you use a bundler, set up an alias for `@nx-js/observer-util` to point to your desired build. You can learn how to do it with webpack [here](https://webpack.js.org/configuration/resolve/#resolve-alias) and with rollup [here](https://github.com/rollup/rollup-plugin-alias#usage).
 

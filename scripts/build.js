@@ -38,22 +38,6 @@ const bundles = [
     output: {
       format: 'cjs'
     }
-  },
-  {
-    input: {
-      input: path.resolve('src/index.js'),
-      plugins: [
-        babelPlugin({
-          exclude: 'node_modules/**'
-        }),
-        resolvePlugin(),
-        externalsPlugin({ dependencies: false, peerDependecies: true })
-      ]
-    },
-    output: {
-      format: 'umd',
-      name: 'observer'
-    }
   }
 ]
 
