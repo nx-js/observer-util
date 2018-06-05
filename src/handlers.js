@@ -66,14 +66,6 @@ function set (target, key, value, receiver) {
   const oldValue = target[key]
   // execute the set operation before running any reaction
   const result = Reflect.set(target, key, value, receiver)
-  // emit a warning and do not queue anything when another reaction is queued
-  // from an already running reaction
-  if (hasRunningReaction()) {
-    console.error(
-      `Mutating observables in reactions is forbidden. You set ${key} to ${value}.`
-    )
-    return result
-  }
   // do not queue reactions if it is a symbol keyed property
   // or the target of the operation is not the raw receiver
   // (possible because of prototypal inheritance)
