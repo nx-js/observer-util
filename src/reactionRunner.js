@@ -2,16 +2,16 @@ import {
   registerReactionForOperation,
   getReactionsForOperation,
   releaseReaction
-} from './store';
+} from './store'
 
 // reactions can call each other and form a call stack
-const reactionStack = [];
-let isDebugging = false;
+const reactionStack = []
+let isDebugging = false
 
-export function runAsReaction(reaction, fn, context, args) {
+export function runAsReaction (reaction, fn, context, args) {
   // do not build reactive relations, if the reaction is unobserved
   if (reaction.unobserved) {
-    return Reflect.apply(fn, context, args);
+    return Reflect.apply(fn, context, args)
   }
 
   // only run the reaction if it is not already in the reaction stack
@@ -19,58 +19,58 @@ export function runAsReaction(reaction, fn, context, args) {
   if (reactionStack.indexOf(reaction) === -1) {
     // release the (obj -> key -> reactions) connections
     // and reset the cleaner connections
-    releaseReaction(reaction);
+    releaseReaction(reaction)
 
     try {
       // set the reaction as the currently running one
       // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
-      reactionStack.push(reaction);
-      return Reflect.apply(fn, context, args);
+      reactionStack.push(reaction)
+      return Reflect.apply(fn, context, args)
     } finally {
       // always remove the currently running flag from the reaction when it stops execution
-      reactionStack.pop();
+      reactionStack.pop()
     }
   }
 }
 
 // register the currently running reaction to be queued again on obj.key mutations
-export function registerRunningReactionForOperation(operation) {
+export function registerRunningReactionForOperation (operation) {
   // get the current reaction from the top of the stack
-  const runningReaction = reactionStack[reactionStack.length - 1];
+  const runningReaction = reactionStack[reactionStack.length - 1]
   if (runningReaction) {
-    debugOperation(runningReaction, operation);
-    registerReactionForOperation(runningReaction, operation);
+    debugOperation(runningReaction, operation)
+    registerReactionForOperation(runningReaction, operation)
   }
 }
 
-export function queueReactionsForOperation(operation) {
+export function queueReactionsForOperation (operation) {
   // iterate and queue every reaction, which is triggered by obj.key mutation
-  getReactionsForOperation(operation).forEach(queueReaction, operation);
+  getReactionsForOperation(operation).forEach(queueReaction, operation)
 }
 
-function queueReaction(reaction) {
-  debugOperation(reaction, this);
+function queueReaction (reaction) {
+  debugOperation(reaction, this)
   // queue the reaction for later execution or run it immediately
   if (typeof reaction.scheduler === 'function') {
-    reaction.scheduler(reaction);
+    reaction.scheduler(reaction)
   } else if (typeof reaction.scheduler === 'object') {
-    reaction.scheduler.add(reaction);
+    reaction.scheduler.add(reaction)
   } else {
-    reaction();
+    reaction()
   }
 }
 
-function debugOperation(reaction, operation) {
+function debugOperation (reaction, operation) {
   if (reaction.debugger && !isDebugging) {
     try {
-      isDebugging = true;
-      reaction.debugger(operation);
+      isDebugging = true
+      reaction.debugger(operation)
     } finally {
-      isDebugging = false;
+      isDebugging = false
     }
   }
 }
 
-export function hasRunningReaction() {
-  return reactionStack.length > 0;
+export function hasRunningReaction () {
+  return reactionStack.length > 0
 }

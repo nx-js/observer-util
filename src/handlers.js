@@ -7,12 +7,18 @@ import {
 } from './reactionRunner'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
+const wellKnownSymbols = new Set(
+  Object.getOwnPropertyNames(Symbol)
+    .map(key => Symbol[key])
+    .filter(value => typeof value === 'symbol')
+)
 
 // intercept get operations on observables to know which reaction uses their properties
 function get (target, key, receiver) {
   const result = Reflect.get(target, key, receiver)
-  // do not register (observable.prop -> reaction) pairs for these cases
-  if (typeof key === 'symbol' || typeof result === 'function') {
+  // do not register (observable.prop -> reaction) pairs for well known symbols
+  // these symbols are frequently retrieved in low level JavaScript under the hood
+  if (typeof key === 'symbol' && wellKnownSymbols.has(key)) {
     return result
   }
   // register and save (observable.prop -> runningReaction)
@@ -40,10 +46,6 @@ function get (target, key, receiver) {
 
 function has (target, key) {
   const result = Reflect.has(target, key)
-  // do not register (observable.prop -> reaction) pairs for these cases
-  if (typeof key === 'symbol') {
-    return result
-  }
   // register and save (observable.prop -> runningReaction)
   registerRunningReactionForOperation({ target, key, type: 'has' })
   return result
@@ -66,13 +68,11 @@ function set (target, key, value, receiver) {
   const oldValue = target[key]
   // execute the set operation before running any reaction
   const result = Reflect.set(target, key, value, receiver)
-  // do not queue reactions if it is a symbol keyed property
-  // or the target of the operation is not the raw receiver
+  // do not queue reactions if the target of the operation is not the raw receiver
   // (possible because of prototypal inheritance)
-  if (typeof key === 'symbol' || target !== proxyToRaw.get(receiver)) {
+  if (target !== proxyToRaw.get(receiver)) {
     return result
   }
-
   // queue a reaction if it's a new property or its value changed
   if (!hadKey) {
     queueReactionsForOperation({ target, key, value, receiver, type: 'add' })
@@ -95,8 +95,8 @@ function deleteProperty (target, key) {
   const oldValue = target[key]
   // execute the delete operation before running any reaction
   const result = Reflect.deleteProperty(target, key)
-  // only queue reactions for non symbol keyed property delete which resulted in an actual change
-  if (typeof key !== 'symbol' && hadKey) {
+  // only queue reactions for delete operations which resulted in an actual change
+  if (hadKey) {
     queueReactionsForOperation({ target, key, oldValue, type: 'delete' })
   }
   return result
