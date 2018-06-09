@@ -34,9 +34,11 @@ const config = {
         include: ['src/**/*.js']
       })
     ],
-    format: 'iife',
-    name: 'observer',
-    sourcemap: 'inline'
+    output: {
+      format: 'iife',
+      name: 'observer',
+      sourcemap: 'inline'
+    }
   },
   coverageReporter: {
     dir: 'coverage',
