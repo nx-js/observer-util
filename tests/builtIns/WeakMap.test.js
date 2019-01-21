@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, raw } from '@nx-js/observer-util'
+import { observable, isObservable, observe, raw } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('WeakMap', () => {
@@ -81,5 +81,19 @@ describe('WeakMap', () => {
     expect(dummy).to.equal(undefined)
     raw(map).delete(key)
     expect(dummy).to.equal(undefined)
+  })
+
+  it('should wrap object values with observables when requested from a reaction', () => {
+    const key = {}
+    const key2 = {}
+    const map = observable(new Map())
+    map.set(key, {})
+    map.set(key2, {})
+
+    expect(isObservable(map.get(key))).to.be.false
+    expect(isObservable(map.get(key2))).to.be.false
+    observe(() => expect(isObservable(map.get(key))).to.be.true)
+    expect(isObservable(map.get(key))).to.be.true
+    expect(isObservable(map.get(key2))).to.be.false
   })
 })

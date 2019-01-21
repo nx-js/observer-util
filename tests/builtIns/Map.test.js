@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, raw } from '@nx-js/observer-util'
+import { observable, isObservable, observe, raw } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('Map', () => {
@@ -286,5 +286,57 @@ describe('Map', () => {
     map.set({}, 2)
     expect(dummy).to.equal(1)
     expect(mapSpy.callCount).to.equal(2)
+  })
+
+  it('should wrap object values with observables when requested from a reaction', () => {
+    const map = observable(new Map())
+    map.set('key', {})
+    map.set('key2', {})
+
+    expect(isObservable(map.get('key'))).to.be.false
+    expect(isObservable(map.get('key2'))).to.be.false
+    observe(() => expect(isObservable(map.get('key'))).to.be.true)
+    expect(isObservable(map.get('key'))).to.be.true
+    expect(isObservable(map.get('key2'))).to.be.false
+  })
+
+  it('should wrap object values with observables when iterated from a reaction', () => {
+    const map = observable(new Map())
+    map.set('key', {})
+
+    map.forEach(value => expect(isObservable(value)).to.be.false)
+    for (let [key, value] of map) {
+      expect(isObservable(value)).to.be.false
+    }
+    for (let [key, value] of map.entries()) {
+      expect(isObservable(value)).to.be.false
+    }
+    for (let value of map.values()) {
+      expect(isObservable(value)).to.be.false
+    }
+
+    observe(() => {
+      map.forEach(value => expect(isObservable(value)).to.be.true)
+      for (let [key, value] of map) {
+        expect(isObservable(value)).to.be.true
+      }
+      for (let [key, value] of map.entries()) {
+        expect(isObservable(value)).to.be.true
+      }
+      for (let value of map.values()) {
+        expect(isObservable(value)).to.be.true
+      }
+    })
+
+    map.forEach(value => expect(isObservable(value)).to.be.true)
+    for (let [key, value] of map) {
+      expect(isObservable(value)).to.be.true
+    }
+    for (let [key, value] of map.entries()) {
+      expect(isObservable(value)).to.be.true
+    }
+    for (let value of map.values()) {
+      expect(isObservable(value)).to.be.true
+    }
   })
 })

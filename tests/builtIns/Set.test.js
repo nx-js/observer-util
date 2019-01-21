@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, raw } from '@nx-js/observer-util'
+import { observable, isObservable, observe, raw } from '@nx-js/observer-util'
 import { spy } from '../utils'
 
 describe('Set', () => {
@@ -274,5 +274,45 @@ describe('Set', () => {
     set.add(key)
     expect(dummy).to.equal(true)
     expect(setSpy.callCount).to.equal(2)
+  })
+
+  it('should wrap object values with observables when iterated from a reaction', () => {
+    const set = observable(new Set())
+    set.add({})
+
+    set.forEach(value => expect(isObservable(value)).to.be.false)
+    for (let value of set) {
+      expect(isObservable(value)).to.be.false
+    }
+    for (let [_, value] of set.entries()) {
+      expect(isObservable(value)).to.be.false
+    }
+    for (let value of set.values()) {
+      expect(isObservable(value)).to.be.false
+    }
+
+    observe(() => {
+      set.forEach(value => expect(isObservable(value)).to.be.true)
+      for (let value of set) {
+        expect(isObservable(value)).to.be.true
+      }
+      for (let [_, value] of set.entries()) {
+        expect(isObservable(value)).to.be.true
+      }
+      for (let value of set.values()) {
+        expect(isObservable(value)).to.be.true
+      }
+    })
+
+    set.forEach(value => expect(isObservable(value)).to.be.true)
+    for (let value of set) {
+      expect(isObservable(value)).to.be.true
+    }
+    for (let [_, value] of set.entries()) {
+      expect(isObservable(value)).to.be.true
+    }
+    for (let value of set.values()) {
+      expect(isObservable(value)).to.be.true
+    }
   })
 })
