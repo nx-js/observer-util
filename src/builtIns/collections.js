@@ -8,7 +8,7 @@ import { proxyToRaw, rawToProxy } from '../internals'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
-function findObservable(obj) {
+function findObservable (obj) {
   const observableObj = rawToProxy.get(obj)
   if (hasRunningReaction() && typeof obj === 'object' && obj !== null) {
     if (observableObj) {
@@ -19,7 +19,7 @@ function findObservable(obj) {
   return observableObj || obj
 }
 
-function patchIterator(iterator, isEntries) {
+function patchIterator (iterator, isEntries) {
   const originalNext = iterator.next
   iterator.next = () => {
     let { done, value } = originalNext.call(iterator)
@@ -36,19 +36,19 @@ function patchIterator(iterator, isEntries) {
 }
 
 const instrumentations = {
-  has(key) {
+  has (key) {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, key, type: 'has' })
     return proto.has.apply(target, arguments)
   },
-  get(key) {
+  get (key) {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, key, type: 'get' })
     return findObservable(proto.get.apply(target, arguments))
   },
-  add(key) {
+  add (key) {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
@@ -59,7 +59,7 @@ const instrumentations = {
     }
     return result
   },
-  set(key, value) {
+  set (key, value) {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
@@ -73,7 +73,7 @@ const instrumentations = {
     }
     return result
   },
-  delete(key) {
+  delete (key) {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
@@ -85,7 +85,7 @@ const instrumentations = {
     }
     return result
   },
-  clear() {
+  clear () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadItems = target.size !== 0
@@ -97,7 +97,7 @@ const instrumentations = {
     }
     return result
   },
-  forEach(cb, ...args) {
+  forEach (cb, ...args) {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
@@ -106,34 +106,34 @@ const instrumentations = {
     const wrappedCb = (value, ...rest) => cb(findObservable(value), ...rest)
     return proto.forEach.call(target, wrappedCb, ...args)
   },
-  keys() {
+  keys () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
     return proto.keys.apply(target, arguments)
   },
-  values() {
+  values () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
     const iterator = proto.values.apply(target, arguments)
     return patchIterator(iterator, false)
   },
-  entries() {
+  entries () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
     const iterator = proto.entries.apply(target, arguments)
     return patchIterator(iterator, true)
   },
-  [Symbol.iterator]() {
+  [Symbol.iterator] () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
     const iterator = proto[Symbol.iterator].apply(target, arguments)
     return patchIterator(iterator, target instanceof Map)
   },
-  get size() {
+  get size () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
@@ -142,7 +142,7 @@ const instrumentations = {
 }
 
 export default {
-  get(target, key, receiver) {
+  get (target, key, receiver) {
     // instrument methods and property accessors to be reactive
     target = hasOwnProperty.call(instrumentations, key)
       ? instrumentations
