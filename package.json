@@ -1,6 +1,6 @@
 {
   "name": "@nx-js/observer-util",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "Simple transparent reactivity with 100% language coverage. Made with ES6 Proxies.",
   "main": "dist/cjs.es5.js",
   "module": "dist/es.es5.js",
