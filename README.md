@@ -44,6 +44,7 @@ The Observer Utility aims to eradicate these edge cases. It comes with a tiny le
 This is a framework independent library, which powers the reactivity system behind other state management solutions. These are the currently available bindings.
 
 * [React Easy State](https://github.com/solkimicreb/react-easy-state) is a state management solution for React with a minimal learning curve.
+* [preact-ns-observer](https://github.com/mseddon/preact-nx-observer) provides a simple `@observable` decorator that makes Preact components reactive.
 
 ## Installation
 
@@ -101,6 +102,19 @@ const counter = store({
 const UserComp = view(() => <div onClick={counter.up}>{counter.num}</div>);
 ```
 
+#### Preact Component
+```js
+import { observer } from "preact-nx-observer";
+
+let store = observable({ title: "This is foo's data"});
+
+@observer // Component will now re-render whenever store.title changes.
+class Foo extends Component {
+  render() {
+    return <h1>{store.title}</h1>
+  }
+}
+```
 #### More examples
 
 <details>
