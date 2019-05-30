@@ -9,7 +9,13 @@ import {
 const hasOwnProperty = Object.prototype.hasOwnProperty
 const wellKnownSymbols = new Set(
   Object.getOwnPropertyNames(Symbol)
-    .map(key => Symbol[key])
+    .map(key => {
+      try {
+        return Symbol[key]
+      } catch (e) {
+        return null;
+      }
+    })
     .filter(value => typeof value === 'symbol')
 )
 
