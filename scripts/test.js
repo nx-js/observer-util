@@ -27,7 +27,7 @@ const config = {
       resolve(),
       commonjs({
         namedExports: {
-          'node_modules/chair/lib/chai.js': ['expect']
+          'node_modules/chai/lib/chai.js': ['expect']
         }
       }),
       coverage({

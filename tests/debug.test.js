@@ -1,4 +1,5 @@
-import { expect } from 'chai'
+import chai from 'chai';
+const { expect }  =  chai;
 import { spy } from './utils'
 import { observe, observable } from '@yunfengdie/observer-util'
 

@@ -1,6 +1,7 @@
 /* eslint no-unused-expressions: 0, no-unused-vars: 0 */
 
-import { expect } from 'chai'
+import chai from 'chai';
+const { expect }  =  chai;
 import { observable, isObservable, observe, raw } from '@yunfengdie/observer-util'
 import { spy } from '../utils'
 

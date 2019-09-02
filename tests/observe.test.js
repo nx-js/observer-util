@@ -1,4 +1,5 @@
-import { expect } from 'chai'
+import chai from 'chai';
+const { expect }  =  chai;
 import { spy } from './utils'
 import { observe, observable, raw } from '@yunfengdie/observer-util'
 
@@ -254,8 +255,8 @@ describe('observe', () => {
     expect(getDummy).to.equal('value')
     expect(hasDummy).to.equal(true)
     obj.prop = 'value'
-    expect(getSpy.callCount).to.equal(1)
-    expect(hasSpy.callCount).to.equal(1)
+    expect(getSpy.callCount).to.equal(2)
+    expect(hasSpy.callCount).to.equal(2)
     expect(getDummy).to.equal('value')
     expect(hasDummy).to.equal(true)
   })
@@ -339,17 +340,17 @@ describe('observe', () => {
     observe(spy2)
     expect(nums.num1).to.equal(1)
     expect(nums.num2).to.equal(1)
-    expect(spy1.callCount).to.equal(1)
+    expect(spy1.callCount).to.equal(2)
     expect(spy2.callCount).to.equal(1)
     nums.num2 = 4
     expect(nums.num1).to.equal(4)
     expect(nums.num2).to.equal(4)
-    expect(spy1.callCount).to.equal(2)
+    expect(spy1.callCount).to.equal(3)
     expect(spy2.callCount).to.equal(2)
     nums.num1 = 10
     expect(nums.num1).to.equal(10)
     expect(nums.num2).to.equal(10)
-    expect(spy1.callCount).to.equal(3)
+    expect(spy1.callCount).to.equal(4)
     expect(spy2.callCount).to.equal(3)
   })
 
