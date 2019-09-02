@@ -1,6 +1,6 @@
 {
   "name": "nemo-observer-util",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "description": "Simple transparent reactivity with 100% language coverage. Made with ES6 Proxies.",
   "main": "dist/cjs.es5.js",
   "module": "dist/es.es5.js",
@@ -51,6 +51,7 @@
     "buble": "^0.15.2",
     "chai": "^4.1.2",
     "coveralls": "^3.0.1",
+    "del": "^5.1.0",
     "karma": "^2.0.2",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
