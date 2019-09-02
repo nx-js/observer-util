@@ -19,7 +19,7 @@ const config = {
   rollupPreprocessor: {
     plugins: [
       alias({
-        '@yunfengdie/observer-util': path.resolve(bundlePath)
+        'nemo-observer-util': path.resolve(bundlePath)
       }),
       babel({
         exclude: 'node_modules/**'

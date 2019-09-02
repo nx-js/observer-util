@@ -1,4 +1,4 @@
-declare module '@yunfengdie/observer-util' {
+declare module 'nemo-observer-util' {
   function observable<Observable extends object>(obj?: Observable): Observable
   function isObservable(obj: object): boolean
   function raw<Observable extends object>(obj: Observable): Observable

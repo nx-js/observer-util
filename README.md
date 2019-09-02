@@ -9,7 +9,7 @@ with below change:
 
 Transparent reactivity with 100% language coverage. Made with :heart: and ES6 Proxies.
 
-[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](https://img.shields.io/bundlephobia/minzip/@yunfengdie/observer-util.svg)](https://bundlephobia.com/result?p=@yunfengdie/observer-util) [![Version](https://img.shields.io/npm/v/@yunfengdie/observer-util.svg)](https://www.npmjs.com/package/@yunfengdie/observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/@yunfengdie/observer-util.svg)](https://www.npmjs.com/package/@yunfengdie/observer-util)
+[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](https://img.shields.io/bundlephobia/minzip/nemo-observer-util.svg)](https://bundlephobia.com/result?p=nemo-observer-util) [![Version](https://img.shields.io/npm/v/nemo-observer-util.svg)](https://www.npmjs.com/package/nemo-observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/nemo-observer-util.svg)](https://www.npmjs.com/package/nemo-observer-util)
 
 <details>
 <summary><strong>Table of Contents</strong></summary>
@@ -56,7 +56,7 @@ This is a framework independent library, which powers the reactivity system behi
 ## Installation
 
 ```
-$ npm install @yunfengdie/observer-util
+$ npm install nemo-observer-util
 ```
 
 ## Usage
@@ -68,7 +68,7 @@ The two building blocks of reactivity are **observables** and **reactions**. Obs
 Observables are transparent Proxies, which can be created with the `observable` function. From the outside they behave exactly like plain JS objects.
 
 ```js
-import { observable } from '@yunfengdie/observer-util';
+import { observable } from 'nemo-observer-util';
 
 const counter = observable({ num: 0 });
 
@@ -83,7 +83,7 @@ Reactions are functions, which use observables. They can be created with the `ob
 #### Vanilla JavaScript
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const counter = observable({ num: 0 });
 const countLogger = observe(() => console.log(counter.num));
@@ -128,7 +128,7 @@ class Foo extends Component {
 <summary>Dynamic properties</summary>
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const profile = observable();
 observe(() => console.log(profile.name));
@@ -142,7 +142,7 @@ profile.name = 'Bob';
 <summary>Nested properties</summary>
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const person = observable({
   name: {
@@ -163,7 +163,7 @@ person.name.first = 'Bob';
 <summary>Computed properties</summary>
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const person = observable({
   firstName: 'Bob',
@@ -184,7 +184,7 @@ person.firstName = 'Ann';
 <summary>Conditionals</summary>
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const person = observable({
   gender: 'male',
@@ -208,7 +208,7 @@ person.gender = 'female';
 <summary>Arrays</summary>
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const users = observable([]);
 
@@ -229,7 +229,7 @@ users.pop();
 <summary>ES6 collections</summary>
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const people = observable(new Map());
 
@@ -251,7 +251,7 @@ people.set('John', 35);
 <summary>Inherited properties</summary>
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const defaultUser = observable({
   name: 'Unknown',
@@ -279,7 +279,7 @@ delete user.name;
 Reactions are scheduled to run whenever the relevant observable state changes. The default scheduler runs the reactions synchronously, but custom schedulers can be passed to change this behavior. Schedulers are usually functions which receive the scheduled reaction as argument.
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 // this scheduler delays reactions by 1 second
 const scheduler = reaction => setTimeout(reaction, 1000);
@@ -301,7 +301,7 @@ Alternatively schedulers can be objects with an `add` and `delete` method. Check
 The React scheduler simply calls `setState` on relevant observable changes. This delegates the render scheduling to React Fiber. It works roughly like this.
 
 ```js
-import { observe } from '@yunfengdie/observer-util';
+import { observe } from 'nemo-observer-util';
 
 class ReactiveComp extends BaseComp {
   constructor() {
@@ -320,7 +320,7 @@ class ReactiveComp extends BaseComp {
 Schedulers can be objects with an `add` and `delete` method, which schedule and unschedule reactions. ES6 Sets can be used as a scheduler, that automatically removes duplicate reactions.
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 
 const reactions = new Set();
 const person = observable({ name: 'Josh' });
@@ -343,7 +343,7 @@ person.age = 87;
 Queues from the [Queue Util](https://github.com/nx-js/queue-util) can be used to implement complex scheduling patterns by combining automatic priority based and manual execution.
 
 ```js
-import { observable, observe } from '@yunfengdie/observer-util';
+import { observable, observe } from 'nemo-observer-util';
 import { Queue, priorities } from '@nx-js/queue-util';
 
 const scheduler = new Queue(priorities.LOW);
@@ -391,7 +391,7 @@ Wraps the passed function with a reaction, which behaves just like the original 
 Unobserves the passed reaction. Unobserved reactions won't be automatically run anymore.
 
 ```js
-import { observable, observe, unobserve } from '@yunfengdie/observer-util';
+import { observable, observe, unobserve } from 'nemo-observer-util';
 
 const counter = observable({ num: 0 });
 const logger = observe(() => console.log(counter.num));
@@ -407,7 +407,7 @@ Original objects are never modified, but transparently wrapped by observable pro
 #### Using `raw` at property access
 
 ```js
-import { observable, observe, raw } from '@yunfengdie/observer-util';
+import { observable, observe, raw } from 'nemo-observer-util';
 
 const person = observable();
 const logger = observe(() => console.log(person.name));
@@ -422,7 +422,7 @@ raw(person).name = 'John';
 #### Using `raw` at property mutation
 
 ```js
-import { observable, observe, raw } from '@yunfengdie/observer-util';
+import { observable, observe, raw } from 'nemo-observer-util';
 
 const person = observable({ age: 20 });
 observe(() => console.log(`${person.name}: ${raw(person).age}`));
@@ -448,12 +448,12 @@ person.age = 33;
 
 This library detects if you use ES6 or commonJS modules and serve the right format to you. The exposed bundles are transpiled to ES5 to support common tools - like UglifyJS minifying. If you would like a finer control over the provided build, you can specify them in your imports.
 
-* `@yunfengdie/observer-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
-* `@yunfengdie/observer-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
-* `@yunfengdie/observer-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
-* `@yunfengdie/observer-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
+* `nemo-observer-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
+* `nemo-observer-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
+* `nemo-observer-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
+* `nemo-observer-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
 
-If you use a bundler, set up an alias for `@yunfengdie/observer-util` to point to your desired build. You can learn how to do it with webpack [here](https://webpack.js.org/configuration/resolve/#resolve-alias) and with rollup [here](https://github.com/rollup/rollup-plugin-alias#usage).
+If you use a bundler, set up an alias for `nemo-observer-util` to point to your desired build. You can learn how to do it with webpack [here](https://webpack.js.org/configuration/resolve/#resolve-alias) and with rollup [here](https://github.com/rollup/rollup-plugin-alias#usage).
 
 ## Contributing
 

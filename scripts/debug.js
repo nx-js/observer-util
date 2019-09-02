@@ -17,7 +17,7 @@ const config = {
       }),
       resolvePlugin(),
       alias({
-        '@yunfengdie/observer-util': path.resolve(bundlePath)
+        'nemo-observer-util': path.resolve(bundlePath)
       })
     ]
   },

@@ -1,7 +1,7 @@
 import chai from 'chai'
 const { expect } = chai
 import { spy } from './utils'
-import { observable, observe, unobserve } from '@yunfengdie/observer-util'
+import { observable, observe, unobserve } from 'nemo-observer-util'
 
 describe('unobserve', () => {
   it('should unobserve the observed function', () => {

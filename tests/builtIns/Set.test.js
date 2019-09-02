@@ -7,7 +7,7 @@ import {
   isObservable,
   observe,
   raw
-} from '@yunfengdie/observer-util'
+} from 'nemo-observer-util'
 import { spy } from '../utils'
 
 describe('Set', () => {

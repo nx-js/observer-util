@@ -5,7 +5,7 @@ import {
   observe,
   isObservable,
   raw
-} from '@yunfengdie/observer-util'
+} from 'nemo-observer-util'
 
 describe('observable', () => {
   it('should return a new observable when no argument is provided', () => {
