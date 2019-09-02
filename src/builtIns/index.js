@@ -1,7 +1,8 @@
 import collectionHandlers from './collections'
 
 // eslint-disable-next-line
-const globalObj = typeof window === 'object' ? window : Function('return this')();
+const globalObj =
+  typeof window === 'object' ? window : Function('return this')()
 
 // built-in object can not be wrapped by Proxies
 // their methods expect the object instance as the 'this' instead of the Proxy wrapper

@@ -1,5 +1,5 @@
-import chai from 'chai';
-const { expect }  =  chai;
+import chai from 'chai'
+const { expect } = chai
 import { observable, isObservable, observe } from '@yunfengdie/observer-util'
 
 const TypedArrays = [

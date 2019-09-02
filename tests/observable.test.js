@@ -1,6 +1,11 @@
-import chai from 'chai';
-const { expect }  =  chai;
-import { observable, observe, isObservable, raw } from '@yunfengdie/observer-util'
+import chai from 'chai'
+const { expect } = chai
+import {
+  observable,
+  observe,
+  isObservable,
+  raw
+} from '@yunfengdie/observer-util'
 
 describe('observable', () => {
   it('should return a new observable when no argument is provided', () => {

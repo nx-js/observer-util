@@ -1,5 +1,5 @@
-import chai from 'chai';
-const { expect }  =  chai;
+import chai from 'chai'
+const { expect } = chai
 import { observable, isObservable } from '@yunfengdie/observer-util'
 
 describe('none observable built-ins', () => {
