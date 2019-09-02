@@ -76,7 +76,7 @@ function set (target, key, value, receiver) {
   // queue a reaction if it's a new property or its value changed
   if (!hadKey) {
     queueReactionsForOperation({ target, key, value, receiver, type: 'add' })
-  } else if (value !== oldValue) {
+  } else {
     queueReactionsForOperation({
       target,
       key,
