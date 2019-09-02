@@ -1,8 +1,7 @@
 import chai from 'chai'
-const { expect } = chai
 import { spy } from './utils'
 import { observe, observable, raw } from 'nemo-observer-util'
-
+const { expect } = chai
 describe('observe', () => {
   it('should run the passed function once (wrapped by a reaction)', () => {
     const fnSpy = spy(() => {})

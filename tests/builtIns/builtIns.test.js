@@ -1,6 +1,6 @@
 import chai from 'chai'
-const { expect } = chai
 import { observable, isObservable } from 'nemo-observer-util'
+const { expect } = chai
 
 describe('none observable built-ins', () => {
   it('objects with global constructors should not be converted to observables', () => {

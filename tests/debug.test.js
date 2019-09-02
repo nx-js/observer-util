@@ -1,8 +1,7 @@
 import chai from 'chai'
-const { expect } = chai
 import { spy } from './utils'
 import { observe, observable } from 'nemo-observer-util'
-
+const { expect } = chai
 describe('debugger', () => {
   it('should debug get operations', () => {
     let dummy

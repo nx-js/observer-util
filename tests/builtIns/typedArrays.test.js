@@ -1,6 +1,6 @@
 import chai from 'chai'
-const { expect } = chai
 import { observable, isObservable, observe } from 'nemo-observer-util'
+const { expect } = chai
 
 const TypedArrays = [
   Int8Array,

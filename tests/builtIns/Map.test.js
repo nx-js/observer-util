@@ -1,7 +1,5 @@
 /* eslint no-unused-expressions: 0, no-unused-vars: 0 */
-
 import chai from 'chai'
-const { expect } = chai
 import {
   observable,
   isObservable,
@@ -9,7 +7,7 @@ import {
   raw
 } from 'nemo-observer-util'
 import { spy } from '../utils'
-
+const { expect } = chai
 describe('Map', () => {
   it('should be a proper JS Map', () => {
     const map = observable(new Map())

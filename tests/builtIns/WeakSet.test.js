@@ -1,8 +1,7 @@
 import chai from 'chai'
-const { expect } = chai
 import { observable, observe, raw } from 'nemo-observer-util'
 import { spy } from '../utils'
-
+const { expect } = chai
 describe('WeakSet', () => {
   it('should be a proper JS WeakSet', () => {
     const set = observable(new WeakSet())

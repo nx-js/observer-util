@@ -1,12 +1,11 @@
 import chai from 'chai'
-const { expect } = chai
 import {
   observable,
   observe,
   isObservable,
   raw
 } from 'nemo-observer-util'
-
+const { expect } = chai
 describe('observable', () => {
   it('should return a new observable when no argument is provided', () => {
     const obs = observable()
