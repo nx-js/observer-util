@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { spy } from './utils'
-import { observe, observable, raw } from '@nx-js/observer-util'
+import { observe, observable, raw } from '@yunfengdie/observer-util'
 
 describe('observe', () => {
   it('should run the passed function once (wrapped by a reaction)', () => {

@@ -1,7 +1,7 @@
 /* eslint no-unused-expressions: 0, no-unused-vars: 0 */
 
 import { expect } from 'chai'
-import { observable, isObservable, observe, raw } from '@nx-js/observer-util'
+import { observable, isObservable, observe, raw } from '@yunfengdie/observer-util'
 import { spy } from '../utils'
 
 describe('Set', () => {

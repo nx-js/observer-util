@@ -1,4 +1,4 @@
-declare module '@nx-js/observer-util' {
+declare module '@yunfengdie/observer-util' {
   function observable<Observable extends object>(obj?: Observable): Observable
   function isObservable(obj: object): boolean
   function raw<Observable extends object>(obj: Observable): Observable

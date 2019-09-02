@@ -1,4 +1,4 @@
-import { observable, observe, unobserve } from '@nx-js/observer-util'
+import { observable, observe, unobserve } from '@yunfengdie/observer-util'
 
 const data = observable({ array: [1, 2, 3, 4], num: 12 })
 let reactions = []

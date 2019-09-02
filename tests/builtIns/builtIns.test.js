@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, isObservable } from '@nx-js/observer-util'
+import { observable, isObservable } from '@yunfengdie/observer-util'
 
 describe('none observable built-ins', () => {
   it('objects with global constructors should not be converted to observables', () => {

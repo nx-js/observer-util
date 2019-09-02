@@ -17,7 +17,7 @@ const config = {
       }),
       resolvePlugin(),
       alias({
-        '@nx-js/observer-util': path.resolve(bundlePath)
+        '@yunfengdie/observer-util': path.resolve(bundlePath)
       })
     ]
   },

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, observe, raw } from '@nx-js/observer-util'
+import { observable, observe, raw } from '@yunfengdie/observer-util'
 import { spy } from '../utils'
 
 describe('WeakSet', () => {

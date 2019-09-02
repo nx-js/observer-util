@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { observable, isObservable, observe } from '@nx-js/observer-util'
+import { observable, isObservable, observe } from '@yunfengdie/observer-util'
 
 const TypedArrays = [
   Int8Array,
