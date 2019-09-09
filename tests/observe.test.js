@@ -333,7 +333,7 @@ describe('observe', () => {
 
   it('should avoid infinite loops with other reactions', () => {
     config({
-      skipSameValueChange: true,
+      skipSameValueChange: true
     })
     const nums = observable({ num1: 0, num2: 1 })
 
@@ -356,7 +356,7 @@ describe('observe', () => {
     expect(spy1.callCount).to.equal(3)
     expect(spy2.callCount).to.equal(3)
     config({
-      skipSameValueChange: false,
+      skipSameValueChange: false
     })
   })
 
@@ -557,27 +557,27 @@ describe('options', () => {
 describe('config', () => {
   beforeEach(() => {
     config({
-      skipSameValueChange: true,
+      skipSameValueChange: true
     })
   })
   afterEach(() => {
     config({
-      skipSameValueChange: false,
+      skipSameValueChange: false
     })
   })
   it('get', () => {
-    const c = config();
+    const c = config()
     expect(c).to.eql({
-      skipSameValueChange: true,
+      skipSameValueChange: true
     })
   })
 
   it('set', () => {
     const c = config({
-      skipSameValueChange: false,
-    });
+      skipSameValueChange: false
+    })
     expect(c).to.eql({
-      skipSameValueChange: false,
+      skipSameValueChange: false
     })
   })
 
