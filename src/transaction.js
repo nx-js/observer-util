@@ -1,8 +1,8 @@
 import { queueReaction } from './reactionRunner'
 
-let uuid = 0;
-function getUUID() {
-  return uuid++;
+let uuid = 0
+function getUUID () {
+  return uuid++
 }
 class TransactionManager {
   constructor () {
@@ -52,25 +52,25 @@ export function endTransaction (target) {
 }
 
 // wrapper sync function to support transaction
-export function withTransaction(target, propertyKey, descriptor) {
-  const identity = getUUID();
+export function withTransaction (target, propertyKey, descriptor) {
+  const identity = getUUID()
   if (descriptor) {
     // use as class method decorator
-    const originalFunc = descriptor.value;
-    descriptor.value = function(...args) {
-      transaction.start(identity);
-      const res = originalFunc.apply(this, args);
-      transaction.end(identity);
-      return res;
+    const originalFunc = descriptor.value
+    descriptor.value = function (...args) {
+      transaction.start(identity)
+      const res = originalFunc.apply(this, args)
+      transaction.end(identity)
+      return res
     }
   } else {
     // use as function wrapper
-    const originalFunc = target;
-    return function(...args) {
-      transaction.start(identity);
-      const res = originalFunc.apply(this, args);
-      transaction.end(identity);
-      return res;
+    const originalFunc = target
+    return function (...args) {
+      transaction.start(identity)
+      const res = originalFunc.apply(this, args)
+      transaction.end(identity)
+      return res
     }
   }
 }
