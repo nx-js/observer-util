@@ -1,7 +1,7 @@
 
 This repo is just a fork of https://github.com/nx-js/observer-util
 with below change:
-- remove `this.a = this.a` diff
+- add config.skipSameValueChange, which default is true, so that we can skip `this.a = this.a` diff
 
 - - -
 

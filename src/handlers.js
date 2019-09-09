@@ -5,6 +5,7 @@ import {
   queueReactionsForOperation,
   hasRunningReaction
 } from './reactionRunner'
+import { InternalConfig } from './config'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 const wellKnownSymbols = new Set(
@@ -76,7 +77,7 @@ function set (target, key, value, receiver) {
   // queue a reaction if it's a new property or its value changed
   if (!hadKey) {
     queueReactionsForOperation({ target, key, value, receiver, type: 'add' })
-  } else {
+  } else if (!InternalConfig.skipSameValueChange || value !== oldValue) {
     queueReactionsForOperation({
       target,
       key,

@@ -1,7 +1,8 @@
 import chai from 'chai'
 import { spy } from './utils'
-import { observe, observable, raw } from 'nemo-observer-util'
+import { observe, observable, raw, config } from 'nemo-observer-util'
 const { expect } = chai
+
 describe('observe', () => {
   it('should run the passed function once (wrapped by a reaction)', () => {
     const fnSpy = spy(() => {})
@@ -331,6 +332,9 @@ describe('observe', () => {
   })
 
   it('should avoid infinite loops with other reactions', () => {
+    config({
+      skipSameValueChange: true,
+    })
     const nums = observable({ num1: 0, num2: 1 })
 
     const spy1 = spy(() => (nums.num1 = nums.num2))
@@ -339,18 +343,21 @@ describe('observe', () => {
     observe(spy2)
     expect(nums.num1).to.equal(1)
     expect(nums.num2).to.equal(1)
-    expect(spy1.callCount).to.equal(2)
+    expect(spy1.callCount).to.equal(1)
     expect(spy2.callCount).to.equal(1)
     nums.num2 = 4
     expect(nums.num1).to.equal(4)
     expect(nums.num2).to.equal(4)
-    expect(spy1.callCount).to.equal(3)
+    expect(spy1.callCount).to.equal(2)
     expect(spy2.callCount).to.equal(2)
     nums.num1 = 10
     expect(nums.num1).to.equal(10)
     expect(nums.num2).to.equal(10)
-    expect(spy1.callCount).to.equal(4)
+    expect(spy1.callCount).to.equal(3)
     expect(spy2.callCount).to.equal(3)
+    config({
+      skipSameValueChange: false,
+    })
   })
 
   it('should return a new reactive version of the function', () => {
@@ -544,5 +551,51 @@ describe('options', () => {
     expect(dummy).to.equal(null)
     observed.obj = document
     expect(dummy).to.equal(9)
+  })
+})
+
+describe('config', () => {
+  beforeEach(() => {
+    config({
+      skipSameValueChange: true,
+    })
+  })
+  afterEach(() => {
+    config({
+      skipSameValueChange: false,
+    })
+  })
+  it('get', () => {
+    const c = config();
+    expect(c).to.eql({
+      skipSameValueChange: true,
+    })
+  })
+
+  it('set', () => {
+    const c = config({
+      skipSameValueChange: false,
+    });
+    expect(c).to.eql({
+      skipSameValueChange: false,
+    })
+  })
+
+  it('should observe set operations without a value change when skipSameValueChange', () => {
+    let hasDummy, getDummy
+    const obj = observable({ prop: 'value' })
+
+    const getSpy = spy(() => (getDummy = obj.prop))
+    const hasSpy = spy(() => (hasDummy = 'prop' in obj))
+    observe(getSpy)
+    observe(hasSpy)
+
+    expect(getDummy).to.equal('value')
+    expect(hasDummy).to.equal(true)
+    obj.prop = 'value'
+    expect(getSpy.callCount).to.equal(1)
+    expect(hasSpy.callCount).to.equal(1)
+    expect(getDummy).to.equal('value')
+    expect(hasDummy).to.equal(true)
   })
 })

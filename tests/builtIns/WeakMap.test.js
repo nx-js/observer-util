@@ -1,11 +1,6 @@
 /* eslint no-unused-expressions: 0, no-unused-vars: 0 */
 import chai from 'chai'
-import {
-  observable,
-  isObservable,
-  observe,
-  raw
-} from 'nemo-observer-util'
+import { observable, isObservable, observe, raw } from 'nemo-observer-util'
 import { spy } from '../utils'
 const { expect } = chai
 describe('WeakMap', () => {
