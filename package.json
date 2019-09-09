@@ -25,12 +25,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:nx-js/observer-util.git"
+    "url": "git@github.com:yunfengdie/observer-util.git"
   },
   "bugs": {
-    "url": "https://github.com/nx-js/observer-util/issues"
+    "url": "https://github.com/yunfengdie/observer-util/issues"
   },
-  "homepage": "https://github.com/nx-js/observer-util#readme",
+  "homepage": "https://github.com/yunfengdie/observer-util#readme",
   "license": "MIT",
   "keywords": [
     "nx",
