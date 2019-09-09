@@ -243,7 +243,7 @@ describe('observe', () => {
     expect(dummy).to.equal(newFunc)
   })
 
-  it('should not observe set operations without a value change', () => {
+  it('should observe set operations without a value change when skipSameValueChange is false', () => {
     let hasDummy, getDummy
     const obj = observable({ prop: 'value' })
 
