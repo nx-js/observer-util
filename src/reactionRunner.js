@@ -3,6 +3,7 @@ import {
   getReactionsForOperation,
   releaseReaction
 } from './store'
+import { transaction } from './transaction'
 
 // reactions can call each other and form a call stack
 const reactionStack = []
@@ -45,11 +46,17 @@ export function registerRunningReactionForOperation (operation) {
 
 export function queueReactionsForOperation (operation) {
   // iterate and queue every reaction, which is triggered by obj.key mutation
-  getReactionsForOperation(operation).forEach(queueReaction, operation)
+  getReactionsForOperation(operation).forEach(reaction => {
+    if (transaction.duringTransaction) {
+      transaction.add(reaction, operation)
+    } else {
+      queueReaction(reaction, operation)
+    }
+  })
 }
 
-function queueReaction (reaction) {
-  debugOperation(reaction, this)
+export function queueReaction (reaction, operation) {
+  debugOperation(reaction, operation)
   // queue the reaction for later execution or run it immediately
   if (typeof reaction.scheduler === 'function') {
     reaction.scheduler(reaction)
