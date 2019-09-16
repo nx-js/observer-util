@@ -1,6 +1,6 @@
 {
   "name": "nemo-observer-util",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "Simple transparent reactivity with 100% language coverage. Made with ES6 Proxies.",
   "main": "dist/cjs.es5.js",
   "module": "dist/es.es5.js",
@@ -17,7 +17,9 @@
     "lint-fix": "prettier --ignore-path '.gitignore' --write '**/!(bundle).js' && standard --fix",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "build": "node ./scripts/build.js",
-    "build-toc": "node ./scripts/buildToc.js"
+    "build-toc": "node ./scripts/buildToc.js",
+    "prepublishOnly": "rm -rf node_modules/ && npm i && npm run test && npm run build",
+    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push origin --all && git push origin --tags"
   },
   "author": {
     "name": "Miklos Bertalan",
