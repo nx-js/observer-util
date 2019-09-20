@@ -44,7 +44,7 @@ async function build () {
     const es5Path = path.resolve('dist', `${config.output.format}.es5.js`)
     const { code: es5Code } = buble.transform(es6Code, {
       transforms: {
-        dangerousForOf: true,
+        forOf: false,
         modules: false
       }
     })

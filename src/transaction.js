@@ -33,9 +33,8 @@ class TransactionManager {
     const todoCopy = this.runners
     this.runners = new Map()
     this.duringTransaction = false
-    const iterator = todoCopy[Symbol.iterator]()
-    for (let item of iterator) {
-      const [reaction, operation] = item
+
+    for (const [reaction, operation] of todoCopy.entries()) {
       queueReaction(reaction, operation)
     }
   }
