@@ -2,10 +2,12 @@ const fs = require('fs')
 const path = require('path')
 const { exec } = require('child_process')
 
-const distPath = path.resolve('dist')
-const files = fs.readdirSync(distPath)
-
 async function testBuilds () {
+  await execPromise(`npm run build`)
+
+  const distPath = path.resolve('dist')
+  const files = fs.readdirSync(distPath)
+
   for (let file of files) {
     const err = await execPromise(`BUNDLE=${file} npm run test`)
     if (err) {

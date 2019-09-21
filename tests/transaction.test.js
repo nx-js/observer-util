@@ -4,9 +4,9 @@ import {
   observe,
   observable,
   startTransaction,
-  endTransaction
+  endTransaction,
+  withTransaction
 } from 'nemo-observer-util'
-import { withTransaction } from '../src'
 const { expect } = chai
 
 describe('transaction', () => {
