@@ -2,7 +2,7 @@
 This repo is just a fork of https://github.com/nx-js/observer-util
 with below change:
 - add `config({ skipSameValueChange: true })` to enable same value setter check
-- add `startTransaction(identity) endTransaction('identity')` to support transaction
+- add `startTransaction(identity) endTransaction('identity') withTransaction` to support batch
 
 - - -
 
