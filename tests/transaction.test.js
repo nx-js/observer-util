@@ -97,10 +97,10 @@ describe('transaction', () => {
     observe(fn3)
     expect(fn3.callCount).to.equal(1)
     expect(dummy).to.equal('jk')
-    expect(fn1).to.throw('transaction end not match with start');
+    expect(fn1).to.throw('transaction end not match with start')
 
     // restore, so that below test case can run normally
-    transaction.stacks = [];
+    transaction.stacks = []
   })
 
   it('should support function wrapper', () => {
@@ -143,13 +143,13 @@ describe('transaction', () => {
       }
     })
     class Foo {
-      bar() {
+      bar () {
         model.user.lastName = 'k1'
         model.user.lastName = 'k2'
       }
     }
     __decorate([withTransaction], Foo.prototype, 'bar', null)
-    const foo = new Foo();
+    const foo = new Foo()
     const fn1 = spy(
       withTransaction(() => {
         model.user.firstName = 'j1'
@@ -181,10 +181,10 @@ describe('transaction', () => {
       bar = () => {
         model.user.lastName = 'k1'
         model.user.lastName = 'k2'
-      }
+      };
     }
-    __decorate([withTransaction], Foo.prototype, 'bar', void 0)
-    const foo = new Foo();
+    __decorate([withTransaction], Foo.prototype, 'bar', undefined)
+    const foo = new Foo()
     const fn1 = spy(
       withTransaction(() => {
         model.user.firstName = 'j1'
@@ -206,6 +206,8 @@ describe('transaction', () => {
   })
 
   it('must wrap to funciton', () => {
-    expect(() => withTransaction('xx')).to.throw('transaction should must wrap on Function: ');
+    expect(() => withTransaction('xx')).to.throw(
+      'transaction should must wrap on Function: '
+    )
   })
 })

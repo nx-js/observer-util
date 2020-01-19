@@ -189,7 +189,7 @@ describe('observe', () => {
     const numbers = observable({ num1: 3 })
     observe(() => {
       dummy = 0
-      for (let key in numbers) {
+      for (const key in numbers) {
         dummy += numbers[key]
       }
     })

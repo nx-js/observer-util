@@ -74,7 +74,7 @@ describe('action', () => {
         return this.data
       };
     }
-    __decorate([action], Foo.prototype, 'bar', void 0)
+    __decorate([action], Foo.prototype, 'bar', undefined)
     const foo = new Foo()
     expect(() => foo.bar()).to.not.throw()
     expect(foo.bar()).to.equal(123)

@@ -10,14 +10,17 @@ class TransactionManager {
     this.duringTransaction = false
     this.stacks = []
   }
+
   add (reaction, operation) {
     // use last operation as source
     this.runners.set(reaction, operation)
   }
+
   start (target) {
     this.duringTransaction = true
     this.stacks.push(target)
   }
+
   end (target) {
     const lastStack = this.stacks[this.stacks.length - 1]
     if (lastStack !== target) {
@@ -28,6 +31,7 @@ class TransactionManager {
       this.flush()
     }
   }
+
   flush () {
     // copy incase being modified during exec reaction
     const todoCopy = this.runners
@@ -97,8 +101,6 @@ export function createTransaction (originalFunc) {
     transaction.start(identity)
     try {
       return originalFunc.apply(this, args)
-    } catch (err) {
-      throw err
     } finally {
       transaction.end(identity)
     }

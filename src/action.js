@@ -67,8 +67,6 @@ function createAction (fn) {
     startAction()
     try {
       return transactionFn.apply(this, args)
-    } catch (err) {
-      throw err
     } finally {
       endAction()
     }

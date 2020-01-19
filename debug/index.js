@@ -17,7 +17,7 @@ function observeMany () {
 }
 
 function unobserveMany () {
-  for (let reaction of reactions) {
+  for (const reaction of reactions) {
     unobserve(reaction)
   }
   reactions = []

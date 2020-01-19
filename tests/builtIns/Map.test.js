@@ -51,7 +51,7 @@ describe('Map', () => {
     observe(() => {
       dummy = 0
       // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of map) {
+      for (const [key, num] of map) {
         dummy += num
       }
     })
@@ -91,7 +91,7 @@ describe('Map', () => {
     const map = observable(new Map())
     observe(() => {
       dummy = 0
-      for (let key of map.keys()) {
+      for (const key of map.keys()) {
         dummy += key
       }
     })
@@ -112,7 +112,7 @@ describe('Map', () => {
     const map = observable(new Map())
     observe(() => {
       dummy = 0
-      for (let num of map.values()) {
+      for (const num of map.values()) {
         dummy += num
       }
     })
@@ -134,7 +134,7 @@ describe('Map', () => {
     observe(() => {
       dummy = 0
       // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of map.entries()) {
+      for (const [key, num] of map.entries()) {
         dummy += num
       }
     })
@@ -221,20 +221,20 @@ describe('Map', () => {
     observe(() => {
       dummy = 0
       // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of raw(map).entries()) {
+      for (const [key, num] of raw(map).entries()) {
         dummy += num
       }
-      for (let key of raw(map).keys()) {
+      for (const key of raw(map).keys()) {
         dummy += raw(map).get(key)
       }
-      for (let num of raw(map).values()) {
+      for (const num of raw(map).values()) {
         dummy += num
       }
       raw(map).forEach((num, key) => {
         dummy += num
       })
       // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of raw(map)) {
+      for (const [key, num] of raw(map)) {
         dummy += num
       }
     })
@@ -318,37 +318,37 @@ describe('Map', () => {
     map.set('key', {})
 
     map.forEach(value => expect(isObservable(value)).to.be.false)
-    for (let [key, value] of map) {
+    for (const [key, value] of map) {
       expect(isObservable(value)).to.be.false
     }
-    for (let [key, value] of map.entries()) {
+    for (const [key, value] of map.entries()) {
       expect(isObservable(value)).to.be.false
     }
-    for (let value of map.values()) {
+    for (const value of map.values()) {
       expect(isObservable(value)).to.be.false
     }
 
     observe(() => {
       map.forEach(value => expect(isObservable(value)).to.be.true)
-      for (let [key, value] of map) {
+      for (const [key, value] of map) {
         expect(isObservable(value)).to.be.true
       }
-      for (let [key, value] of map.entries()) {
+      for (const [key, value] of map.entries()) {
         expect(isObservable(value)).to.be.true
       }
-      for (let value of map.values()) {
+      for (const value of map.values()) {
         expect(isObservable(value)).to.be.true
       }
     })
 
     map.forEach(value => expect(isObservable(value)).to.be.true)
-    for (let [key, value] of map) {
+    for (const [key, value] of map) {
       expect(isObservable(value)).to.be.true
     }
-    for (let [key, value] of map.entries()) {
+    for (const [key, value] of map.entries()) {
       expect(isObservable(value)).to.be.true
     }
-    for (let value of map.values()) {
+    for (const value of map.values()) {
       expect(isObservable(value)).to.be.true
     }
   })
