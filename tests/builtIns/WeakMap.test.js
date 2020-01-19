@@ -1,6 +1,12 @@
 /* eslint no-unused-expressions: 0, no-unused-vars: 0 */
 import chai from 'chai'
-import { observable, isObservable, observe, raw } from 'nemo-observer-util'
+import {
+  observable,
+  isObservable,
+  observe,
+  raw,
+  config
+} from 'nemo-observer-util'
 import { spy } from '../utils'
 const { expect } = chai
 describe('WeakMap', () => {
@@ -36,6 +42,9 @@ describe('WeakMap', () => {
   })
 
   it('should not observe non value changing mutations', () => {
+    config({
+      skipSameValueChange: true
+    })
     let dummy
     const key = {}
     const map = observable(new WeakMap())
@@ -56,6 +65,9 @@ describe('WeakMap', () => {
     map.delete(key)
     expect(dummy).to.equal(undefined)
     expect(mapSpy.callCount).to.equal(3)
+    config({
+      skipSameValueChange: false
+    })
   })
 
   it('should not observe raw data', () => {

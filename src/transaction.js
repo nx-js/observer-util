@@ -50,26 +50,57 @@ export function endTransaction (target) {
   transaction.end(target)
 }
 
-// wrapper sync function to support transaction
+/**
+ * wrapper sync function to support batch
+ * @param {*} target
+ * @param {*} propertyKey
+ * @param {*} descriptor
+ */
 export function withTransaction (target, propertyKey, descriptor) {
-  const identity = getUUID()
-  if (descriptor) {
-    // use as class method decorator
-    const originalFunc = descriptor.value
-    descriptor.value = function (...args) {
-      transaction.start(identity)
-      const res = originalFunc.apply(this, args)
-      transaction.end(identity)
-      return res
+  if (!propertyKey) {
+    // 1. use as function wrapper
+    return createTransaction(target)
+  }
+  // 2. use as a decorator
+  if (propertyKey in target) {
+    // 2.1 use as class method decorator
+    descriptor.value = createTransaction(descriptor.value)
+    return
+  }
+
+  // 2.2 use as class attribute decorator
+  const internalPropertyKey = Symbol(propertyKey)
+  Object.defineProperty(target, propertyKey, {
+    set: function (value) {
+      if (!(internalPropertyKey in this)) {
+        // must be attribute init setter，wrap it to a action
+        value = createTransaction(value)
+      } else {
+        // modify in running, not wrapper it，since decorator should just run in init phase
+      }
+      this[internalPropertyKey] = value
+    },
+    get: function () {
+      return this[internalPropertyKey]
     }
-  } else {
-    // use as function wrapper
-    const originalFunc = target
-    return function (...args) {
-      transaction.start(identity)
-      const res = originalFunc.apply(this, args)
+  })
+}
+
+export function createTransaction (originalFunc) {
+  if (typeof originalFunc !== 'function') {
+    throw new Error(
+      'transaction should must wrap on Function: ' + typeof originalFunc
+    )
+  }
+  const identity = getUUID()
+  return function (...args) {
+    transaction.start(identity)
+    try {
+      return originalFunc.apply(this, args)
+    } catch (err) {
+      throw err
+    } finally {
       transaction.end(identity)
-      return res
     }
   }
 }

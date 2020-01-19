@@ -6,6 +6,7 @@ import {
   hasRunningReaction
 } from './reactionRunner'
 import { InternalConfig } from './config'
+import { writeAbleCheck } from './action'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 const wellKnownSymbols = new Set(
@@ -59,6 +60,7 @@ function ownKeys (target) {
 
 // intercept set operations on observables to know when to trigger reactions
 function set (target, key, value, receiver) {
+  writeAbleCheck()
   // make sure to do not pollute the raw object with observables
   if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
@@ -91,6 +93,7 @@ function set (target, key, value, receiver) {
 }
 
 function deleteProperty (target, key) {
+  writeAbleCheck()
   // save if the object had the key
   const hadKey = hasOwnProperty.call(target, key)
   const oldValue = target[key]

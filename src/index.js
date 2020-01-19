@@ -6,3 +6,4 @@ export {
   endTransaction,
   withTransaction
 } from './transaction'
+export { action } from './action'

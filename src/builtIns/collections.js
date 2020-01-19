@@ -5,6 +5,8 @@ import {
   hasRunningReaction
 } from '../reactionRunner'
 import { proxyToRaw, rawToProxy } from '../internals'
+import { writeAbleCheck } from '../action'
+import { InternalConfig } from '../config'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
@@ -49,6 +51,7 @@ const instrumentations = {
     return findObservable(proto.get.apply(target, arguments))
   },
   add (key) {
+    writeAbleCheck()
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
@@ -60,6 +63,7 @@ const instrumentations = {
     return result
   },
   set (key, value) {
+    writeAbleCheck()
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
@@ -68,12 +72,13 @@ const instrumentations = {
     const result = proto.set.apply(target, arguments)
     if (!hadKey) {
       queueReactionsForOperation({ target, key, value, type: 'add' })
-    } else if (value !== oldValue) {
+    } else if (!InternalConfig.skipSameValueChange || value !== oldValue) {
       queueReactionsForOperation({ target, key, value, oldValue, type: 'set' })
     }
     return result
   },
   delete (key) {
+    writeAbleCheck()
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
@@ -86,6 +91,7 @@ const instrumentations = {
     return result
   },
   clear () {
+    writeAbleCheck()
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     const hadItems = target.size !== 0

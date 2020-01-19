@@ -1,6 +1,6 @@
 {
   "name": "nemo-observer-util",
-  "version": "4.4.5",
+  "version": "4.5.0",
   "description": "Simple transparent reactivity with 100% language coverage. Made with ES6 Proxies.",
   "main": "dist/cjs.es5.js",
   "module": "dist/es.es5.js",
@@ -14,7 +14,7 @@
     "test-builds": "node ./scripts/testBuilds.js",
     "debug": "node ./scripts/debug.js",
     "lint": "standard",
-    "lint-fix": "prettier --ignore-path '.gitignore' --write '**/!(bundle).js' && standard --fix",
+    "lint-fix": "prettier --ignore-path '.gitignore,tests/utils.js' --write '**/!(bundle).js' && standard --fix",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "build": "node ./scripts/build.js",
     "build-toc": "node ./scripts/buildToc.js",
@@ -46,6 +46,7 @@
   ],
   "devDependencies": {
     "babel-core": "6.26.3",
+    "babel-eslint": "^10.0.3",
     "babel-preset-es2016": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-react": "^6.24.1",
@@ -74,7 +75,7 @@
     "rollup-plugin-commonjs": "^9.1.3",
     "rollup-plugin-coverage": "^0.1.4",
     "rollup-plugin-node-resolve": "^3.3.0",
-    "standard": "^11.0.1"
+    "standard": "^14.3.1"
   },
   "engines": {
     "node": ">=6.5.0"
@@ -83,6 +84,10 @@
     "env": [
       "browser",
       "mocha"
+    ],
+    "parser": "babel-eslint",
+    "ignore": [
+      "tests/utils.js"
     ]
   },
   "pre-push": [

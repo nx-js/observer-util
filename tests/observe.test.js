@@ -568,7 +568,8 @@ describe('config', () => {
   it('get', () => {
     const c = config()
     expect(c).to.eql({
-      skipSameValueChange: true
+      skipSameValueChange: true,
+      onlyAllowChangeInAction: false
     })
   })
 
@@ -577,7 +578,8 @@ describe('config', () => {
       skipSameValueChange: false
     })
     expect(c).to.eql({
-      skipSameValueChange: false
+      skipSameValueChange: false,
+      onlyAllowChangeInAction: false
     })
   })
 
