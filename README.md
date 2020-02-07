@@ -162,7 +162,7 @@ const person = observable({
   firstName: 'Bob',
   lastName: 'Smith',
   get name() {
-    return `${firstName} ${lastName}`;
+    return `${this.firstName} ${this.lastName}`;
   }
 });
 
