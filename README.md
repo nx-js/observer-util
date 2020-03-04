@@ -2,16 +2,18 @@
 
 This repo is just a fork of https://github.com/nx-js/observer-util
 with below change:
+
 - add `config({ skipSameValueChange: true })` to enable same value setter check
 - add `startTransaction(identity) endTransaction('identity') withTransaction` to support batch
 - add `config({ onlyAllowChangeInAction: true })` and `@action` to support action pattern
-- - -
+
+---
 
 # The Observer Utility
 
 Transparent reactivity with 100% language coverage. Made with :heart: and ES6 Proxies.
 
-[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](https://img.shields.io/bundlephobia/minzip/nemo-observer-util.svg)](https://bundlephobia.com/result?p=nemo-observer-util) [![Version](https://img.shields.io/npm/v/nemo-observer-util.svg)](https://www.npmjs.com/package/nemo-observer-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/nemo-observer-util.svg)](https://www.npmjs.com/package/nemo-observer-util)
+[![Build](https://img.shields.io/circleci/project/github/nx-js/observer-util/master.svg)](https://circleci.com/gh/nx-js/observer-util/tree/master) [![Coverage Status](https://coveralls.io/repos/github/nx-js/observer-util/badge.svg)](https://coveralls.io/github/nx-js/observer-util) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Package size](https://img.shields.io/bundlephobia/minzip/nemo-observable-util.svg)](https://bundlephobia.com/result?p=nemo-observable-util) [![Version](https://img.shields.io/npm/v/nemo-observable-util.svg)](https://www.npmjs.com/package/nemo-observable-util) [![dependencies Status](https://david-dm.org/nx-js/observer-util/status.svg)](https://david-dm.org/nx-js/observer-util) [![License](https://img.shields.io/npm/l/nemo-observable-util.svg)](https://www.npmjs.com/package/nemo-observable-util)
 
 <details>
 <summary><strong>Table of Contents</strong></summary>
@@ -19,22 +21,22 @@ Transparent reactivity with 100% language coverage. Made with :heart: and ES6 Pr
 
 <!-- toc -->
 
-* [Motivation](#motivation)
-* [Bindings](#bindings)
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Observables](#observables)
-  * [Reactions](#reactions)
-  * [Reaction scheduling](#reaction-scheduling)
-* [API](#api)
-  * [Proxy = observable(object)](#proxy--observableobject)
-  * [boolean = isObservable(object)](#boolean--isobservableobject)
-  * [reaction = observe(function, config)](#reaction--observefunction-config)
-  * [unobserve(reaction)](#unobservereaction)
-  * [obj = raw(observable)](#obj--rawobservable)
-* [Platform support](#platform-support)
-* [Alternative builds](#alternative-builds)
-* [Contributing](#contributing)
+- [Motivation](#motivation)
+- [Bindings](#bindings)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Observables](#observables)
+  - [Reactions](#reactions)
+  - [Reaction scheduling](#reaction-scheduling)
+- [API](#api)
+  - [Proxy = observable(object)](#proxy--observableobject)
+  - [boolean = isObservable(object)](#boolean--isobservableobject)
+  - [reaction = observe(function, config)](#reaction--observefunction-config)
+  - [unobserve(reaction)](#unobservereaction)
+  - [obj = raw(observable)](#obj--rawobservable)
+- [Platform support](#platform-support)
+- [Alternative builds](#alternative-builds)
+- [Contributing](#contributing)
 
 <!-- tocstop -->
 
@@ -52,13 +54,13 @@ The Observer Utility aims to eradicate these edge cases. It comes with a tiny le
 
 This is a framework independent library, which powers the reactivity system behind other state management solutions. These are the currently available bindings.
 
-* [React Easy State](https://github.com/solkimicreb/react-easy-state) is a state management solution for React with a minimal learning curve.
-* [preact-ns-observer](https://github.com/mseddon/preact-nx-observer) provides a simple `@observable` decorator that makes Preact components reactive.
+- [React Easy State](https://github.com/solkimicreb/react-easy-state) is a state management solution for React with a minimal learning curve.
+- [preact-ns-observer](https://github.com/mseddon/preact-nx-observer) provides a simple `@observable` decorator that makes Preact components reactive.
 
 ## Installation
 
 ```
-$ npm install nemo-observer-util
+$ npm install nemo-observable-util
 ```
 
 ## Usage
@@ -70,7 +72,7 @@ The two building blocks of reactivity are **observables** and **reactions**. Obs
 Observables are transparent Proxies, which can be created with the `observable` function. From the outside they behave exactly like plain JS objects.
 
 ```js
-import { observable } from 'nemo-observer-util';
+import { observable } from 'nemo-observable-util';
 
 const counter = observable({ num: 0 });
 
@@ -85,7 +87,7 @@ Reactions are functions, which use observables. They can be created with the `ob
 #### Vanilla JavaScript
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const counter = observable({ num: 0 });
 const countLogger = observe(() => console.log(counter.num));
@@ -112,25 +114,27 @@ const UserComp = view(() => <div onClick={counter.up}>{counter.num}</div>);
 ```
 
 #### Preact Component
-```js
-import { observer } from "preact-nx-observer";
 
-let store = observable({ title: "This is foo's data"});
+```js
+import { observer } from 'preact-nx-observer';
+
+let store = observable({ title: "This is foo's data" });
 
 @observer // Component will now re-render whenever store.title changes.
 class Foo extends Component {
   render() {
-    return <h1>{store.title}</h1>
+    return <h1>{store.title}</h1>;
   }
 }
 ```
+
 #### More examples
 
 <details>
 <summary>Dynamic properties</summary>
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const profile = observable();
 observe(() => console.log(profile.name));
@@ -144,7 +148,7 @@ profile.name = 'Bob';
 <summary>Nested properties</summary>
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const person = observable({
   name: {
@@ -165,7 +169,7 @@ person.name.first = 'Bob';
 <summary>Computed properties</summary>
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const person = observable({
   firstName: 'Bob',
@@ -186,7 +190,7 @@ person.firstName = 'Ann';
 <summary>Conditionals</summary>
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const person = observable({
   gender: 'male',
@@ -210,7 +214,7 @@ person.gender = 'female';
 <summary>Arrays</summary>
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const users = observable([]);
 
@@ -231,7 +235,7 @@ users.pop();
 <summary>ES6 collections</summary>
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const people = observable(new Map());
 
@@ -253,7 +257,7 @@ people.set('John', 35);
 <summary>Inherited properties</summary>
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const defaultUser = observable({
   name: 'Unknown',
@@ -281,7 +285,7 @@ delete user.name;
 Reactions are scheduled to run whenever the relevant observable state changes. The default scheduler runs the reactions synchronously, but custom schedulers can be passed to change this behavior. Schedulers are usually functions which receive the scheduled reaction as argument.
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 // this scheduler delays reactions by 1 second
 const scheduler = reaction => setTimeout(reaction, 1000);
@@ -303,7 +307,7 @@ Alternatively schedulers can be objects with an `add` and `delete` method. Check
 The React scheduler simply calls `setState` on relevant observable changes. This delegates the render scheduling to React Fiber. It works roughly like this.
 
 ```js
-import { observe } from 'nemo-observer-util';
+import { observe } from 'nemo-observable-util';
 
 class ReactiveComp extends BaseComp {
   constructor() {
@@ -322,7 +326,7 @@ class ReactiveComp extends BaseComp {
 Schedulers can be objects with an `add` and `delete` method, which schedule and unschedule reactions. ES6 Sets can be used as a scheduler, that automatically removes duplicate reactions.
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 
 const reactions = new Set();
 const person = observable({ name: 'Josh' });
@@ -345,7 +349,7 @@ person.age = 87;
 Queues from the [Queue Util](https://github.com/nx-js/queue-util) can be used to implement complex scheduling patterns by combining automatic priority based and manual execution.
 
 ```js
-import { observable, observe } from 'nemo-observer-util';
+import { observable, observe } from 'nemo-observable-util';
 import { Queue, priorities } from '@nx-js/queue-util';
 
 const scheduler = new Queue(priorities.LOW);
@@ -368,9 +372,9 @@ Queues are automatically scheduling reactions - based on their priority - but th
 
 Creates and returns a proxied observable object, which behaves just like the originally passed object. The original object is **not modified**.
 
-* If no argument is provided, it returns an empty observable object.
-* If an object is passed as argument, it wraps the passed object in an observable.
-* If an observable object is passed, it returns the passed observable object.
+- If no argument is provided, it returns an empty observable object.
+- If an object is passed as argument, it wraps the passed object in an observable.
+- If an observable object is passed, it returns the passed observable object.
 
 ### boolean = isObservable(object)
 
@@ -382,18 +386,18 @@ Wraps the passed function with a reaction, which behaves just like the original 
 
 `observe` also accepts an optional config object with the following options.
 
-* `lazy`: A boolean, which controls if the reaction is executed when it is created or not. If it is true, the reaction has to be called once manually to trigger the reactivity process. Defaults to false.
+- `lazy`: A boolean, which controls if the reaction is executed when it is created or not. If it is true, the reaction has to be called once manually to trigger the reactivity process. Defaults to false.
 
-* `scheduler`: A function, which is called with the reaction when it is scheduled to run. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions. The default scheduler runs the reaction synchronously on observable mutations. You can learn more about reaction scheduling in the [related docs section](#reaction-scheduling).
+- `scheduler`: A function, which is called with the reaction when it is scheduled to run. It can also be an object with an `add` and `delete` method - which schedule and unschedule reactions. The default scheduler runs the reaction synchronously on observable mutations. You can learn more about reaction scheduling in the [related docs section](#reaction-scheduling).
 
-* `debugger`: An optional function. It is called with contextual metadata object on basic operations - like set, get, delete, etc. The metadata object can be used to determine why the operation wired or scheduled the reaction and it always has enough data to reverse the operation. The debugger is always called before the scheduler.
+- `debugger`: An optional function. It is called with contextual metadata object on basic operations - like set, get, delete, etc. The metadata object can be used to determine why the operation wired or scheduled the reaction and it always has enough data to reverse the operation. The debugger is always called before the scheduler.
 
 ### unobserve(reaction)
 
 Unobserves the passed reaction. Unobserved reactions won't be automatically run anymore.
 
 ```js
-import { observable, observe, unobserve } from 'nemo-observer-util';
+import { observable, observe, unobserve } from 'nemo-observable-util';
 
 const counter = observable({ num: 0 });
 const logger = observe(() => console.log(counter.num));
@@ -409,7 +413,7 @@ Original objects are never modified, but transparently wrapped by observable pro
 #### Using `raw` at property access
 
 ```js
-import { observable, observe, raw } from 'nemo-observer-util';
+import { observable, observe, raw } from 'nemo-observable-util';
 
 const person = observable();
 const logger = observe(() => console.log(person.name));
@@ -424,7 +428,7 @@ raw(person).name = 'John';
 #### Using `raw` at property mutation
 
 ```js
-import { observable, observe, raw } from 'nemo-observer-util';
+import { observable, observe, raw } from 'nemo-observable-util';
 
 const person = observable({ age: 20 });
 observe(() => console.log(`${person.name}: ${raw(person).age}`));
@@ -438,24 +442,24 @@ person.age = 33;
 
 ## Platform support
 
-* Node: 6.5 and above
-* Chrome: 49 and above
-* Firefox: 38 and above
-* Safari: 10 and above
-* Edge: 12 and above
-* Opera: 36 and above
-* IE is not supported
+- Node: 6.5 and above
+- Chrome: 49 and above
+- Firefox: 38 and above
+- Safari: 10 and above
+- Edge: 12 and above
+- Opera: 36 and above
+- IE is not supported
 
 ## Alternative builds
 
 This library detects if you use ES6 or commonJS modules and serve the right format to you. The exposed bundles are transpiled to ES5 to support common tools - like UglifyJS minifying. If you would like a finer control over the provided build, you can specify them in your imports.
 
-* `nemo-observer-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
-* `nemo-observer-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
-* `nemo-observer-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
-* `nemo-observer-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
+- `nemo-observable-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
+- `nemo-observable-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
+- `nemo-observable-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
+- `nemo-observable-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
 
-If you use a bundler, set up an alias for `nemo-observer-util` to point to your desired build. You can learn how to do it with webpack [here](https://webpack.js.org/configuration/resolve/#resolve-alias) and with rollup [here](https://github.com/rollup/rollup-plugin-alias#usage).
+If you use a bundler, set up an alias for `nemo-observable-util` to point to your desired build. You can learn how to do it with webpack [here](https://webpack.js.org/configuration/resolve/#resolve-alias) and with rollup [here](https://github.com/rollup/rollup-plugin-alias#usage).
 
 ## Contributing
 

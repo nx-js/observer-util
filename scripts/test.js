@@ -1,13 +1,13 @@
-const path = require('path')
-const resolve = require('rollup-plugin-node-resolve')
-const commonjs = require('rollup-plugin-commonjs')
-const babel = require('rollup-plugin-babel')
-const coverage = require('rollup-plugin-coverage')
-const alias = require('rollup-plugin-alias')
-const TestServer = require('karma').Server
+const path = require('path');
+const resolve = require('rollup-plugin-node-resolve');
+const commonjs = require('rollup-plugin-commonjs');
+const babel = require('rollup-plugin-babel');
+const coverage = require('rollup-plugin-coverage');
+const alias = require('rollup-plugin-alias');
+const TestServer = require('karma').Server;
 
-const bundleName = process.env.BUNDLE
-const bundlePath = bundleName ? `dist/${bundleName}` : 'src/index.js'
+const bundleName = process.env.BUNDLE;
+const bundlePath = bundleName ? `dist/${bundleName}` : 'src/index.js';
 
 const config = {
   frameworks: ['mocha', 'chai', 'source-map-support'],
@@ -19,7 +19,7 @@ const config = {
   rollupPreprocessor: {
     plugins: [
       alias({
-        'nemo-observer-util': path.resolve(bundlePath)
+        'nemo-observable-util': path.resolve(bundlePath)
       }),
       babel({
         exclude: 'node_modules/**'
@@ -56,10 +56,10 @@ const config = {
       flags: ['--no-sandbox']
     }
   }
-}
+};
 
 const testServer = new TestServer(config, exitCode => {
-  console.log(`Karma has exited with ${exitCode}`)
-  process.exit(exitCode)
-})
-testServer.start()
+  console.log(`Karma has exited with ${exitCode}`);
+  process.exit(exitCode);
+});
+testServer.start();
