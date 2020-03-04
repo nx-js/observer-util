@@ -1,6 +1,6 @@
-import chai from 'chai';
-import { observable, isObservable, observe } from 'nemo-observable-util';
-const { expect } = chai;
+import chai from 'chai'
+import { observable, isObservable, observe } from 'nemo-observable-util'
+const { expect } = chai
 
 const TypedArrays = [
   Int8Array,
@@ -12,20 +12,20 @@ const TypedArrays = [
   Uint32Array,
   Float32Array,
   Float64Array
-];
+]
 
 describe('typed arrays', () => {
   for (const TypedArray of TypedArrays) {
     it(`${TypedArray.name} should observe mutations`, () => {
-      let dummy;
-      const array = observable(new TypedArray(2));
-      expect(isObservable(array)).to.equal(true);
+      let dummy
+      const array = observable(new TypedArray(2))
+      expect(isObservable(array)).to.equal(true)
 
-      observe(() => (dummy = array[0]));
+      observe(() => (dummy = array[0]))
 
-      expect(dummy).to.equal(0);
-      array[0] = 12;
-      expect(dummy).to.equal(12);
-    });
+      expect(dummy).to.equal(0)
+      array[0] = 12
+      expect(dummy).to.equal(12)
+    })
   }
-});
+})

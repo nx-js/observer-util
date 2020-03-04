@@ -1,74 +1,74 @@
-import { InternalConfig } from './config';
-import { createTransaction } from './transaction';
+import { InternalConfig } from './config'
+import { createTransaction } from './transaction'
 
-let actionCount = 0;
+let actionCount = 0
 
-export function action(target, propertyKey, descriptor) {
+export function action (target, propertyKey, descriptor) {
   if (!propertyKey) {
     // 1. use as function wrapper
-    return createAction(target);
+    return createAction(target)
   }
   // 2. use as a decorator
   if (propertyKey in target) {
     // 2.1 use as class method decorator
-    descriptor.value = createAction(descriptor.value);
-    return;
+    descriptor.value = createAction(descriptor.value)
+    return
   }
   // 2.2 use as class attribute decorator
-  const internalPropertyKey = Symbol(propertyKey);
+  const internalPropertyKey = Symbol(propertyKey)
   Object.defineProperty(target, propertyKey, {
-    set: function(value) {
+    set: function (value) {
       if (!(internalPropertyKey in this)) {
         // must be attribute init setter，wrap it to a action
-        value = createAction(value);
+        value = createAction(value)
       } else {
         // modify in running, not wrapper it，since decorator should just run in init phase
       }
-      this[internalPropertyKey] = value;
+      this[internalPropertyKey] = value
     },
-    get: function() {
-      return this[internalPropertyKey];
+    get: function () {
+      return this[internalPropertyKey]
     }
-  });
+  })
 }
 
-function duringAction() {
-  return actionCount > 0;
+function duringAction () {
+  return actionCount > 0
 }
 
-function startAction() {
-  actionCount = actionCount + 1;
+function startAction () {
+  actionCount = actionCount + 1
 }
 
-function endAction() {
-  actionCount = actionCount - 1;
+function endAction () {
+  actionCount = actionCount - 1
   if (actionCount < 0) {
     throw new Error(
       '[nemo-observable-util] call endAction but no action is running!'
-    );
+    )
   }
 }
 
-function canWrite() {
-  return !InternalConfig.onlyAllowChangeInAction || duringAction();
+function canWrite () {
+  return !InternalConfig.onlyAllowChangeInAction || duringAction()
 }
 
 export const DISABLE_WRITE_ERR =
-  '[nemo-observable-util] can not modify data outside @action';
-export function writeAbleCheck() {
+  '[nemo-observable-util] can not modify data outside @action'
+export function writeAbleCheck () {
   if (!canWrite()) {
-    throw new Error(DISABLE_WRITE_ERR);
+    throw new Error(DISABLE_WRITE_ERR)
   }
 }
 
-function createAction(fn) {
-  const transactionFn = createTransaction(fn);
-  return function(...args) {
-    startAction();
+function createAction (fn) {
+  const transactionFn = createTransaction(fn)
+  return function (...args) {
+    startAction()
     try {
-      return transactionFn.apply(this, args);
+      return transactionFn.apply(this, args)
     } finally {
-      endAction();
+      endAction()
     }
-  };
+  }
 }
