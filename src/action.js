@@ -1,56 +1,13 @@
 import { InternalConfig } from './config'
 import { createTransaction } from './transaction'
+import { StackManager } from './utils/stack'
+import { decoratorFactory } from './utils/decorator'
 
-let actionCount = 0
-
-export function action (target, propertyKey, descriptor) {
-  if (!propertyKey) {
-    // 1. use as function wrapper
-    return createAction(target)
-  }
-  // 2. use as a decorator
-  if (propertyKey in target) {
-    // 2.1 use as class method decorator
-    descriptor.value = createAction(descriptor.value)
-    return
-  }
-  // 2.2 use as class attribute decorator
-  const internalPropertyKey = Symbol(propertyKey)
-  Object.defineProperty(target, propertyKey, {
-    set: function (value) {
-      if (!(internalPropertyKey in this)) {
-        // must be attribute init setter，wrap it to a action
-        value = createAction(value)
-      } else {
-        // modify in running, not wrapper it，since decorator should just run in init phase
-      }
-      this[internalPropertyKey] = value
-    },
-    get: function () {
-      return this[internalPropertyKey]
-    }
-  })
-}
-
-function duringAction () {
-  return actionCount > 0
-}
-
-function startAction () {
-  actionCount = actionCount + 1
-}
-
-function endAction () {
-  actionCount = actionCount - 1
-  if (actionCount < 0) {
-    throw new Error(
-      '[nemo-observable-util] call endAction but no action is running!'
-    )
-  }
-}
+export const action = decoratorFactory(createAction)
+export const actionManager = new StackManager()
 
 function canWrite () {
-  return !InternalConfig.onlyAllowChangeInAction || duringAction()
+  return !InternalConfig.onlyAllowChangeInAction || actionManager.duringStack
 }
 
 export const DISABLE_WRITE_ERR =
@@ -61,14 +18,20 @@ export function writeAbleCheck () {
   }
 }
 
-function createAction (fn) {
-  const transactionFn = createTransaction(fn)
+function createAction (originalFunc) {
+  if (typeof originalFunc !== 'function') {
+    throw new Error(
+      'action should must wrap on Function: ' + typeof originalFunc
+    )
+  }
+  const transactionFn = createTransaction(originalFunc)
+  const identity = actionManager.getUUID()
   return function (...args) {
-    startAction()
+    actionManager.start(identity)
     try {
       return transactionFn.apply(this, args)
     } finally {
-      endAction()
+      actionManager.end(identity)
     }
   }
 }

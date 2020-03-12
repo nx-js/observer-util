@@ -4,6 +4,8 @@ export { config } from './config'
 export {
   startTransaction,
   endTransaction,
-  withTransaction
+  withTransaction,
+  transactionManager
 } from './transaction'
-export { action } from './action'
+export { action, actionManager } from './action'
+export { decoratorFactory } from './utils/decorator'

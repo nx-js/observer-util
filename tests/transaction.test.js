@@ -7,7 +7,7 @@ import {
   endTransaction,
   withTransaction
 } from 'nemo-observable-util'
-import { transaction } from '../src/transaction'
+import { transactionManager } from '../src/transaction'
 const { expect } = chai
 
 describe('transaction', () => {
@@ -100,7 +100,7 @@ describe('transaction', () => {
     expect(fn1).to.throw('transaction end not match with start')
 
     // restore, so that below test case can run normally
-    transaction.stacks = []
+    transactionManager.stacks = []
   })
 
   it('should support function wrapper', () => {
