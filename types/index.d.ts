@@ -38,11 +38,11 @@ declare module 'nemo-observable-util' {
     key: any,
     d: TypedPropertyDescriptor<any>
   ): void;
-  declare const transactionManager: any;
-  function config(arg: ObservableConfig): ObservableConfig;
+  const transactionManager: any;
+  function config(arg?: ObservableConfig): ObservableConfig;
   function action<F extends Function>(fn: F): F;
   function action(target: any, key: any, d: TypedPropertyDescriptor<any>): void;
-  declare const actionManager: any;
+  const actionManager: any;
   function decoratorFactory<T extends Function>(
     wrapperFn: (f: T) => T
   ): MethodDecorator | PropertyDecorator;
