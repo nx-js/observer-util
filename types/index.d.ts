@@ -41,7 +41,12 @@ declare module 'nemo-observable-util' {
   const transactionManager: any;
   function config(arg?: ObservableConfig): ObservableConfig;
   function action<F extends Function>(fn: F): F;
-  function action(target: any, key: any, d: TypedPropertyDescriptor<any>): void;
+  function action(
+    target: Object,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<T>
+  ): TypedPropertyDescriptor<T> | void;
+  function action(target: Object, propertyKey: string | symbol): void;
   const actionManager: any;
   function decoratorFactory<T extends Function>(
     wrapperFn: (f: T) => T
