@@ -41,7 +41,7 @@ declare module 'nemo-observable-util' {
   const transactionManager: any;
   function config(arg?: ObservableConfig): ObservableConfig;
   function action<F extends Function>(fn: F): F;
-  function action(
+  function action<T>(
     target: Object,
     propertyKey: string | symbol,
     descriptor: TypedPropertyDescriptor<T>
