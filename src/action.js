@@ -35,3 +35,7 @@ function createAction (originalFunc) {
     }
   }
 }
+
+export function runInAction (fn) {
+  return action(fn)()
+}

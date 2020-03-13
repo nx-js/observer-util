@@ -7,5 +7,5 @@ export {
   withTransaction,
   transactionManager
 } from './transaction'
-export { action, actionManager } from './action'
+export { action, actionManager, runInAction } from './action'
 export { decoratorFactory } from './utils/decorator'
