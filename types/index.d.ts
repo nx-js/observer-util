@@ -47,7 +47,7 @@ declare module 'nemo-observable-util' {
     descriptor: TypedPropertyDescriptor<T>
   ): TypedPropertyDescriptor<T> | void;
   function action(target: Object, propertyKey: string | symbol): void;
-  function runInAction<T extends Function>(f: T): ReturnType<T>;
+  function runInAction<T extends (...args: any) => any>(f: T): ReturnType<T>;
   const actionManager: any;
   function decoratorFactory<T extends Function>(
     wrapperFn: (f: T) => T
