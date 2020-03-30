@@ -38,6 +38,7 @@ declare module 'nemo-observable-util' {
     key: any,
     d: TypedPropertyDescriptor<any>
   ): void;
+  function flush(): void;
   const transactionManager: any;
   function config(arg?: ObservableConfig): ObservableConfig;
   function action<F extends Function>(fn: F): F;

@@ -37,3 +37,7 @@ export function createTransaction (originalFunc) {
     }
   }
 }
+
+export function flush () {
+  runnerManager.flush()
+}
