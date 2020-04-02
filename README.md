@@ -153,7 +153,7 @@ person.name.first = 'Bob';
 
 </details>
 <details>
-<summary>Computed properties</summary>
+<summary>Getter properties</summary>
 
 ```js
 import { observable, observe } from '@nx-js/observer-util';
