@@ -48,6 +48,13 @@ declare module 'nemo-observable-util' {
     descriptor: TypedPropertyDescriptor<T>
   ): TypedPropertyDescriptor<T> | void;
   function action(target: Object, propertyKey: string | symbol): void;
+  function asyncAction<F extends Function>(fn: F): F;
+  function asyncAction<T>(
+    target: Object,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<T>
+  ): TypedPropertyDescriptor<T> | void;
+  function asyncAction(target: Object, propertyKey: string | symbol): void;
   function runInAction<T extends (...args: any) => any>(f: T): ReturnType<T>;
   const actionManager: any;
   function decoratorFactory<T extends Function>(

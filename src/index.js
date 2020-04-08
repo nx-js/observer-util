@@ -8,5 +8,5 @@ export {
   transactionManager,
   flush
 } from './transaction'
-export { action, actionManager, runInAction } from './action'
+export { action, actionManager, runInAction, asyncAction } from './action'
 export { decoratorFactory } from './utils/decorator'

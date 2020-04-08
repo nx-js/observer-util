@@ -1,9 +1,10 @@
 import { InternalConfig } from './config'
-import { createTransaction } from './transaction'
+import { createTransaction, transactionManager } from './transaction'
 import { StackManager } from './utils/stack'
 import { decoratorFactory } from './utils/decorator'
 
 export const action = decoratorFactory(createAction)
+export const asyncAction = decoratorFactory(createAsyncAction)
 export const actionManager = new StackManager()
 
 function canWrite () {
@@ -35,7 +36,44 @@ function createAction (originalFunc) {
     }
   }
 }
-
+function createAsyncAction (originalFunc) {
+  if (typeof originalFunc !== 'function') {
+    throw new Error(
+      'action should must wrap on Function: ' + typeof originalFunc
+    )
+  }
+  const actionId = actionManager.getUUID()
+  const transactionId = transactionManager.getUUID()
+  return function (...args) {
+    const start = () => {
+      actionManager.start(actionId)
+      transactionManager.start(transactionId)
+    }
+    const end = () => {
+      transactionManager.end(transactionId)
+      actionManager.end(actionId)
+    }
+    let res
+    try {
+      start()
+      res = originalFunc.apply(this, args)
+      if (!res || !res.then || typeof res.then !== 'function') {
+        throw new Error(
+          'asyncAction should must wrap on Async Function: ' + originalFunc.name
+        )
+      }
+      if (!res.finally) {
+        res.then(end)
+        res.catch(end)
+      } else {
+        res.finally(end)
+      }
+    } finally {
+      end()
+    }
+    return res
+  }
+}
 export function runInAction (fn) {
   return action(fn)()
 }

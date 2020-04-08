@@ -1,10 +1,12 @@
+import chaiAsPromised from 'chai-as-promised'
 import chai from 'chai'
 import { spy, __decorate } from './utils'
-import { observe, observable, config, action } from 'nemo-observable-util'
+import { observe, observable, config, asyncAction } from 'nemo-observable-util'
 import { DISABLE_WRITE_ERR } from '../src/action'
+chai.use(chaiAsPromised)
 const { expect } = chai
 
-describe('action', () => {
+describe('asyncAction', () => {
   beforeEach(() => {
     config({
       onlyAllowChangeInAction: true
@@ -15,20 +17,7 @@ describe('action', () => {
       onlyAllowChangeInAction: false
     })
   })
-  it('should throw when not function', () => {
-    let dummy
-    const counter = observable({ nested: { num: 0 } })
-    const fn = spy(() => (dummy = counter.nested.num))
-    observe(fn)
-
-    expect(fn.callCount).to.equal(1)
-    expect(dummy).to.equal(0)
-    expect(() => {
-      counter.nested.num = 8
-    }).to.throw(DISABLE_WRITE_ERR)
-    expect(() => action(1)).to.throw('action should must wrap on Function')
-  })
-  it('should support function wrapper', () => {
+  it('should throw when sync function', async () => {
     let dummy
     const counter = observable({ nested: { num: 0 } })
     const fn = spy(() => (dummy = counter.nested.num))
@@ -40,12 +29,46 @@ describe('action', () => {
       counter.nested.num = 8
     }).to.throw(DISABLE_WRITE_ERR)
     expect(
-      action(() => {
+      asyncAction(() => {
         counter.nested.num = 8
       })
-    ).to.not.throw()
+    ).to.throw('asyncAction should must wrap on Async Function')
   })
-  it('should support class method decorator', () => {
+  it('should end when sync throw', async () => {
+    let dummy
+    const counter = observable({ nested: { num: 0 } })
+    const fn = spy(() => (dummy = counter.nested.num))
+    observe(fn)
+
+    expect(fn.callCount).to.equal(1)
+    expect(dummy).to.equal(0)
+    expect(() => {
+      counter.nested.num = 8
+    }).to.throw(DISABLE_WRITE_ERR)
+    expect(
+      asyncAction(() => {
+        throw new Error('xx')
+      })
+    ).to.throw('xx')
+  })
+  it('should support function wrapper', async () => {
+    let dummy
+    const counter = observable({ nested: { num: 0 } })
+    const fn = spy(() => (dummy = counter.nested.num))
+    observe(fn)
+
+    expect(fn.callCount).to.equal(1)
+    expect(dummy).to.equal(0)
+    expect(() => {
+      counter.nested.num = 8
+    }).to.throw(DISABLE_WRITE_ERR)
+    await expect(
+      asyncAction(async () => {
+        counter.nested.num = 8
+      })()
+    ).to.eventually.fulfilled
+  })
+  it('should support class method decorator', async () => {
     let dummy
     const counter = observable({ nested: { num: 0 } })
     const fn = spy(() => (dummy = counter.nested.num))
@@ -58,18 +81,19 @@ describe('action', () => {
     }).to.throw(DISABLE_WRITE_ERR)
     class Foo {
       data = 456;
-      bar () {
-        counter.nested.num = 8
+      async bar () {
+        counter.nested.num = 9
         return this.data
       }
     }
-    __decorate([action], Foo.prototype, 'bar', null)
+    __decorate([asyncAction], Foo.prototype, 'bar', null)
     const foo = new Foo()
-    expect(() => foo.bar()).to.not.throw()
-    expect(foo.bar()).to.equal(456)
+    await expect(foo.bar()).to.eventually.fulfilled
+    expect(foo.data).to.equal(456)
+    expect(counter.nested.num).to.equal(9)
   })
 
-  it('should support class attribute decorator', () => {
+  it('should support class attribute decorator', async () => {
     let dummy
     const counter = observable({ nested: { num: 0 } })
     const fn = spy(() => (dummy = counter.nested.num))
@@ -82,14 +106,15 @@ describe('action', () => {
     }).to.throw(DISABLE_WRITE_ERR)
     class Foo {
       data = 123;
-      bar = () => {
-        counter.nested.num = 8
+      bar = async () => {
+        counter.nested.num = 10
         return this.data
       };
     }
-    __decorate([action], Foo.prototype, 'bar', undefined)
+    __decorate([asyncAction], Foo.prototype, 'bar', undefined)
     const foo = new Foo()
-    expect(() => foo.bar()).to.not.throw()
-    expect(foo.bar()).to.equal(123)
+    await expect(foo.bar()).to.eventually.fulfilled
+    expect(foo.data).to.equal(123)
+    expect(counter.nested.num).to.equal(10)
   })
 })
