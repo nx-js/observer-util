@@ -69,6 +69,36 @@ describe('action', () => {
     expect(foo.bar()).to.equal(456)
   })
 
+  it('should support setter', () => {
+    let dummy
+    const counter = observable({ nested: { num: 0 } })
+    const fn = spy(() => (dummy = counter.nested.num))
+    observe(fn)
+
+    expect(fn.callCount).to.equal(1)
+    expect(dummy).to.equal(0)
+    expect(() => {
+      counter.nested.num = 8
+    }).to.throw(DISABLE_WRITE_ERR)
+    function Foo () {
+      this._data = 456
+    }
+    Object.defineProperty(Foo.prototype, 'bar', {
+      get: function () {
+        return this._data
+      },
+      set: function (v) {
+        this._data = v
+      },
+      enumerable: true,
+      configurable: true
+    })
+    __decorate([action], Foo.prototype, 'bar', null)
+    const foo = new Foo()
+    expect(() => (foo.bar = 900)).to.not.throw()
+    expect(foo.bar).to.equal(900)
+  })
+
   it('should support class attribute decorator', () => {
     let dummy
     const counter = observable({ nested: { num: 0 } })
