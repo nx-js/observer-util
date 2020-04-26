@@ -88,6 +88,7 @@ describe('action', () => {
         return this._data
       },
       set: function (v) {
+        counter.nested.num = 9999991
         this._data = v
       },
       enumerable: true,
@@ -97,6 +98,68 @@ describe('action', () => {
     const foo = new Foo()
     expect(() => (foo.bar = 900)).to.not.throw()
     expect(foo.bar).to.equal(900)
+    expect(counter.nested.num).to.equal(9999991)
+  })
+
+  it('should throw when setter & BaseModel without action', () => {
+    let dummy
+    const counter = observable({ nested: { num: 0 } })
+    const fn = spy(() => (dummy = counter.nested.num))
+    observe(fn)
+
+    expect(fn.callCount).to.equal(1)
+    expect(dummy).to.equal(0)
+    expect(() => {
+      counter.nested.num = 8
+    }).to.throw(DISABLE_WRITE_ERR)
+    function Foo () {
+      this._data = 456
+    }
+    Object.defineProperty(Foo.prototype, 'bar', {
+      get: function () {
+        return this._data
+      },
+      set: function (v) {
+        counter.nested.num = 9999991
+        this._data = v
+      },
+      enumerable: true,
+      configurable: true
+    })
+    const foo = observable(new Foo())
+    expect(() => (foo.bar = 900)).to.throw(DISABLE_WRITE_ERR)
+  })
+
+  it('should support setter & BaseModel', () => {
+    let dummy
+    const counter = observable({ nested: { num: 0 } })
+    const fn = spy(() => (dummy = counter.nested.num))
+    observe(fn)
+
+    expect(fn.callCount).to.equal(1)
+    expect(dummy).to.equal(0)
+    expect(() => {
+      counter.nested.num = 8
+    }).to.throw(DISABLE_WRITE_ERR)
+    function Foo () {
+      this._data = 456
+    }
+    Object.defineProperty(Foo.prototype, 'bar', {
+      get: function () {
+        return this._data
+      },
+      set: function (v) {
+        counter.nested.num = 9999991
+        this._data = v
+      },
+      enumerable: true,
+      configurable: true
+    })
+    __decorate([action], Foo.prototype, 'bar', null)
+    const foo = observable(new Foo())
+    expect(() => (foo.bar = 900)).to.not.throw()
+    expect(foo.bar).to.equal(900)
+    expect(counter.nested.num).to.equal(9999991)
   })
 
   it('should support class attribute decorator', () => {

@@ -1,20 +1,30 @@
 import { InternalConfig } from './config'
 import { createTransaction, transactionManager } from './transaction'
 import { StackManager } from './utils/stack'
-import { decoratorFactory } from './utils/decorator'
+import { decoratorFactory, NemoObservableInfo } from './utils/decorator'
 
 export const action = decoratorFactory(createAction)
 export const asyncAction = decoratorFactory(createAsyncAction)
 export const actionManager = new StackManager()
 
-function canWrite () {
-  return !InternalConfig.onlyAllowChangeInAction || actionManager.duringStack
+function canWrite (target, key) {
+  if (!InternalConfig.onlyAllowChangeInAction) {
+    return true
+  }
+  if (actionManager.duringStack) {
+    return true
+  }
+  const proto = Object.getPrototypeOf(target)
+  if (proto && proto[NemoObservableInfo] && proto[NemoObservableInfo][key]) {
+    return true
+  }
+  return false
 }
 
 export const DISABLE_WRITE_ERR =
   '[nemo-observable-util] can not modify data outside @action'
-export function writeAbleCheck () {
-  if (!canWrite()) {
+export function writeAbleCheck (target, key) {
+  if (!canWrite(target, key)) {
     throw new Error(DISABLE_WRITE_ERR)
   }
 }

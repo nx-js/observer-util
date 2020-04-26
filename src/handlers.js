@@ -60,7 +60,7 @@ function ownKeys (target) {
 
 // intercept set operations on observables to know when to trigger reactions
 function set (target, key, value, receiver) {
-  writeAbleCheck()
+  writeAbleCheck(target, key)
   // make sure to do not pollute the raw object with observables
   if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
@@ -93,7 +93,7 @@ function set (target, key, value, receiver) {
 }
 
 function deleteProperty (target, key) {
-  writeAbleCheck()
+  writeAbleCheck(target, key)
   // save if the object had the key
   const hadKey = hasOwnProperty.call(target, key)
   const oldValue = target[key]

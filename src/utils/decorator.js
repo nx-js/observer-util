@@ -1,3 +1,4 @@
+export const NemoObservableInfo = Symbol('nemo-observable-info')
 export function decoratorFactory (wrapperFn) {
   return function (target, propertyKey, descriptor) {
     if (!propertyKey) {
@@ -14,11 +15,20 @@ export function decoratorFactory (wrapperFn) {
     const v = Object.getOwnPropertyDescriptor(target, propertyKey)
     if (v) {
       if ('get' in v) {
+        target[NemoObservableInfo] = {
+          ...target[NemoObservableInfo],
+          [propertyKey]: true
+        }
         v.get = wrapperFn(v.get)
       }
       if ('set' in v) {
+        target[NemoObservableInfo] = {
+          ...target[NemoObservableInfo],
+          [propertyKey]: true
+        }
         v.set = wrapperFn(v.set)
       }
+      return v
     } else {
       // 2.3 use as class normal attribute decorator
       // must be arrow function

@@ -51,8 +51,8 @@ const instrumentations = {
     return findObservable(proto.get.apply(target, arguments))
   },
   add (key) {
-    writeAbleCheck()
     const target = proxyToRaw.get(this)
+    writeAbleCheck(target, key)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
     // forward the operation before queueing reactions
@@ -63,8 +63,8 @@ const instrumentations = {
     return result
   },
   set (key, value) {
-    writeAbleCheck()
     const target = proxyToRaw.get(this)
+    writeAbleCheck(target, key)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
     const oldValue = proto.get.call(target, key)
@@ -78,8 +78,8 @@ const instrumentations = {
     return result
   },
   delete (key) {
-    writeAbleCheck()
     const target = proxyToRaw.get(this)
+    writeAbleCheck(target, key)
     const proto = Reflect.getPrototypeOf(this)
     const hadKey = proto.has.call(target, key)
     const oldValue = proto.get ? proto.get.call(target, key) : undefined
@@ -91,8 +91,8 @@ const instrumentations = {
     return result
   },
   clear () {
-    writeAbleCheck()
     const target = proxyToRaw.get(this)
+    writeAbleCheck(target)
     const proto = Reflect.getPrototypeOf(this)
     const hadItems = target.size !== 0
     const oldTarget = target instanceof Map ? new Map(target) : new Set(target)
