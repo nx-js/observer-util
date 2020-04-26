@@ -5,6 +5,7 @@ import {
   queueReactionsForOperation,
   hasRunningReaction
 } from './reactionRunner'
+import { handlers } from './handlerHooks'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 const wellKnownSymbols = new Set(
@@ -15,7 +16,7 @@ const wellKnownSymbols = new Set(
 
 // intercept get operations on observables to know which reaction uses their properties
 function get (target, key, receiver) {
-  const result = Reflect.get(target, key, receiver)
+  const result = handlers.get(target, key, receiver)
   // do not register (observable.prop -> reaction) pairs for well known symbols
   // these symbols are frequently retrieved in low level JavaScript under the hood
   if (typeof key === 'symbol' && wellKnownSymbols.has(key)) {
@@ -45,7 +46,7 @@ function get (target, key, receiver) {
 }
 
 function has (target, key) {
-  const result = Reflect.has(target, key)
+  const result = handlers.has(target, key)
   // register and save (observable.prop -> runningReaction)
   registerRunningReactionForOperation({ target, key, type: 'has' })
   return result
@@ -53,7 +54,7 @@ function has (target, key) {
 
 function ownKeys (target) {
   registerRunningReactionForOperation({ target, type: 'iterate' })
-  return Reflect.ownKeys(target)
+  return handlers.ownKeys(target)
 }
 
 // intercept set operations on observables to know when to trigger reactions
@@ -67,7 +68,7 @@ function set (target, key, value, receiver) {
   // save if the value changed because of this set operation
   const oldValue = target[key]
   // execute the set operation before running any reaction
-  const result = Reflect.set(target, key, value, receiver)
+  const result = handlers.set(target, key, value, receiver)
   // do not queue reactions if the target of the operation is not the raw receiver
   // (possible because of prototypal inheritance)
   if (target !== proxyToRaw.get(receiver)) {
@@ -94,7 +95,7 @@ function deleteProperty (target, key) {
   const hadKey = hasOwnProperty.call(target, key)
   const oldValue = target[key]
   // execute the delete operation before running any reaction
-  const result = Reflect.deleteProperty(target, key)
+  const result = handlers.deleteProperty(target, key)
   // only queue reactions for delete operations which resulted in an actual change
   if (hadKey) {
     queueReactionsForOperation({ target, key, oldValue, type: 'delete' })
@@ -102,4 +103,7 @@ function deleteProperty (target, key) {
   return result
 }
 
-export default { get, has, ownKeys, set, deleteProperty }
+// allow custom handlers for proxy traps that this lib does not use
+// this prevents the need for double Proxy wrapping for users
+// who wish to further extend JS behavior with Proxy traps
+export default { ...handlers, get, has, ownKeys, set, deleteProperty }

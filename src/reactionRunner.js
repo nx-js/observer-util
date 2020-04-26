@@ -3,6 +3,7 @@ import {
   getReactionsForOperation,
   releaseReaction
 } from './store'
+import { handlers } from './handlerHooks'
 
 // reactions can call each other and form a call stack
 const reactionStack = []
@@ -11,7 +12,7 @@ let isDebugging = false
 export function runAsReaction (reaction, fn, context, args) {
   // do not build reactive relations, if the reaction is unobserved
   if (reaction.unobserved) {
-    return Reflect.apply(fn, context, args)
+    return handlers.runReaction(fn, context, args)
   }
 
   // only run the reaction if it is not already in the reaction stack
@@ -25,7 +26,7 @@ export function runAsReaction (reaction, fn, context, args) {
       // set the reaction as the currently running one
       // this is required so that we can create (observable.prop -> reaction) pairs in the get trap
       reactionStack.push(reaction)
-      return Reflect.apply(fn, context, args)
+      return handlers.runReaction(fn, context, args)
     } finally {
       // always remove the currently running flag from the reaction when it stops execution
       reactionStack.pop()
@@ -45,7 +46,9 @@ export function registerRunningReactionForOperation (operation) {
 
 export function queueReactionsForOperation (operation) {
   // iterate and queue every reaction, which is triggered by obj.key mutation
-  getReactionsForOperation(operation).forEach(queueReaction, operation)
+  handlers
+    .orderReactions(getReactionsForOperation(operation))
+    .forEach(queueReaction, operation)
 }
 
 function queueReaction (reaction) {
