@@ -3,8 +3,8 @@ import { createTransaction, transactionManager } from './transaction'
 import { StackManager } from './utils/stack'
 import { decoratorFactory, NemoObservableInfo } from './utils/decorator'
 
-export const action = decoratorFactory(createAction)
-export const asyncAction = decoratorFactory(createAsyncAction)
+export const action = decoratorFactory(createAction, createAction)
+export const asyncAction = decoratorFactory(createAsyncAction, createAction)
 export const actionManager = new StackManager()
 
 function canWrite (target, key) {
@@ -29,7 +29,7 @@ export function writeAbleCheck (target, key) {
   }
 }
 
-function createAction (originalFunc) {
+export function createAction (originalFunc) {
   if (typeof originalFunc !== 'function') {
     throw new Error(
       'action should must wrap on Function: ' + typeof originalFunc

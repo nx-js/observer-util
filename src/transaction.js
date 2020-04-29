@@ -1,6 +1,7 @@
 import { StackManager } from './utils/stack'
 import { decoratorFactory } from './utils/decorator'
 import { RunnerManager } from './utils/runner'
+import { createAction } from './action'
 
 export const runnerManager = new RunnerManager()
 export const transactionManager = new StackManager(runnerManager.flush)
@@ -19,7 +20,10 @@ export function endTransaction (target) {
  * @param {*} propertyKey
  * @param {*} descriptor
  */
-export const withTransaction = decoratorFactory(createTransaction)
+export const withTransaction = decoratorFactory(
+  createTransaction,
+  createAction
+)
 
 export function createTransaction (originalFunc) {
   if (typeof originalFunc !== 'function') {

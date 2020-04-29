@@ -1,52 +1,58 @@
 export const NemoObservableInfo = Symbol('nemo-observable-info')
-export function decoratorFactory (wrapperFn) {
+
+export function decoratorFactory (functionWrapperFn, propertyInitWrapperFn) {
   return function (target, propertyKey, descriptor) {
     if (!propertyKey) {
-      // 1. use as function wrapper
-      return wrapperFn(target)
+      // 非装饰器使用场景，直接包裹
+      return functionWrapperFn(target)
     }
-    // 2. use as a decorator
+
     if (descriptor && typeof descriptor.value === 'function') {
-      // 2.1 use as class method decorator
-      descriptor.value = wrapperFn(descriptor.value)
+      // 一定是 decorator 打在 class method 上，直接包裹
+      descriptor.value = functionWrapperFn(descriptor.value)
       return
     }
-    // 2.2 use as class setter decorator
+
     const v = Object.getOwnPropertyDescriptor(target, propertyKey)
     if (v) {
+      // 一定是 decorator 打在 class getter setter 属性
       if ('get' in v) {
         target[NemoObservableInfo] = {
           ...target[NemoObservableInfo],
           [propertyKey]: true
         }
-        v.get = wrapperFn(v.get)
+        v.get = functionWrapperFn(v.get)
       }
       if ('set' in v) {
         target[NemoObservableInfo] = {
           ...target[NemoObservableInfo],
           [propertyKey]: true
         }
-        v.set = wrapperFn(v.set)
+        v.set = functionWrapperFn(v.set)
       }
+      // getOwnPropertyDescriptor 拿到的东西直接修改无用，这里 return 新的交给 ts decorator 帮我们替换
       return v
-    } else {
-      // 2.3 use as class normal attribute decorator
-      // must be arrow function
-      const internalPropertyKey = Symbol(propertyKey)
-      Object.defineProperty(target, propertyKey, {
-        set: function (value) {
-          if (!(internalPropertyKey in this)) {
-            // must be attribute init setter，wrap it to a action
-            value = wrapperFn(value)
-          } else {
-            // modify in running, not wrapper it，since decorator should just run in init phase
-          }
-          this[internalPropertyKey] = value
-        },
-        get: function () {
-          return this[internalPropertyKey]
-        }
-      })
     }
+    // 一定是 decorator 打在 class property 上
+    const internalPropertyKey = Symbol(propertyKey)
+    Object.defineProperty(target, propertyKey, {
+      set: function (value) {
+        if (!(internalPropertyKey in this)) {
+          // 如果属性值是函数，包裹一下，否则不处理
+          value =
+            typeof value === 'function' ? functionWrapperFn(value) : value
+          // 对这个属性的初始值赋值过程也包裹一下
+          propertyInitWrapperFn(() => {
+            this[internalPropertyKey] = value
+          })()
+        } else {
+          // 后续二次修改的过程不做特殊处理
+          this[internalPropertyKey] = value
+        }
+      },
+      get: function () {
+        return this[internalPropertyKey]
+      }
+    })
   }
 }

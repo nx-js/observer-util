@@ -58,6 +58,6 @@ declare module 'nemo-observable-util' {
   function runInAction<T extends (...args: any) => any>(f: T): ReturnType<T>;
   const actionManager: any;
   function decoratorFactory<T extends Function>(
-    wrapperFn: (f: T) => T
+    wrapperFn: (f: T, i: Function) => T
   ): MethodDecorator | PropertyDecorator;
 }
