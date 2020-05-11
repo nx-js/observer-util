@@ -24,7 +24,6 @@ Transparent reactivity with 100% language coverage. Made with :heart: and ES6 Pr
   * [unobserve(reaction)](#unobservereaction)
   * [obj = raw(observable)](#obj--rawobservable)
 * [Platform support](#platform-support)
-* [Alternative builds](#alternative-builds)
 * [Contributing](#contributing)
 
 <!-- tocstop -->
@@ -436,17 +435,6 @@ person.age = 33;
 * Edge: 12 and above
 * Opera: 36 and above
 * IE is not supported
-
-## Alternative builds
-
-This library detects if you use ES6 or commonJS modules and serve the right format to you. The exposed bundles are transpiled to ES5 to support common tools - like UglifyJS minifying. If you would like a finer control over the provided build, you can specify them in your imports.
-
-* `@nx-js/observer-util/dist/es.es6.js` exposes an ES6 build with ES6 modules.
-* `@nx-js/observer-util/dist/es.es5.js` exposes an ES5 build with ES6 modules.
-* `@nx-js/observer-util/dist/cjs.es6.js` exposes an ES6 build with commonJS modules.
-* `@nx-js/observer-util/dist/cjs.es5.js` exposes an ES5 build with commonJS modules.
-
-If you use a bundler, set up an alias for `@nx-js/observer-util` to point to your desired build. You can learn how to do it with webpack [here](https://webpack.js.org/configuration/resolve/#resolve-alias) and with rollup [here](https://github.com/rollup/rollup-plugin-alias#usage).
 
 ## Contributing
 

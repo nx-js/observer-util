@@ -1,4 +1,4 @@
-export const proxyToRaw = new WeakMap();
-export const rawToProxy = new WeakMap();
+export const proxyToRaw = new WeakMap()
+export const rawToProxy = new WeakMap()
 // stores custom proxy handlers for observables
-export const rawToHandlers = new WeakMap();
+export const rawToOptions = new WeakMap()

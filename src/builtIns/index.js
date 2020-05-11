@@ -1,12 +1,12 @@
-import collectionHandlers from './collections'
+import collectionHandlers from './collectionHandlers'
 
-// eslint-disable-next-line
-const globalObj = typeof window === 'object' ? window : Function('return this')();
+const globalObj =
+  // eslint-disable-next-line no-new-func
+  typeof window === 'object' ? window : Function('return this')()
 
-// built-in object can not be wrapped by Proxies
-// their methods expect the object instance as the 'this' instead of the Proxy wrapper
-// complex objects are wrapped with a Proxy of instrumented methods
-// which switch the proxy to the raw object and to add reactive wiring
+// these stateful built-in objects can and should be wrapped by Proxies if they are part of a store
+// simple ones - like arrays - ar wrapped with the normal observable Proxy
+// complex ones - like Map and Set - are wrapped with a Proxy of instrumented methods
 const handlers = new Map([
   [Map, collectionHandlers],
   [Set, collectionHandlers],
@@ -25,12 +25,23 @@ const handlers = new Map([
   [Float64Array, false]
 ])
 
-export function shouldInstrument ({ constructor }) {
+// some (usually stateless) built-in objects can not be and should not be wrapped by Proxies
+// their methods expect the object instance as the receiver ('this') instead of the Proxy wrapper
+// wrapping them and calling their methods causes erros like: "TypeError: this is not a Date object."
+export function shouldInstrument (obj) {
+  const { constructor } = obj
+
+  // functions and objects in the above handlers array are safe to instrument
+  if (typeof obj === 'function' || handlers.has(constructor)) {
+    return true
+  }
+
+  // other built-in objects should not be implemented
   const isBuiltIn =
     typeof constructor === 'function' &&
     constructor.name in globalObj &&
     globalObj[constructor.name] === constructor
-  return !isBuiltIn || handlers.has(constructor)
+  return !isBuiltIn
 }
 
 export function getHandlers (obj) {

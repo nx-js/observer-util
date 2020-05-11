@@ -1,0 +1,8 @@
+{
+  "testURL": "http://observer-util.com",
+  "testRegex": "/__tests__/.*test.js",
+  "collectCoverage": true,
+  "coverageReporters": ["lcovonly", "text"],
+  "collectCoverageFrom": ["src/**/*.js"],
+  "coverageDirectory": "coverage"
+}

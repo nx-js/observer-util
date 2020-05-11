@@ -1,4 +1,3 @@
-import { expect } from 'chai'
 import { observable, isObservable, observe } from '@nx-js/observer-util'
 
 const TypedArrays = [
@@ -15,16 +14,16 @@ const TypedArrays = [
 
 describe('typed arrays', () => {
   for (const TypedArray of TypedArrays) {
-    it(`${TypedArray.name} should observe mutations`, () => {
+    test(`${TypedArray.name} should observe mutations`, () => {
       let dummy
       const array = observable(new TypedArray(2))
-      expect(isObservable(array)).to.equal(true)
+      expect(isObservable(array)).toBe(true)
 
       observe(() => (dummy = array[0]))
 
-      expect(dummy).to.equal(0)
+      expect(dummy).toBe(0)
       array[0] = 12
-      expect(dummy).to.equal(12)
+      expect(dummy).toBe(12)
     })
   }
 })

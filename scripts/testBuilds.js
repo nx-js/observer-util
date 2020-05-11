@@ -6,7 +6,7 @@ const distPath = path.resolve('dist')
 const files = fs.readdirSync(distPath)
 
 async function testBuilds () {
-  for (let file of files) {
+  for (const file of files) {
     const err = await execPromise(`BUNDLE=${file} npm run test`)
     if (err) {
       console.error('\x1b[31m', `Error in ${file}`, '\x1b[30m')
@@ -17,7 +17,7 @@ async function testBuilds () {
 }
 
 function execPromise (cmd) {
-  return new Promise(resolve => exec(cmd, resolve))
+  return new Promise((resolve) => exec(cmd, resolve))
 }
 
 testBuilds()
