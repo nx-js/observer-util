@@ -69,7 +69,7 @@ describe('action', () => {
     expect(foo.bar()).to.equal(456)
   })
 
-  it('should support setter', () => {
+  it('should support setter & getter', () => {
     let dummy
     const counter = observable({ nested: { num: 0 } })
     const fn = spy(() => (dummy = counter.nested.num))
@@ -98,6 +98,35 @@ describe('action', () => {
     const foo = new Foo()
     expect(() => (foo.bar = 900)).to.not.throw()
     expect(foo.bar).to.equal(900)
+    expect(counter.nested.num).to.equal(9999991)
+  })
+
+  it('should support only getter', () => {
+    let dummy
+    const counter = observable({ nested: { num: 0 } })
+    const fn = spy(() => (dummy = counter.nested.num))
+    observe(fn)
+
+    expect(fn.callCount).to.equal(1)
+    expect(dummy).to.equal(0)
+    expect(() => {
+      counter.nested.num = 8
+    }).to.throw(DISABLE_WRITE_ERR)
+    function Foo () {
+      this._data = 456
+    }
+    Object.defineProperty(Foo.prototype, 'bar', {
+      get: function () {
+        this._data = 0;
+        counter.nested.num = 9999991
+        return this._data
+      },
+      enumerable: true,
+      configurable: true
+    })
+    __decorate([action], Foo.prototype, 'bar', null)
+    const foo = new Foo()
+    expect(foo.bar).to.equal(0)
     expect(counter.nested.num).to.equal(9999991)
   })
 

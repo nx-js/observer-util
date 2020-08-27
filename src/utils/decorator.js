@@ -16,14 +16,14 @@ export function decoratorFactory (functionWrapperFn, propertyInitWrapperFn) {
     const v = Object.getOwnPropertyDescriptor(target, propertyKey)
     if (v) {
       // 一定是 decorator 打在 class getter setter 属性
-      if ('get' in v) {
+      if ('get' in v && v.get !== undefined) {
         target[NemoObservableInfo] = {
           ...target[NemoObservableInfo],
           [propertyKey]: true
         }
         v.get = functionWrapperFn(v.get)
       }
-      if ('set' in v) {
+      if ('set' in v && v.set !== undefined) {
         target[NemoObservableInfo] = {
           ...target[NemoObservableInfo],
           [propertyKey]: true
