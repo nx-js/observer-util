@@ -117,7 +117,7 @@ describe('action', () => {
     }
     Object.defineProperty(Foo.prototype, 'bar', {
       get: function () {
-        this._data = 0;
+        this._data = 0
         counter.nested.num = 9999991
         return this._data
       },
