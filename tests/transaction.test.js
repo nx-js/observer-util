@@ -206,7 +206,7 @@ describe('transaction', () => {
   })
 
   it('must wrap to funciton', () => {
-    expect(() => withTransaction('xx')).to.throw(
+    expect(() => withTransaction(12)).to.throw(
       'transaction should must wrap on Function: '
     )
   })

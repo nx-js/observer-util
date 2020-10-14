@@ -1,3 +1,5 @@
+import { action } from 'nemo-observable-util';
+
 declare module 'nemo-observable-util' {
   function observable<Observable extends object>(obj?: Observable): Observable;
   function isObservable(obj: object): boolean;
@@ -41,13 +43,25 @@ declare module 'nemo-observable-util' {
   function flush(): void;
   const transactionManager: any;
   function config(arg?: ObservableConfig): ObservableConfig;
-  function action<F extends Function>(fn: F): F;
-  function action<T>(
-    target: Object,
-    propertyKey: string | symbol,
-    descriptor: TypedPropertyDescriptor<T>
-  ): TypedPropertyDescriptor<T> | void;
-  function action(target: Object, propertyKey: string | symbol): void;
+  export interface IActionFactory {
+    // PropertyDecorator
+    (target: Object, propertyKey: string | symbol): void;
+    // MethodDecorator
+    <T>(
+      target: Object,
+      propertyKey: string | symbol,
+      descriptor: TypedPropertyDescriptor<T>
+    ): TypedPropertyDescriptor<T> | void;
+    // Function Wrapper
+    <T extends Function>(fn: T): T;
+
+    // Function Wrapper With Custom Name
+    (name: string): IActionFactory;
+  }
+  interface IBoundActionFactory extends PropertyDecorator {
+    (name: string): PropertyDecorator;
+  }
+  const action: IActionFactory;
   function asyncAction<F extends Function>(fn: F): F;
   function asyncAction<T>(
     target: Object,

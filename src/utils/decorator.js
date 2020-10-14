@@ -2,17 +2,30 @@ export const NemoObservableInfo = Symbol('nemo-observable-info')
 
 export function decoratorFactory (functionWrapperFn, propertyInitWrapperFn) {
   return function (target, propertyKey, descriptor) {
+    // #region 一个参数：直接当 function 使用
     if (!propertyKey) {
-      // 非装饰器使用场景，直接包裹
+      if (typeof target === 'string') {
+        // 自定义 name 的
+        const customName = target
+        return decoratorFactory(
+          (...args) => functionWrapperFn(...args, customName),
+          (...args) => propertyInitWrapperFn(...args, customName)
+        )
+      }
+      // 不自定义 name 的
       return functionWrapperFn(target)
     }
+    // #endregion
 
+    // #region 三个参数：当 MethodDecorator 使用
     if (descriptor && typeof descriptor.value === 'function') {
       // 一定是 decorator 打在 class method 上，直接包裹
       descriptor.value = functionWrapperFn(descriptor.value)
       return
     }
+    // #endregion
 
+    // #region 两个参数：当 PropertyDecorator 使用
     const v = Object.getOwnPropertyDescriptor(target, propertyKey)
     if (v) {
       // 一定是 decorator 打在 class getter setter 属性
@@ -55,4 +68,5 @@ export function decoratorFactory (functionWrapperFn, propertyInitWrapperFn) {
       }
     })
   }
+  // #endregion
 }

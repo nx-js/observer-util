@@ -25,14 +25,14 @@ export const withTransaction = decoratorFactory(
   createAction
 )
 
-export function createTransaction (originalFunc) {
+export function createTransaction (originalFunc, ...restNames) {
   if (typeof originalFunc !== 'function') {
     throw new Error(
       'transaction should must wrap on Function: ' + typeof originalFunc
     )
   }
   const identity = transactionManager.getUUID()
-  return function (...args) {
+  function res (...args) {
     transactionManager.start(identity)
     try {
       return originalFunc.apply(this, args)
@@ -40,6 +40,15 @@ export function createTransaction (originalFunc) {
       transactionManager.end(identity)
     }
   }
+  if (restNames.length) {
+    Object.defineProperty(res, 'name', {
+      configurable: true,
+      writable: false,
+      enumerable: false,
+      value: restNames.join('')
+    })
+  }
+  return res
 }
 export function flush () {
   runnerManager.flush()

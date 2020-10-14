@@ -6,6 +6,7 @@ with below change:
 - add `config({ skipSameValueChange: true })` to enable same value setter check
 - add `startTransaction(identity) endTransaction('identity') withTransaction` to support batch
 - add `config({ onlyAllowChangeInAction: true })` and `@action` to support action pattern
+- support custom action name `@action('do something')`
 
 ---
 
