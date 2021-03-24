@@ -349,7 +349,7 @@ person.name = 'Barbie';
 person.age = 87;
 ```
 
-Queues are automatically scheduling reactions - based on their priority - but they can also be stopped, started and cleared manually at any time. Learn more about them [here]().
+Queues are automatically scheduling reactions - based on their priority - but they can also be stopped, started and cleared manually at any time.
 
 </details>
 
