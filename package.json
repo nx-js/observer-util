@@ -27,6 +27,11 @@
     "type": "git",
     "url": "git@github.com:nx-js/observer-util.git"
   },
+  "prettier": {
+    "singleQuote": true,
+    "semi": false,
+    "trailingComma": "none"
+  },
   "bugs": {
     "url": "https://github.com/nx-js/observer-util/issues"
   },
