@@ -1,51 +1,46 @@
-import { observable } from './observable'
-import { proxyToRaw, rawToProxy } from './internals'
+import { observable, observableChild } from './observable'
+import { proxyToRaw } from './internals'
 import {
   registerRunningReactionForOperation,
-  queueReactionsForOperation,
-  hasRunningReaction
+  queueReactionsForOperation
 } from './reactionRunner'
+import { runProxyHandler } from './customHandlers'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 const wellKnownSymbols = new Set(
   Object.getOwnPropertyNames(Symbol)
-    .map(key => Symbol[key])
-    .filter(value => typeof value === 'symbol')
+    .map((key) => Symbol[key])
+    .filter((value) => typeof value === 'symbol')
 )
 
 // intercept get operations on observables to know which reaction uses their properties
 function get (target, key, receiver) {
-  const result = Reflect.get(target, key, receiver)
+  const result = runProxyHandler('get', target, key, receiver)
   // do not register (observable.prop -> reaction) pairs for well known symbols
   // these symbols are frequently retrieved in low level JavaScript under the hood
   if (typeof key === 'symbol' && wellKnownSymbols.has(key)) {
     return result
   }
-  // register and save (observable.prop -> runningReaction)
+  // register and save the (observable.prop -> runningReaction) relation
   registerRunningReactionForOperation({ target, key, receiver, type: 'get' })
-  // if we are inside a reaction and observable.prop is an object wrap it in an observable too
-  // this is needed to intercept property access on that object too (dynamic observable tree)
-  const observableResult = rawToProxy.get(result)
-  if (hasRunningReaction() && typeof result === 'object' && result !== null) {
-    if (observableResult) {
-      return observableResult
-    }
-    // do not violate the none-configurable none-writable prop get handler invariant
-    // fall back to none reactive mode in this case, instead of letting the Proxy throw a TypeError
-    const descriptor = Reflect.getOwnPropertyDescriptor(target, key)
-    if (
-      !descriptor ||
-      !(descriptor.writable === false && descriptor.configurable === false)
-    ) {
-      return observable(result)
-    }
+
+  // do not violate the none-configurable none-writable prop get handler invariant
+  // fall back to none reactive mode in this case, instead of letting the Proxy throw a TypeError
+  const descriptor = Reflect.getOwnPropertyDescriptor(target, key)
+  if (
+    descriptor &&
+    descriptor.writable === false &&
+    descriptor.configurable === false
+  ) {
+    return result
   }
+
   // otherwise return the observable wrapper if it is already created and cached or the raw object
-  return observableResult || result
+  return observableChild(result, target)
 }
 
 function has (target, key) {
-  const result = Reflect.has(target, key)
+  const result = runProxyHandler('has', target, key)
   // register and save (observable.prop -> runningReaction)
   registerRunningReactionForOperation({ target, key, type: 'has' })
   return result
@@ -53,23 +48,25 @@ function has (target, key) {
 
 function ownKeys (target) {
   registerRunningReactionForOperation({ target, type: 'iterate' })
-  return Reflect.ownKeys(target)
+  return runProxyHandler('ownKeys', target)
 }
 
 // intercept set operations on observables to know when to trigger reactions
 function set (target, key, value, receiver) {
   // make sure to do not pollute the raw object with observables
-  if (typeof value === 'object' && value !== null) {
-    value = proxyToRaw.get(value) || value
-  }
+  value = proxyToRaw.get(value) || value
   // save if the object had a descriptor for this key
   const hadKey = hasOwnProperty.call(target, key)
   // save if the value changed because of this set operation
   const oldValue = target[key]
   // execute the set operation before running any reaction
-  const result = Reflect.set(target, key, value, receiver)
+  const result = runProxyHandler('set', target, key, value, receiver)
   // do not queue reactions if the target of the operation is not the raw receiver
-  // (possible because of prototypal inheritance)
+  // this possible because of prototypal inheritance
+  // when the prototype has a setter the set operation traverses the whole prototype chain
+  // and calls the set trap on every object until it finds the setter
+  // this is undesired, it is enough for us to trigger the reactions in the set trap of
+  // the receiver (child) object to avoid duplicate reactions
   if (target !== proxyToRaw.get(receiver)) {
     return result
   }
@@ -94,7 +91,7 @@ function deleteProperty (target, key) {
   const hadKey = hasOwnProperty.call(target, key)
   const oldValue = target[key]
   // execute the delete operation before running any reaction
-  const result = Reflect.deleteProperty(target, key)
+  const result = runProxyHandler('deleteProperty', target, key)
   // only queue reactions for delete operations which resulted in an actual change
   if (hadKey) {
     queueReactionsForOperation({ target, key, oldValue, type: 'delete' })
@@ -102,4 +99,9 @@ function deleteProperty (target, key) {
   return result
 }
 
-export default { get, has, ownKeys, set, deleteProperty }
+// return an observable object instance when an observable class is instantiated
+function construct (target, args, newTarget) {
+  return observable(runProxyHandler('construct', target, args, newTarget))
+}
+
+export default { get, has, ownKeys, set, deleteProperty, construct }
