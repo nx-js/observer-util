@@ -1,6 +1,6 @@
 {
-  "name": "@nx-js/observer-util",
-  "version": "4.3.0-alpha.2",
+  "name": "@frontity/observer-util",
+  "version": "4.3.0-beta.0",
   "description": "Simple transparent reactivity with 100% language coverage. Made with ES6 Proxies.",
   "main": "dist/bundle.cjs.js",
   "module": "dist/bundle.es.js",
