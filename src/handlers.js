@@ -1,5 +1,5 @@
 import { observable } from './observable'
-import { proxyToRaw, rawToProxy } from './internals'
+import { proxyToRaw, rawToProxy, updateFnDefiniton } from './internals'
 import {
   registerRunningReactionForOperation,
   queueReactionsForOperation,
@@ -16,6 +16,7 @@ const wellKnownSymbols = new Set(
 // intercept get operations on observables to know which reaction uses their properties
 function get (target, key, receiver) {
   const result = Reflect.get(target, key, receiver)
+
   // do not register (observable.prop -> reaction) pairs for well known symbols
   // these symbols are frequently retrieved in low level JavaScript under the hood
   if (typeof key === 'symbol' && wellKnownSymbols.has(key)) {
@@ -26,7 +27,8 @@ function get (target, key, receiver) {
   // if we are inside a reaction and observable.prop is an object wrap it in an observable too
   // this is needed to intercept property access on that object too (dynamic observable tree)
   const observableResult = rawToProxy.get(result)
-  if (hasRunningReaction() && typeof result === 'object' && result !== null) {
+  const updateFn = updateFnDefiniton.get(receiver);
+  if ((hasRunningReaction() || updateFn) && typeof result === 'object' && result !== null) {
     if (observableResult) {
       return observableResult
     }
@@ -37,7 +39,7 @@ function get (target, key, receiver) {
       !descriptor ||
       !(descriptor.writable === false && descriptor.configurable === false)
     ) {
-      return observable(result)
+      return observable(result, updateFn)
     }
   }
   // otherwise return the observable wrapper if it is already created and cached or the raw object
@@ -58,9 +60,20 @@ function ownKeys (target) {
 
 // intercept set operations on observables to know when to trigger reactions
 function set (target, key, value, receiver) {
+  const updateFn = updateFnDefiniton.get(receiver)
+
   // make sure to do not pollute the raw object with observables
   if (typeof value === 'object' && value !== null) {
-    value = proxyToRaw.get(value) || value
+    const rawVal = proxyToRaw.get(value);
+
+    if (rawVal) {
+      if (updateFn && updateFnDefiniton.get(value) != updateFn) {
+        console.warn('You moved a store into a store with a global reaction. This is not supported. The global reactions WILL NOT be called for this store.\nTo avoid this, copy the object (e.g. json.parse(json.stringify(obj))')
+      }
+
+      value = rawVal
+    }
+
   }
   // save if the object had a descriptor for this key
   const hadKey = hasOwnProperty.call(target, key)
@@ -68,6 +81,15 @@ function set (target, key, value, receiver) {
   const oldValue = target[key]
   // execute the set operation before running any reaction
   const result = Reflect.set(target, key, value, receiver)
+
+
+
+  // execute global store update
+  if (updateFn) {
+    updateFn();
+  }
+
+
   // do not queue reactions if the target of the operation is not the raw receiver
   // (possible because of prototypal inheritance)
   if (target !== proxyToRaw.get(receiver)) {
@@ -99,6 +121,12 @@ function deleteProperty (target, key) {
   if (hadKey) {
     queueReactionsForOperation({ target, key, oldValue, type: 'delete' })
   }
+
+  const updateFn = updateFnDefiniton.get(rawToProxy.get(target));
+  if (updateFn) {
+    updateFn();
+  }
+
   return result
 }
 
