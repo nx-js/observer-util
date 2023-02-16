@@ -1,5 +1,5 @@
 declare module '@nx-js/observer-util' {
-  function observable<Observable extends object>(obj?: Observable): Observable
+  function observable<Observable extends object>(obj?: Observable, onChange: () => void): Observable
   function isObservable(obj: object): boolean
   function raw<Observable extends object>(obj: Observable): Observable
 

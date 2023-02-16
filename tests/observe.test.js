@@ -545,4 +545,54 @@ describe('options', () => {
     observed.obj = document
     expect(dummy).to.equal(9)
   })
+
+  it('should do a global reaction.', () => {
+    let counter = 0
+    let obs = observable({}, () => { counter++ });
+
+    expect(counter).to.equal(0);
+    obs.lol = 'hi';
+    expect(counter).to.equal(1);
+    obs.lol2 = { wow: 'cool', me: { you: {} } };
+    expect(counter).to.equal(2);
+    obs.lol2.me.you.test = 'else';
+    expect(counter).to.equal(3);
+  });
+
+  it('should do a global reaction on a set', () => {
+    let counter = 0
+    let obs = observable({ x: new Set() }, () => { counter++ });
+
+    expect(counter).to.equal(0);
+    obs.x.add('hi there')
+    expect(counter).to.equal(1);
+  });
+
+  it('should only call the right global reaction', () => {
+    let counterA = 0;
+    let counterB = 0;
+
+    let obsA = observable({}, () => { counterA++ });
+    let obsB = observable({}, () => { counterB++ });
+
+    expect(counterA).to.equal(0);
+    expect(counterB).to.equal(0);
+
+    obsA.wow = 'hi';
+
+    expect(counterA).to.equal(1);
+    expect(counterB).to.equal(0);
+  });
+
+  it('should do a global reaction on delete.', () => {
+    let counter = 0
+    let obs = observable({}, () => { counter++ });
+
+    expect(counter).to.equal(0);
+    obs.lol = 'hi';
+    expect(counter).to.equal(1);
+    delete obs.lol;
+    expect(counter).to.equal(2);
+  });
+
 })

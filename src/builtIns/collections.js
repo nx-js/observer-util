@@ -4,30 +4,30 @@ import {
   queueReactionsForOperation,
   hasRunningReaction
 } from '../reactionRunner'
-import { proxyToRaw, rawToProxy } from '../internals'
+import { proxyToRaw, rawToProxy, updateFnDefiniton } from '../internals'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
-function findObservable (obj) {
+function findObservable (obj, updateFn) {
   const observableObj = rawToProxy.get(obj)
   if (hasRunningReaction() && typeof obj === 'object' && obj !== null) {
     if (observableObj) {
       return observableObj
     }
-    return observable(obj)
+    return observable(obj, updateFn)
   }
   return observableObj || obj
 }
 
-function patchIterator (iterator, isEntries) {
+function patchIterator (iterator, isEntries, updateFn) {
   const originalNext = iterator.next
   iterator.next = () => {
     let { done, value } = originalNext.call(iterator)
     if (!done) {
       if (isEntries) {
-        value[1] = findObservable(value[1])
+        value[1] = findObservable(value[1], updateFn)
       } else {
-        value = findObservable(value)
+        value = findObservable(value, updateFn)
       }
     }
     return { done, value }
@@ -46,7 +46,7 @@ const instrumentations = {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, key, type: 'get' })
-    return findObservable(proto.get.apply(target, arguments))
+    return findObservable(proto.get.apply(target, arguments), updateFnDefiniton.get(this))
   },
   add (key) {
     const target = proxyToRaw.get(this)
@@ -57,6 +57,13 @@ const instrumentations = {
     if (!hadKey) {
       queueReactionsForOperation({ target, key, value: key, type: 'add' })
     }
+
+
+    const updateFn = updateFnDefiniton.get(this);
+    if (updateFn) {
+      updateFn();
+    }
+
     return result
   },
   set (key, value) {
@@ -71,6 +78,16 @@ const instrumentations = {
     } else if (value !== oldValue) {
       queueReactionsForOperation({ target, key, value, oldValue, type: 'set' })
     }
+
+    const updateFn = updateFnDefiniton.get(this);
+    if (updateFn) {
+      updateFn();
+
+      if (proxyToRaw.get(value) && updateFnDefiniton.get(value) != updateFn) {
+        console.warn('You moved a store into a different store with a global reaction. This is not supported. The global reactions WILL NOT be called for this store.\nTo avoid this, copy the object (e.g. json.parse(json.stringify(obj))')
+      }
+    }
+
     return result
   },
   delete (key) {
@@ -83,6 +100,12 @@ const instrumentations = {
     if (hadKey) {
       queueReactionsForOperation({ target, key, oldValue, type: 'delete' })
     }
+
+    const updateFn = updateFnDefiniton.get(this);
+    if (updateFn) {
+      updateFn();
+    }
+
     return result
   },
   clear () {
@@ -95,6 +118,12 @@ const instrumentations = {
     if (hadItems) {
       queueReactionsForOperation({ target, oldTarget, type: 'clear' })
     }
+
+    const updateFn = updateFnDefiniton.get(this);
+    if (updateFn) {
+      updateFn();
+    }
+
     return result
   },
   forEach (cb, ...args) {
@@ -103,7 +132,7 @@ const instrumentations = {
     registerRunningReactionForOperation({ target, type: 'iterate' })
     // swap out the raw values with their observable pairs
     // before passing them to the callback
-    const wrappedCb = (value, ...rest) => cb(findObservable(value), ...rest)
+    const wrappedCb = (value, ...rest) => cb(findObservable(value, updateFnDefiniton.get(this)), ...rest)
     return proto.forEach.call(target, wrappedCb, ...args)
   },
   keys () {
@@ -117,21 +146,21 @@ const instrumentations = {
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
     const iterator = proto.values.apply(target, arguments)
-    return patchIterator(iterator, false)
+    return patchIterator(iterator, false, updateFnDefiniton.get(this))
   },
   entries () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
     const iterator = proto.entries.apply(target, arguments)
-    return patchIterator(iterator, true)
+    return patchIterator(iterator, true, updateFnDefiniton.get(this))
   },
   [Symbol.iterator] () {
     const target = proxyToRaw.get(this)
     const proto = Reflect.getPrototypeOf(this)
     registerRunningReactionForOperation({ target, type: 'iterate' })
     const iterator = proto[Symbol.iterator].apply(target, arguments)
-    return patchIterator(iterator, target instanceof Map)
+    return patchIterator(iterator, target instanceof Map, updateFnDefiniton.get(this))
   },
   get size () {
     const target = proxyToRaw.get(this)
