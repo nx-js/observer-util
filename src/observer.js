@@ -13,6 +13,7 @@ export function observe (fn, options = {}) {
   // save the scheduler and debugger on the reaction
   reaction.scheduler = options.scheduler
   reaction.debugger = options.debugger
+  reaction.failOnRecursion = options.failOnRecursion
   // save the fact that this is a reaction
   reaction[IS_REACTION] = true
   // run the reaction once if it is not a lazy one

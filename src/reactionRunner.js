@@ -30,6 +30,10 @@ export function runAsReaction (reaction, fn, context, args) {
       // always remove the currently running flag from the reaction when it stops execution
       reactionStack.pop()
     }
+  } else {
+    if (reaction.failOnRecursion) {
+      throw new Error('Recursive reactions are not allowed');
+    }
   }
 }
 

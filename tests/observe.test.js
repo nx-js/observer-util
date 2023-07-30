@@ -353,6 +353,27 @@ describe('observe', () => {
     expect(spy2.callCount).to.equal(3)
   })
 
+  it('should throw on recursion if instructed', () => {
+    const counter = observable({ num: 0 })
+
+    // TODO: supporting recursion would obviate
+    // the need for this feature
+    const numSpy = spy(() => {
+      counter.num++
+    })
+
+    let threw = false;
+    try {
+      observe(numSpy, { failOnRecursion: true })
+    } catch (ex) {
+	threw = true;
+    }
+
+    expect(counter.num).to.equal(1)
+    expect(numSpy.callCount).to.equal(0)
+    expect(threw).to.equal(true)
+  });
+
   it('should return a new reactive version of the function', () => {
     function greet () {
       return 'Hello World'
