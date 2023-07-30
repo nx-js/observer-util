@@ -12,6 +12,7 @@ declare module '@nx-js/observer-util' {
     scheduler?: Scheduler | Function
     debugger?: Function
     lazy?: boolean
+    failOnRecursion?: boolean
   }
 
   function observe<Reaction extends Function>(func: Reaction, options?: ObserveOptions): Reaction
